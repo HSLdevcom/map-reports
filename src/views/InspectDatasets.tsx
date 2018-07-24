@@ -62,7 +62,7 @@ class InspectDatasets extends React.Component<any, any> {
         {MapComponent && <MapComponent datasetId={state.selectedDataset} />}
         <OptionsBox>
           <Typography gutterBottom variant="headline" component="h2">
-            Tarkastastele ja raportoi
+            Tarkastele ja raportoi
           </Typography>
           <Select value={state.selectedDataset} onChange={this.onChangeDataset}>
             {[
