@@ -3,8 +3,8 @@ set -e
 
 ORG=${ORG:-hsldevcom}
 DOCKER_TAG=${TRAVIS_BUILD_NUMBER:-latest}
-DOCKER_IMAGE=$ORG/map-reports:${DOCKER_TAG}
-DOCKER_IMAGE_LATEST=$ORG/map-reports:latest
+DOCKER_IMAGE=$ORG/hsl-map-reports:${DOCKER_TAG}
+DOCKER_IMAGE_LATEST=$ORG/hsl-map-reports:latest
 
 docker build --tag=$DOCKER_IMAGE .
 
