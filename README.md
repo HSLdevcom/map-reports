@@ -5,13 +5,13 @@
 Build:
 
 ```
-docker build -t map-reports .
+docker build -t hsldevcom/hsl-map-reports .
 ```
 
 Run:
 
 ```
-docker run -d -p 4000:4000 -p 1234:1234 map-reports
+docker run -d -p 4000:4000 -p 1234:1234 hsldevcom/hsl-map-reports
 ```
 
 You can also use the scripts `yarn run docker:build` and `yarn run docker:run`, which will have a higher likelihood of actually working.

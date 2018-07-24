@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "docker:build": "docker build -t map-reports .",
-    "docker:run": "docker run -d -p 4000:4000 -p 1234:1234 map-reports",
+    "docker:build": "docker build -t hsldevcom/hsl-map-reports .",
+    "docker:run": "docker run -d -p 4000:4000 -p 1234:1234 hsldevcom/hsl-map-reports",
     "start": "parcel index.html",
     "build": "parcel build index.html",
     "serve-ui": "serve -s -l 1234 dist",
