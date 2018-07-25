@@ -3,7 +3,7 @@ FROM node:10-alpine
 ARG API_URL=http://localhost:4000
 ENV API_URL=$API_URL
 
-ARG BASE_URL=
+ARG BASE_URL=""
 ENV BASE_URL=$BASE_URL
 
 ENV WORK /opt/reporter
