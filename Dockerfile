@@ -23,6 +23,4 @@ RUN yarn build
 
 EXPOSE 4000 1234
 
-CMD \
-  node_modules/.bin/nodemon --exec "yarn run server" & \
-  node_modules/.bin/nodemon --exec "yarn run serve-ui"
+CMD yarn run production
