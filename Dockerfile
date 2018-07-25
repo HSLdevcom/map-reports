@@ -6,6 +6,9 @@ ENV API_URL=$API_URL
 ARG BASE_URL=""
 ENV BASE_URL=$BASE_URL
 
+ARG PUBLIC_PATH="/"
+ENV PUBLIC_PATH=$PUBLIC_PATH
+
 ENV WORK /opt/reporter
 
 # Create app directory
@@ -19,7 +22,7 @@ RUN yarn
 
 # Bundle app source
 COPY . ${WORK}
-RUN yarn build
+RUN yarn run build --public-url ${PUBLIC_PATH}
 
 EXPOSE 4000 1234
 
