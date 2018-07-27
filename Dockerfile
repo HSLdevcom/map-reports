@@ -1,13 +1,13 @@
 FROM node:10-alpine
 
-ARG API_URL=http://localhost:4000
-ENV API_URL=$API_URL
+ARG api_url="http://localhost:4000"
+ENV API_URL=$api_url
 
-ARG BASE_URL=""
-ENV BASE_URL=$BASE_URL
+ARG base_url=""
+ENV BASE_URL=$base_url
 
-ARG PUBLIC_PATH="/"
-ENV PUBLIC_PATH=$PUBLIC_PATH
+ARG public_path="/"
+ENV PUBLIC_PATH=$public_path
 
 ENV WORK /opt/reporter
 
