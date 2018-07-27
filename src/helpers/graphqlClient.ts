@@ -7,11 +7,11 @@ import { ApolloLink, Observable } from 'apollo-link'
 import fragmentTypes from '../../fragmentTypes.json'
 
 const fragmentMatcher = new IntrospectionFragmentMatcher({
-  introspectionQueryResultData: fragmentTypes
-});
+  introspectionQueryResultData: fragmentTypes,
+})
 
 const cache = new InMemoryCache({
-  fragmentMatcher
+  fragmentMatcher,
 })
 
 const request = async operation => {
@@ -38,7 +38,7 @@ const requestLink = new ApolloLink(
       return () => {
         if (handle) handle.unsubscribe()
       }
-    }),
+    })
 )
 
 const client = new ApolloClient({
@@ -47,8 +47,8 @@ const client = new ApolloClient({
       if (graphQLErrors)
         graphQLErrors.map(({ message, locations, path }) =>
           console.error(
-            `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
-          ),
+            `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+          )
         )
       if (networkError) console.error(`[Network error]: ${networkError}`)
     }),
@@ -68,7 +68,7 @@ const client = new ApolloClient({
       cache,
     }),
     new HttpLink({
-      uri: process.env.API_URL,
+      uri: process.env.API_URL || 'http://localhost:4000',
     }),
   ]),
   cache,

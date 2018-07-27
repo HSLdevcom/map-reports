@@ -5,10 +5,10 @@
     "docker:run": "docker run -d -p 4000:4000 -p 1234:1234 hsldevcom/hsl-map-reports",
     "start": "API_URL=http://localhost:4000 parcel index.html",
     "build": "parcel build index.html",
-    "serve-ui": "micro -l tcp://0.0.0.0:1234",
+    "serve-ui": "forever serve.js",
     "server": "ts-node --project tsconfig.server.json server/server.ts",
     "server:dev": "nodemon --delay 1 --signal SIGTERM --watch 'server/**/*' --exec 'ts-node --project tsconfig.server.json' server/server.ts",
-    "production": "concurrently 'yarn run server' 'yarn run serve-ui'"
+    "production": "forever start -c \"ts-node --project tsconfig.server.json\" server/server.ts -l server.log -o server-out-log -e server-err.log && forever start serve.js  -l ui.log -o ui-out-log -e ui-err.log && forever -f logs 1"
   },
   "dependencies": {
     "@mapbox/geojson-merge": "^1.0.2",
@@ -28,6 +28,7 @@
     "classnames": "^2.2.6",
     "concurrently": "^3.6.0",
     "faker": "^4.1.0",
+    "forever": "^0.15.3",
     "fs-extra": "^6.0.1",
     "fs-jetpack": "^2.0.0",
     "fuzzysearch": "^1.0.3",
