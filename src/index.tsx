@@ -32,7 +32,9 @@ configure({
   enforceActions: true,
 })
 
-const router = Router('/', createHistory())
+const baseUrl = process.env.BASE_URL || ''
+
+const router = Router('/', createHistory({ basename: baseUrl }))
 const mountNode = document.getElementById('app')
 
 let state

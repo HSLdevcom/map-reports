@@ -68,7 +68,7 @@ const client = new ApolloClient({
       cache,
     }),
     new HttpLink({
-      uri: 'http://localhost:4000',
+      uri: process.env.API_URL,
     }),
   ]),
   cache,

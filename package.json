@@ -1,9 +1,14 @@
 {
+  "main": "serve.js",
   "scripts": {
-    "start": "parcel index.html",
+    "docker:build": "docker build -t hsldevcom/hsl-map-reports .",
+    "docker:run": "docker run -d -p 4000:4000 -p 1234:1234 hsldevcom/hsl-map-reports",
+    "start": "API_URL=http://localhost:4000 parcel index.html",
     "build": "parcel build index.html",
-    "server": "ts-node server/server.ts",
-    "server:dev": "nodemon --delay 1 --signal SIGTERM --watch 'server/**/*' --exec 'ts-node --project tsconfig.server.json' server/server.ts"
+    "serve-ui": "micro -l tcp://0.0.0.0:1234",
+    "server": "ts-node --project tsconfig.server.json server/server.ts",
+    "server:dev": "nodemon --delay 1 --signal SIGTERM --watch 'server/**/*' --exec 'ts-node --project tsconfig.server.json' server/server.ts",
+    "production": "concurrently 'yarn run server' 'yarn run serve-ui'"
   },
   "dependencies": {
     "@mapbox/geojson-merge": "^1.0.2",
@@ -21,6 +26,7 @@
     "apollo-link-state": "^0.4.1",
     "apollo-server": "^2.0.0-rc.6",
     "classnames": "^2.2.6",
+    "concurrently": "^3.6.0",
     "faker": "^4.1.0",
     "fs-extra": "^6.0.1",
     "fs-jetpack": "^2.0.0",
@@ -35,6 +41,7 @@
     "leaflet.markercluster": "^1.3.0",
     "lodash": "^4.17.10",
     "luxon": "^1.3.1",
+    "micro": "^9.3.2",
     "mobx": "^5.0.3",
     "mobx-app": "^1.0.3",
     "mobx-react": "^5.2.3",
@@ -54,6 +61,7 @@
     "react-leaflet-markercluster": "^2.0.0-rc3",
     "react-slidedown": "^1.3.0",
     "react-transition-group": "^2.4.0",
+    "serve-handler": "^3.5.0",
     "shortid": "^2.2.11",
     "styled-components": "^3.3.3",
     "ts-node": "^7.0.0",
