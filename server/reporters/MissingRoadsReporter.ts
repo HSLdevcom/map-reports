@@ -15,8 +15,6 @@ const MissingRoadsReporter = (
     ...reporterConfig,
   }
 
-  database.table('reporter').add(reporterMeta)
-
   const cron = '* 6 * * *' // at 6am every day
 
   function schedule(scheduler) {
@@ -27,7 +25,7 @@ const MissingRoadsReporter = (
     const missingRoadsGeoJson = await fs.readJSON(path.join(__dirname, 'assets/osm_puuttuvat_tiet.geojson'))
     const datasetsTable = database.table('datasets')
 
-    datasetsTable.updateOrAdd(reporterMeta.dataset, {
+    await datasetsTable.updateOrAdd(reporterMeta.dataset, {
       id: reporterMeta.dataset,
       label: 'Missing roads',
       geoJSON: JSON.stringify(missingRoadsGeoJson),

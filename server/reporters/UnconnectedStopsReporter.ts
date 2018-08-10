@@ -22,8 +22,6 @@ const UnconnectedStopsReporter = (
     ...reporterConfig,
   }
 
-  database.table('reporter').add(reporterMeta)
-
   const csvUrl = 'http://api.digitransit.fi/routing-data/v2/hsl/unconnected.csv'
   const cron = '* 7 * * *' // at 7am every day
   let lastFetchedCsv = ''
@@ -54,7 +52,7 @@ const UnconnectedStopsReporter = (
 
     const datasetsTable = database.table('datasets')
 
-    datasetsTable.updateOrAdd(reporterMeta.dataset, {
+    await datasetsTable.updateOrAdd(reporterMeta.dataset, {
       id: reporterMeta.dataset,
       label: 'Unconnected stops',
       geoJSON: JSON.stringify(stopsGeoJSON),

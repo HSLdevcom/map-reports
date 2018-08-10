@@ -1,65 +1,39 @@
-import { Report } from '../types/Report'
-import { ReporterMeta } from '../types/Reporter'
 import { get as _get, merge } from 'lodash'
-import { Dataset } from '../types/Dataset'
 import knex, { migrate } from './knex'
 
 interface RecordTypeContract {
   id: string
 }
 
-function createDb<RecordType extends RecordTypeContract>(
-  collection: RecordType[],
-  name = 'Item'
-) {
-  function get(id: string = null) {
+function createDb<RecordType extends RecordTypeContract>(table) {
+  async function get(id: string = null) {
     if (id) {
-      return collection.find(item => item.id === id)
+      return table.where('id', id).select()
     }
 
-    return collection
+    return table.select()
   }
 
-  function add(item) {
-    if (get(_get(item, 'id'))) {
-      throw new Error(
-        `An item with id ${_get(item, 'id')} already exists in ${name} table.`
-      )
-    }
-
-    collection.push(item)
-    return item
+  async function add(item) {
+    return table.insert(item)
   }
 
-  function update(id, newValues) {
-    const item = collection.find(i => i.id === id)
-
-    if (!item) {
-      throw new Error(`${name} with ID ${id} not found.`)
-    }
-
-    return merge(item, newValues)
+  async function update(id, newValues) {
+    return table.where('id', id).update(newValues)
   }
 
-  function updateOrAdd(id, item) {
-    const dbItem = get(id)
+  async function updateOrAdd(id, item) {
+    const record = table.where('id', id).select('id')
 
-    if (!dbItem) {
-      return add(item)
+    if(record) {
+      return table.where('id', id).update(item)
     }
 
-    return merge(dbItem, item)
+    return table.insert(item)
   }
 
-  function remove(id) {
-    const itemIndex = collection.findIndex(i => i.id === id)
-
-    if (itemIndex === -1) {
-      return 0
-    }
-
-    const deleted = collection.splice(itemIndex, 1)
-    return deleted.length
+  async function remove(id) {
+    return table.where('id', id).delete()
   }
 
   return {
@@ -71,50 +45,22 @@ function createDb<RecordType extends RecordTypeContract>(
   }
 }
 
-const reportsDb = () => {
-  const reports: Report[] = []
-  return createDb<Report>(reports, 'Report')
-}
-
-const reportersDb = () => {
-  const reporters: ReporterMeta[] = [
-    {
-      id: 'reporter_0',
-      name: 'anonuser',
-      type: 'manual',
-    },
-  ]
-
-  return createDb<ReporterMeta>(reporters, 'Reporter')
-}
-
-const datasetsDb = () => {
-  const datasets: Dataset[] = []
-  return createDb(datasets, 'Dataset')
-}
-
 const database = () => {
   migrate().then(() => console.log('Database migrated.'))
 
   const tables = {
-    report: reportsDb(),
-    reporter: reportersDb(),
-    datasets: datasetsDb(),
+    report: createDb(knex('Reports')),
+    reportItem: createDb(knex('ReportedItems')),
+    reporter: createDb(knex('Reporters')),
+    datasets: createDb(knex('Datasets')),
   }
 
   function table(tableName) {
     return _get(tables, tableName)
   }
 
-  function ensureTable<RecordType extends RecordTypeContract>(tableName, itemName) {
-    if (tableName in tables === false) {
-      tables[tableName] = createDb<RecordType>([], itemName)
-    }
-  }
-
   return {
     table,
-    ensureTable,
   }
 }
 
