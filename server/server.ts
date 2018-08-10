@@ -1,7 +1,9 @@
+import Express from 'express'
 import database from './database'
 import UnconnectedStopsReporter from './reporters/UnconnectedStopsReporter'
 import createServer from './graphql/schema'
 import MissingRoadsReporter from './reporters/MissingRoadsReporter'
+import path from 'path'
 
 /**
  * Set up database
@@ -41,8 +43,14 @@ missingRoadsReporter.run()
  * Start server
  */
 
-const server = createServer(db)
+const app = Express()
 
-server.listen().then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`)
-})
+app.use('/dist', Express.static(path.join(__dirname, '../dist')))
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../dist/index.html')))
+
+const server = createServer(db)
+server.applyMiddleware({ app })
+
+app.listen({ port: 1234 }, () =>
+  console.log(`🚀 Server ready at http://localhost:1234${server.graphqlPath}`)
+)

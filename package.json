@@ -1,14 +1,13 @@
 {
-  "main": "serve.js",
   "scripts": {
-    "docker:build": "docker build -t hsldevcom/hsl-map-reports .",
-    "docker:run": "docker run -d -p 4000:4000 -p 1234:1234 hsldevcom/hsl-map-reports",
-    "start": "API_URL=http://localhost:4000 parcel index.html",
-    "build": "parcel build index.html",
-    "serve-ui": "forever serve.js",
+    "docker:build": "docker build --cpuset-cpus 2 -t hsldevcom/hsl-map-reports .",
+    "docker:run": "docker run --name map-reports -p 1234:1234 hsldevcom/hsl-map-reports",
+    "watch": "parcel watch index.html --public-url ./dist/",
+    "build": "parcel build index.html --public-url ./dist/",
     "server": "ts-node --project tsconfig.server.json server/server.ts",
     "server:dev": "nodemon --delay 1 --signal SIGTERM --watch 'server/**/*' --exec 'ts-node --project tsconfig.server.json' server/server.ts",
-    "production": "forever start -c \"ts-node --project tsconfig.server.json\" server/server.ts -l server.log -o server-out-log -e server-err.log && forever start serve.js  -l ui.log -o ui-out-log -e ui-err.log && forever -f logs 1"
+    "start": "concurrently 'yarn run server:dev' 'yarn run watch'",
+    "production": "forever start -c \"ts-node --project tsconfig.server.json\" server/server.ts -l server.log -o server-out.log -e server-err.log && forever -f logs 0"
   },
   "dependencies": {
     "@mapbox/geojson-merge": "^1.0.2",
@@ -24,9 +23,10 @@
     "apollo-link-error": "^1.1.0",
     "apollo-link-http": "^1.5.4",
     "apollo-link-state": "^0.4.1",
-    "apollo-server": "^2.0.0-rc.6",
+    "apollo-server-express": "^2.0.0",
     "classnames": "^2.2.6",
     "concurrently": "^3.6.0",
+    "express": "^4.16.3",
     "faker": "^4.1.0",
     "forever": "^0.15.3",
     "fs-extra": "^6.0.1",

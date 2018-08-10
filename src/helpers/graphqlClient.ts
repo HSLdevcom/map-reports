@@ -67,9 +67,7 @@ const client = new ApolloClient({
       },
       cache,
     }),
-    new HttpLink({
-      uri: process.env.API_URL || 'http://localhost:4000',
-    }),
+    new HttpLink({ uri: process.env.API_URL || '/graphql' }),
   ]),
   cache,
 })
