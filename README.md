@@ -1,16 +1,22 @@
 # Map Reports
 
+### Start a postgis database
+
+```bash
+docker run --name map-reports-postgis -e POSTGRES_PASSWORD=mysecretpassword -d mdillon/postgis
+```
+
 ### Run in Docker
 
 Build:
 
-```
+```bash
 docker build -t hsldevcom/hsl-map-reports .
 ```
 
 Run:
 
-```
+```bash
 docker run -d -p 4000:4000 -p 1234:1234 hsldevcom/hsl-map-reports
 ```
 

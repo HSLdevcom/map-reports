@@ -53,7 +53,7 @@ const LocationDisplay = styled.div`
   margin-bottom: 1rem;
 `
 
-// If we ant the router, app() from mobx-app cannot be used.
+// If we want the router, app() from mobx-app cannot be used.
 // I might fix this in a later mobx-app version.
 @inject('state', 'actions', 'router')
 @mutate({ mutation: createReportMutation, update: updateReportsConnection })

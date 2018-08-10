@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 import Express from 'express'
 import database from './database'
 import UnconnectedStopsReporter from './reporters/UnconnectedStopsReporter'
@@ -46,7 +48,7 @@ missingRoadsReporter.run()
 const app = Express()
 
 app.use('/dist', Express.static(path.join(__dirname, '../dist')))
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../dist/index.html')))
+app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../dist/index.html')))
 
 const server = createServer(db)
 server.applyMiddleware({ app })

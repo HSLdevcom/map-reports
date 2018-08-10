@@ -25,16 +25,12 @@ const MissingRoadsReporter = (
 
   async function run() {
     const missingRoadsGeoJson = await fs.readJSON(path.join(__dirname, 'assets/osm_puuttuvat_tiet.geojson'))
-    const missingPathsGeoJson = await fs.readJSON(path.join(__dirname, './assets/puuttuvat_polut.geojson'))
-
-    const combined = merge([missingRoadsGeoJson, missingPathsGeoJson])
-
     const datasetsTable = database.table('datasets')
 
     datasetsTable.updateOrAdd(reporterMeta.dataset, {
       id: reporterMeta.dataset,
       label: 'Missing roads',
-      geoJSON: JSON.stringify(combined),
+      geoJSON: JSON.stringify(missingRoadsGeoJson),
     })
   }
 

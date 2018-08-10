@@ -2,6 +2,7 @@ import { Report } from '../types/Report'
 import { ReporterMeta } from '../types/Reporter'
 import { get as _get, merge } from 'lodash'
 import { Dataset } from '../types/Dataset'
+import knex, { migrate } from './knex'
 
 interface RecordTypeContract {
   id: string
@@ -53,7 +54,7 @@ function createDb<RecordType extends RecordTypeContract>(
   function remove(id) {
     const itemIndex = collection.findIndex(i => i.id === id)
 
-    if(itemIndex === -1) {
+    if (itemIndex === -1) {
       return 0
     }
 
@@ -66,7 +67,7 @@ function createDb<RecordType extends RecordTypeContract>(
     add,
     update,
     updateOrAdd,
-    remove
+    remove,
   }
 }
 
@@ -93,6 +94,8 @@ const datasetsDb = () => {
 }
 
 const database = () => {
+  migrate().then(() => console.log('Database migrated.'))
+
   const tables = {
     report: reportsDb(),
     reporter: reportersDb(),
