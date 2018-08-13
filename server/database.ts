@@ -66,6 +66,9 @@ async function createDb<RecordType extends RecordTypeContract>(table) {
   }
 }
 
+// TODO: Sort out database abstraction.
+// Cannot select table once and re-use.
+
 const database = async () => {
   await migrate()
 

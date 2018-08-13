@@ -7,6 +7,8 @@ export default async (reporters, database) => {
     .then(async reporterRecords => {
       console.log(reporterRecords)
 
+      // TODO: Sort out database abstraction
+
       for (const record of reporterRecords) {
         const reporter = reporters.find(r => r.name === record.name)
 
