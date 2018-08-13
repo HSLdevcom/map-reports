@@ -1,58 +1,56 @@
 require('dotenv').config()
 
 import Express from 'express'
-import database from './database'
-import UnconnectedStopsReporter from './reporters/UnconnectedStopsReporter'
-import createServer from './graphql/schema'
-import MissingRoadsReporter from './reporters/MissingRoadsReporter'
 import path from 'path'
+import database from './database'
+import createServer from './graphql/schema'
+import UnconnectedStopsReporter from './reporters/UnconnectedStopsReporter'
+import MissingRoadsReporter from './reporters/MissingRoadsReporter'
+import runReporters from './reporters/runReporters'
+import registerReporters from './reporters/registerReporters'
 
-/**
- * Set up database
- */
+(async () => {
+  /**
+   * Set up database
+   */
 
-const db = database()
+  const db = await database()
 
-/**
- * Set up reporters
- */
+  /**
+   * Set up reporters
+   */
 
-// Create reporter for unconnected stops
-const stopsReporter = UnconnectedStopsReporter(
-  {
-    id: 'reporter_1',
-    type: 'automatic',
-  },
-  db
-)
+  const reporters = [
+    {
+      name: 'unconnected-stops-reporter',
+      type: 'automatic',
+      run: UnconnectedStopsReporter,
+    }, {
+      name: 'missing-roads-reporter',
+      type: 'automatic',
+      run: MissingRoadsReporter
+    }, {
+      name: 'manual-reporter',
+      type: 'manual'
+    }
+  ]
 
-const missingRoadsReporter = MissingRoadsReporter(
-  {
-    id: 'reporter_2',
-    type: 'automatic',
-  },
-  db
-)
+  await registerReporters(reporters, db)
+  await runReporters(reporters, db)
 
-/**
- * Run reporters
- */
+  /**
+   * Start server
+   */
 
-stopsReporter.run()
-missingRoadsReporter.run()
+  const app = Express()
 
-/**
- * Start server
- */
+  app.use('/dist', Express.static(path.join(__dirname, '../dist')))
+  app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../dist/index.html')))
 
-const app = Express()
+  const server = createServer(db)
+  server.applyMiddleware({ app })
 
-app.use('/dist', Express.static(path.join(__dirname, '../dist')))
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../dist/index.html')))
-
-const server = createServer(db)
-server.applyMiddleware({ app })
-
-app.listen({ port: 1234 }, () =>
-  console.log(`🚀 Server ready at http://localhost:1234${server.graphqlPath}`)
-)
+  app.listen({ port: 1234 }, () =>
+    console.log(`🚀 Server ready at http://localhost:1234${server.graphqlPath}`)
+  )
+})()

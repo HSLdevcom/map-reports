@@ -4,11 +4,13 @@ export default function cleanup(callback) {
   // attach user callback to the process event emitter
   // if no callback, it will still exit gracefully on Ctrl-C
   callback = callback || noOp
-  process.on('SIGTERM', callback)
+  // @ts-ignore
+  process.on('signal', callback)
 
   // do app specific cleaning before exiting
   process.on('exit', () => {
-    process.emit('SIGTERM')
+    // @ts-ignore
+    process.emit('signal')
   })
 
   // catch ctrl+c event and exit normally

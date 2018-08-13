@@ -1,7 +1,6 @@
 import { DateTime } from 'luxon'
 import got from 'got'
 import neatCsv from 'neat-csv'
-import { Reporter, ReporterConfig } from '../../types/Reporter'
 import GeoJSON from 'geojson'
 
 type UnconnectedStop = {
@@ -11,59 +10,30 @@ type UnconnectedStop = {
   departures: string
 }
 
-const UnconnectedStopsReporter = (
-  reporterConfig: ReporterConfig,
-  database: any
-): Reporter => {
-  const reporterMeta = {
-    name: 'Unconnected stops reporter',
-    type: 'automatic',
-    dataset: 'unconnected_stops',
-    ...reporterConfig,
+const csvUrl = 'http://api.digitransit.fi/routing-data/v2/hsl/unconnected.csv'
+let lastFetchedCsv = ''
+let lastFetchedAt: DateTime = null
+
+const UnconnectedStopsReporter = async () => {
+  if (
+    !lastFetchedCsv || // if there is not a fetched CSV
+    (!!lastFetchedAt && lastFetchedAt < DateTime.local().minus({ days: 1 })) // ...that is newer than one day...
+  ) {
+    // Fetch a new CSV of unconnected stops.
+    const csvRequest = await got(csvUrl)
+    lastFetchedCsv = csvRequest.body
+    lastFetchedAt = DateTime.local()
   }
 
-  const csvUrl = 'http://api.digitransit.fi/routing-data/v2/hsl/unconnected.csv'
-  const cron = '* 7 * * *' // at 7am every day
-  let lastFetchedCsv = ''
-  let lastFetchedAt: DateTime = null
+  const unconnectedStopsData: UnconnectedStop[] = await neatCsv(lastFetchedCsv)
 
-  function schedule(scheduler) {
-    return scheduler(cron, () => run())
-  }
+  // @ts-ignore
+  const stopsGeoJson = GeoJSON.parse(unconnectedStopsData, {
+    Point: ['jore_lat', 'jore_lon'],
+    include: ['stop_code'],
+  })
 
-  async function run() {
-    if (
-      !lastFetchedCsv || // if there is not a fetched CSV
-      (!!lastFetchedAt && lastFetchedAt < DateTime.local().minus({ days: 1 })) // ...that is newer than one day...
-    ) {
-      // Fetch a new CSV of unconnected stops.
-      const csvRequest = await got(csvUrl)
-      lastFetchedCsv = csvRequest.body
-      lastFetchedAt = DateTime.local()
-    }
-
-    const unconnectedStopsData: UnconnectedStop[] = await neatCsv(lastFetchedCsv)
-
-    // @ts-ignore
-    const stopsGeoJSON = GeoJSON.parse(unconnectedStopsData, {
-      Point: ['jore_lat', 'jore_lon'],
-      include: ['stop_code'],
-    })
-
-    const datasetsTable = database.table('datasets')
-
-    await datasetsTable.updateOrAdd(reporterMeta.dataset, {
-      id: reporterMeta.dataset,
-      label: 'Unconnected stops',
-      geoJSON: JSON.stringify(stopsGeoJSON),
-    })
-  }
-
-  return {
-    meta: reporterMeta,
-    run,
-    schedule,
-  }
+  return JSON.stringify(stopsGeoJson)
 }
 
 export default UnconnectedStopsReporter

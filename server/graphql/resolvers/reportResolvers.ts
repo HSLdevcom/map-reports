@@ -23,6 +23,7 @@ const sortValues = {
 
 const reportResolvers = db => {
   const reportsDb = db.table('report')
+  const reportItemsDb = db.table('reportItem')
   const reporterDb = db.table('reporter')
 
   function applyFilters(reportsToFilter, filterRules) {
@@ -72,12 +73,13 @@ const reportResolvers = db => {
     )
   }
 
-  function allReports() {
+  async function allReports() {
     return reportsDb.get()
   }
 
-  function reportsConnection(_, { perPage = 10, cursor = '', sort, filter }) {
-    const reports = reportsDb.get()
+  async function reportsConnection(_, { perPage = 10, cursor = '', sort, filter }) {
+    const reports = await reportsDb.get()
+
     // Filter first, then sort.
     const requestedReports = applySorting(applyFilters(reports, filter), sort)
 
@@ -102,8 +104,8 @@ const reportResolvers = db => {
     }
   }
 
-  function reportFilterOptions() {
-    const reports = allReports()
+  async function reportFilterOptions() {
+    const reports = await allReports()
     const options = []
     const resolvedReporters = []
 
@@ -145,7 +147,7 @@ const reportResolvers = db => {
     return options
   }
 
-  function createReport(
+  async function createReport(
     _,
     {
       reportData,
@@ -154,35 +156,36 @@ const reportResolvers = db => {
       reportData: ManualReportDataInput
       reportItem: ReportItem
     }
-  ): Report {
-    const report = reportFactory({
-      ...reportData,
-      reporter: 'reporter_0' // TODO: add user id when we have users
-    }, reportItem)
+  ): Promise<Report> {
+    const reportItemInsert = await reportItemsDb.add(reportItem)
+    const reporterId = await reporterDb.table
+      .where('name', 'manual-reporter')
+      .select('id')
 
-    reportsDb.add(report)
+    console.log(reportItemInsert, reporterId)
 
+    const report = reportFactory(
+      {
+        ...reportData,
+        reporter: reporterId[0],
+      },
+      reportItemInsert[0]
+    )
+
+    await reportsDb.add(report)
     return report
   }
 
-  function removeReport(_, { reportId }): boolean {
+  async function removeReport(_, { reportId }): Promise<boolean> {
     return reportsDb.remove(reportId) > 0
   }
 
-  function setStatus(_, { reportId, newStatus }): Report {
+  async function setStatus(_, { reportId, newStatus }): Promise<Report> {
     return reportsDb.update(reportId, { status: newStatus })
   }
 
-  function setPriority(_, { reportId, newPriority }): Report {
+  async function setPriority(_, { reportId, newPriority }): Promise<Report> {
     return reportsDb.update(reportId, { priority: newPriority })
-  }
-
-  function resolveReportItemType(obj) {
-    if (obj.stopCode) {
-      return 'StopReportItem'
-    }
-
-    return 'ReportItem'
   }
 
   return {
@@ -192,7 +195,6 @@ const reportResolvers = db => {
     createReport,
     setStatus,
     setPriority,
-    resolveReportItemType,
     removeReport,
   }
 }

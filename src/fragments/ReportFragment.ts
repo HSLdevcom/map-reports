@@ -8,24 +8,12 @@ export const ReportFragment = gql`
     status
     priority
     item {
-      ... on StopReportItem {
-        stopCode
-        type
-        recommendedMapZoom
-        location {
-          lat
-          lon
-        }
-      }
-      ... on ReportItem {
-        type
-        recommendedMapZoom
-        feature
-        location {
-          lat
-          lon
-        }
-      }
+      type
+      recommendedMapZoom
+      data
+      lat
+      lon
+      entityIdentifier
     }
     createdAt
     updatedAt

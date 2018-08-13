@@ -20,11 +20,12 @@
     "@types/graphql": "^0.13.3",
     "@types/knex": "^0.14.20",
     "@types/leaflet": "^1.2.7",
-    "@types/lodash": "^4.14.110",
+    "@types/lodash": "^4.14.116",
     "@types/luxon": "^1.2.1",
     "@types/node-cron": "^1.2.0",
     "@types/react": "^16.4.6",
     "@types/react-dom": "^16.0.6",
+    "@types/uuid": "^3.4.3",
     "apollo-cache-inmemory": "^1.2.5",
     "apollo-client": "^2.3.5",
     "apollo-link": "^1.2.2",
@@ -57,6 +58,7 @@
     "neat-csv": "^2.1.0",
     "node-cron": "^1.2.1",
     "normalize.css": "^8.0.0",
+    "p-map": "^1.2.0",
     "pathricia": "^1.0.1",
     "pg": "^7.4.3",
     "polished": "^1.9.3",
@@ -73,7 +75,8 @@
     "shortid": "^2.2.11",
     "styled-components": "^3.3.3",
     "ts-node": "^7.0.0",
-    "typescript": "^2.9.2"
+    "typescript": "^2.9.2",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "babel-plugin-transform-class-properties": "^6.24.1",

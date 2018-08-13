@@ -1,17 +1,10 @@
-import { Report } from './Report'
 import { ScheduledTask, schedule } from 'node-cron'
 
-export type ReporterConfig = {
-  id: string
-  name?: string
-  type?: string
-}
-
 export interface ReporterMeta {
-  id: string
+  id?: string
   name: string
   type: string
-  dataset?: string
+  geoJSON?: string
 }
 
 export interface Reporter {
@@ -19,5 +12,5 @@ export interface Reporter {
   run: () => void
   schedule: (
     scheduler: typeof schedule,
-  ) => ScheduledTask
+  ) => ScheduledTask | boolean
 }

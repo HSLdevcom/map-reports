@@ -1,42 +1,14 @@
 import { DateTime } from 'luxon'
-import { Reporter, ReporterConfig } from '../../types/Reporter'
 import fs from 'fs-extra'
 import { merge } from '@mapbox/geojson-merge'
 import path from 'path'
 
-const MissingRoadsReporter = (
-  reporterConfig: ReporterConfig,
-  database: any
-): Reporter => {
-  const reporterMeta = {
-    name: 'Missing roads reporter',
-    type: 'automatic',
-    dataset: 'missing_roads',
-    ...reporterConfig,
-  }
+const MissingRoadsReporter = async () => {
+  const missingRoadsGeoJson = await fs.readJSON(
+    path.join(__dirname, 'assets/osm_puuttuvat_tiet.geojson')
+  )
 
-  const cron = '* 6 * * *' // at 6am every day
-
-  function schedule(scheduler) {
-    return scheduler(cron, () => run())
-  }
-
-  async function run() {
-    const missingRoadsGeoJson = await fs.readJSON(path.join(__dirname, 'assets/osm_puuttuvat_tiet.geojson'))
-    const datasetsTable = database.table('datasets')
-
-    await datasetsTable.updateOrAdd(reporterMeta.dataset, {
-      id: reporterMeta.dataset,
-      label: 'Missing roads',
-      geoJSON: JSON.stringify(missingRoadsGeoJson),
-    })
-  }
-
-  return {
-    meta: reporterMeta,
-    run,
-    schedule,
-  }
+  return JSON.stringify(missingRoadsGeoJson)
 }
 
 export default MissingRoadsReporter

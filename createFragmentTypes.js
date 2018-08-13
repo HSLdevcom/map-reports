@@ -1,7 +1,7 @@
 const got = require('got')
 const fs = require('fs')
 
-got(`http://localhost:4000`, {
+got(`http://localhost:1234/graphql`, {
   method: 'POST',
   json: true,
   body: {

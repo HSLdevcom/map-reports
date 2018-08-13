@@ -24,13 +24,13 @@ export interface ReportItem {
 }
 
 export interface Report<ItemType = ReportItem> {
-  id: string
+  id?: string
   title: string
   message?: string
   reporter: ReporterMeta | string
   status: ReportStatus
   priority: ReportPriority
-  item: ItemType
-  createdAt: number
-  updatedAt: number
+  item: ItemType | string
+  created_at?: number
+  updated_at?: number
 }

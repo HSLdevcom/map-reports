@@ -1,39 +1,61 @@
-import { get as _get, merge } from 'lodash'
+import { get as _get } from 'lodash'
 import knex, { migrate } from './knex'
 
 interface RecordTypeContract {
   id: string
 }
 
-function createDb<RecordType extends RecordTypeContract>(table) {
+async function createDb<RecordType extends RecordTypeContract>(table) {
   async function get(id: string = null) {
     if (id) {
-      return table.where('id', id).select()
+      return table.where('id', id)
     }
 
     return table.select()
   }
 
-  async function add(item) {
-    return table.insert(item)
+  async function add(item, trx?) {
+    try {
+      return table.transacting(trx).insert(item, 'id').catch(err => {})
+    } catch(err) {
+      return []
+    }
   }
 
-  async function update(id, newValues) {
-    return table.where('id', id).update(newValues)
+  async function update(id, newValues, trx?) {
+    try {
+      return table
+        .where('id', id)
+        .transacting(trx)
+        .update(newValues, 'id')
+    } catch(err) {
+      return []
+    }
   }
 
   async function updateOrAdd(id, item) {
-    const record = table.where('id', id).select('id')
+    try {
+      const record = table.where('id', id).select('id')
 
-    if(record) {
-      return table.where('id', id).update(item)
+      if (record) {
+        return table.where('id', id).update(item, 'id')
+      }
+
+      return table.insert(item, 'id')
+    } catch(err) {
+      return []
     }
-
-    return table.insert(item)
   }
 
-  async function remove(id) {
-    return table.where('id', id).delete()
+  async function remove(id, trx?) {
+    try {
+      return table
+        .where('id', id)
+        .transacting(trx)
+        .delete()
+    } catch(err) {
+      return []
+    }
   }
 
   return {
@@ -42,17 +64,17 @@ function createDb<RecordType extends RecordTypeContract>(table) {
     update,
     updateOrAdd,
     remove,
+    table,
   }
 }
 
-const database = () => {
-  migrate().then(() => console.log('Database migrated.'))
+const database = async () => {
+  await migrate()
 
   const tables = {
-    report: createDb(knex('Reports')),
-    reportItem: createDb(knex('ReportedItems')),
-    reporter: createDb(knex('Reporters')),
-    datasets: createDb(knex('Datasets')),
+    report: await createDb(knex('Reports')),
+    reportItem: await createDb(knex('ReportedItems')),
+    reporter: await createDb(knex('Reporters')),
   }
 
   function table(tableName) {

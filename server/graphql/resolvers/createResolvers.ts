@@ -14,10 +14,6 @@ const createResolvers = (db): any => {
 
       // Reporters
       reporters: reporters.allReporters,
-
-      // datasets
-      datasets: () => db.table('datasets').get(),
-      dataset: (_, { id }) => db.table('datasets').get(id)
     },
     Mutation: {
       // Reports
@@ -25,9 +21,6 @@ const createResolvers = (db): any => {
       removeReport: reports.removeReport,
       setStatus: reports.setStatus,
       setPriority: reports.setPriority,
-    },
-    ReportItemType: {
-      __resolveType: reports.resolveReportItemType,
     },
     Report: {
       reporter: reporters.resolveReportReporter,

@@ -95,7 +95,8 @@ class SubmitReport extends React.Component<Props, any> {
           message,
         },
         reportItem: {
-          location,
+          ...location,
+          entityIdentifier: 'general',
           type: 'general',
           recommendedMapZoom: 16,
         },

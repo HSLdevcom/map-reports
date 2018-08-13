@@ -16,28 +16,23 @@ const reportTypeDefs = gql`
   }
 
   type ReportItem {
+    id: ID!
     type: String!
-    location: Location!
-    recommendedMapZoom: Int
-    feature: String
-  }
-
-  type StopReportItem {
-    type: String!
-    location: Location!
-    stopCode: String!
+    lat: Float!
+    lon: Float!
+    entityIdentifier: String!
+    data: String
     recommendedMapZoom: Int
   }
 
   input InputReportItem {
     type: String!
-    location: InputLocation!
+    lat: Float!
+    lon: Float!
     recommendedMapZoom: Int
-    stopCode: String
-    feature: String
+    entityIdentifier: String!
+    data: String
   }
-
-  union ReportItemType = StopReportItem | ReportItem
 
   type Report {
     id: ID!
@@ -46,7 +41,7 @@ const reportTypeDefs = gql`
     reporter: Reporter!
     status: ReportStatus!
     priority: ReportPriority!
-    item: ReportItemType!
+    item: ReportItem!
     createdAt: Int!
     updatedAt: Int!
   }

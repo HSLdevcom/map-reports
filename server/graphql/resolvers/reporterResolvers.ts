@@ -1,12 +1,12 @@
 const reporterResolvers = (db) => {
   const reporterDb = db.table('reporter')
 
-  function allReporters() {
+  async function allReporters() {
     return reporterDb.get()
   }
 
-  function resolveReportReporter(report) {
-    const reporters = allReporters()
+  async function resolveReportReporter(report) {
+    const reporters = await allReporters()
     return reporters.find(rep => rep.id === report.reporter) || 'NO REPORTER'
   }
 
