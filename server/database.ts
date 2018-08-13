@@ -11,22 +11,21 @@ async function createDb<RecordType extends RecordTypeContract>(table) {
       return table.where('id', id)
     }
 
-    return table.select()
+    return table.select('*')
   }
 
-  async function add(item, trx?) {
+  async function add(item) {
     try {
-      return table.transacting(trx).insert(item, 'id').catch(err => {})
+      return table.insert(item, 'id').catch(err => {})
     } catch(err) {
       return []
     }
   }
 
-  async function update(id, newValues, trx?) {
+  async function update(id, newValues) {
     try {
       return table
         .where('id', id)
-        .transacting(trx)
         .update(newValues, 'id')
     } catch(err) {
       return []
@@ -47,11 +46,10 @@ async function createDb<RecordType extends RecordTypeContract>(table) {
     }
   }
 
-  async function remove(id, trx?) {
+  async function remove(id) {
     try {
       return table
         .where('id', id)
-        .transacting(trx)
         .delete()
     } catch(err) {
       return []
