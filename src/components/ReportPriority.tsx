@@ -14,7 +14,7 @@ const setPriorityMutation = gql`
     setPriority(reportId: $reportId, newPriority: $newPriority) {
       id
       priority
-      updatedAt
+      updated_at
     }
   }
 `

@@ -14,7 +14,7 @@ const setStatusMutation = gql`
     setStatus(reportId: $reportId, newStatus: $newStatus) {
       id
       status
-      updatedAt
+      updated_at
     }
   }
 `

@@ -1,3 +1,5 @@
+import { Reporter } from '../../../types/Reporter'
+
 const reporterResolvers = (db) => {
   const reporterDb = db.table('reporter')
 
@@ -13,13 +15,15 @@ const reporterResolvers = (db) => {
   }
 
   async function getReporter(_, { reporterId = '' }) {
-    const reporter = await reporterDb.get(reporterId)
-    return reporter[0]
+    return reporterDb.get(reporterId)
   }
 
-  async function resolveReportReporter(report) {
-    const reporters = await allReporters()
-    return reporters.find(rep => rep.id === report.reporter) || 'NO REPORTER'
+  async function resolveReportReporter(report): Promise<Reporter> {
+    if (typeof report.reporter === 'string') {
+      return reporterDb.get(report.reporter)
+    }
+
+    return report.reporter
   }
 
   return {

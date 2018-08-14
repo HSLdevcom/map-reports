@@ -57,13 +57,15 @@ class UnconnectedStopsMap extends React.Component<Props, any> {
   }
 
   onCreateIssue = async (stopId, lat, lon) => {
-    const { mutate } = this.props
+    const { mutate, queryData } = this.props
+    const reporterId = get(queryData, 'reporter.id', null)
 
     await mutate({
       variables: {
         reportData: {
           title: `Unconnected stop ${stopId}`,
           message: `JORE stop ${stopId} is not connected to an OSM stop.`,
+          reporter: reporterId
         },
         reportItem: {
           lat: parseFloat(lat),

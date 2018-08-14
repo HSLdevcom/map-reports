@@ -42,13 +42,14 @@ const reportTypeDefs = gql`
     status: ReportStatus!
     priority: ReportPriority!
     item: ReportItem!
-    createdAt: Int!
-    updatedAt: Int!
+    created_at: String!
+    updated_at: String!
   }
 
   input InputReport {
     title: String!
     message: String
+    reporter: ID
   }
 
   type ReportsEdge {

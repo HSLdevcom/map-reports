@@ -138,7 +138,7 @@ class ReportItem extends React.Component<Props, any> {
     const { report, onClick } = this.props
 
     return (
-      <Report type={report.item.type} onClick={onClick}>
+      <Report type={get(report, 'item.type', 'manual')} onClick={onClick}>
         <ReportHeading onClick={this.onHeadingClick}>
           <h2>{report.title}</h2>
           <Button

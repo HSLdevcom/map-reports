@@ -55,8 +55,8 @@ const filterLabels = {
   'reporter.type': 'Ilmoittajan tyyppi',
   status: 'Vaihe',
   priority: 'Tärkeys',
-  createdAt: 'Luontipäivämäärä',
-  updatedAt: 'Viimeksi päivitetty',
+  created_at: 'Luontipäivämäärä',
+  updated_at: 'Viimeksi päivitetty',
   asc: 'Nouseva',
   desc: 'Laskeva',
 }

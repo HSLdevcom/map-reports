@@ -12,7 +12,7 @@ const ReportStore = (state, initialState): ReportActions => {
     focusedReport: get(initialState, 'focusedReport', null),
     reportDraft: get(initialState, 'reportDraft', emptyReport),
     sortReports: get(initialState, 'sortReports', {
-      key: 'createdAt',
+      key: 'created_at',
       direction: 'desc',
     }),
     filterReports: get(initialState, 'filterReports', [{ key: '', value: '' }]),

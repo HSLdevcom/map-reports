@@ -25,6 +25,7 @@ const createResolvers = (db): any => {
     },
     Report: {
       reporter: reporters.resolveReportReporter,
+      item: reports.resolveReportItem
     },
     Reporter: {
       geoJSON: (reporter) => {

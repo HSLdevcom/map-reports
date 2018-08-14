@@ -15,8 +15,8 @@ export const ReportFragment = gql`
       lon
       entityIdentifier
     }
-    createdAt
-    updatedAt
+    created_at
+    updated_at
     reporter {
       id
       name

@@ -7,10 +7,18 @@ import {
   ReportStatus as ReportStatusEnum,
 } from '../../../types/Report'
 import createCursor from '../../util/createCursor'
-import { ManualReportDataInput } from '../../../types/CreateReportData'
+import { ReportDataInput } from '../../../types/CreateReportData'
 import { createReport as reportFactory } from '../../reports/createReport'
+import pFilter from 'p-filter'
 
-const filterableKeys = ['reporter.id', 'reporter.type', 'status', 'priority']
+const filterableKeys = [
+  'reporter.id',
+  'reporter.type',
+  'status',
+  'priority',
+  'item.type',
+  'item.entityIdentifier',
+]
 
 // Get the values that these props should be sorted by.
 // Only props listed here use special values, all
@@ -19,6 +27,8 @@ const sortValues = {
   reporter: obj => (obj.reporter.type === 'manual' ? 1 : 0),
   status: obj => Object.values(ReportStatusEnum).indexOf(obj.status),
   priority: obj => Object.values(ReportPriorityEnum).indexOf(obj.priority),
+  created_at: obj => +new Date(obj.created_at),
+  updated_at: obj => +new Date(obj.updated_at),
 }
 
 const reportResolvers = db => {
@@ -26,40 +36,60 @@ const reportResolvers = db => {
   const reportItemsDb = db.table('reportItem')
   const reporterDb = db.table('reporter')
 
-  function applyFilters(reportsToFilter, filterRules) {
-    const resolvedReporters = []
+  function createRelationResolver() {
+    const relations = {
+      reporter: {
+        resolved: [],
+        db: reporterDb,
+      },
+      item: {
+        resolved: [],
+        db: reportItemsDb,
+      },
+    }
+
+    return async report => {
+      const returnReport = { ...report }
+
+      for (const reportProp in report) {
+        if (reportProp in relations === false || typeof report[reportProp] !== 'string') {
+          continue
+        }
+
+        let related = relations[reportProp].resolved.find(
+          r => r.id === report[reportProp]
+        )
+
+        if (!related) {
+          related = await relations[reportProp].db.get(report[reportProp])
+          relations[reportProp].resolved.push(related)
+        }
+
+        returnReport[reportProp] = related
+      }
+
+      return returnReport
+    }
+  }
+
+  async function applyFilters(reportsToFilter, filterRules) {
     const filterGroups = values(groupBy(filterRules.filter(f => !!f.key), 'key'))
+    const resolveRelations = createRelationResolver()
 
     // Include only reports that match all filters
-    return reportsToFilter.filter(report =>
+    return pFilter(reportsToFilter, async reportRecord => {
+      const report = await resolveRelations(reportRecord)
       // make sure that the current report matches every filter group
-      filterGroups.every(filterGroup =>
+      return filterGroups.every(filterGroup =>
         // Filters are grouped by key. If there are many keys, treat it as an
         // "or" filter such that the report[key] value matches either filter.
         // A single filter in a group is effectively an "and" filter.
         filterGroup.some(filter => {
-          let reporter = resolvedReporters.find(rep => rep.id === report.reporter)
-          let reportItem = report
-
-          // If the key starts with 'reporter' and we haven't resolved the reporter yet, do it.
-          if (get(filter, 'key', '').startsWith('reporter') && !reporter) {
-            reporter = reporterDb.get(report.reporter)
-            resolvedReporters.push(reporter) // Add to cache for future iterations
-          }
-
-          // If the key starts with 'reporter', merge the resolved reporter into the report item.
-          if (get(filter, 'key', '').startsWith('reporter')) {
-            reportItem = merge({}, reportItem, { reporter })
-          }
-
           // Use fuzzy search to match the filter value and the report[key] value.
-          return fuzzysearch(
-            toLower(filter.value),
-            toLower(get(reportItem, filter.key, ''))
-          )
+          return fuzzysearch(toLower(filter.value), toLower(get(report, filter.key, '')))
         })
       )
-    )
+    })
   }
 
   function applySorting(reportsToSort, sortRules) {
@@ -81,7 +111,8 @@ const reportResolvers = db => {
     const reports = await reportsDb.get()
 
     // Filter first, then sort.
-    const requestedReports = applySorting(applyFilters(reports, filter), sort)
+    const filteredReports = await applyFilters(reports, filter)
+    const requestedReports = applySorting(filteredReports, sort)
 
     const reportEdges = requestedReports.map(report => ({
       node: report,
@@ -105,12 +136,15 @@ const reportResolvers = db => {
   }
 
   async function reportFilterOptions() {
-    const reports = await allReports()
+    const reports = await reportsDb.get()
     const options = []
-    const resolvedReporters = []
+    const resolveRelations = createRelationResolver()
 
-    reports.forEach(report => {
-      filterableKeys.forEach((key: string) => {
+    for (const recordIndex in reports) {
+      const report = await resolveRelations(reports[recordIndex])
+
+      for (const keyIndex in filterableKeys) {
+        const key = filterableKeys[keyIndex]
         let opt = options.find(o => o.key === key)
 
         if (!opt) {
@@ -119,32 +153,27 @@ const reportResolvers = db => {
           options.push(opt) // Add it for future iterations
         }
 
-        let reportItem = report
-        // Is there an already-resolved reporter in the cache?
-        let reporter = resolvedReporters.find(rep => rep.id === report.reporter)
-
-        // If the key starts with 'reporter' and we haven't resolved the reporter yet, do it.
-        if (key.startsWith('reporter') && !reporter) {
-          reporter = reporterDb.get(report.reporter)
-          resolvedReporters.push(reporter) // Add to cache for future iterations
-        }
-
-        // If the key starts with 'reporter', merge the resolved reporter into the report item.
-        if (key.startsWith('reporter')) {
-          reportItem = merge({}, reportItem, { reporter })
-        }
-
         // Get the value behind the key from the report item.
-        const value = get(reportItem, key, '')
+        const value = get(report, key, '')
 
         // If the value exists on this item AND has not yet been added to the options, add it.
         if (value && opt.options.indexOf(value) === -1) {
           opt.options.push(value)
         }
-      })
-    })
+      }
+    }
+
+    console.log(options)
 
     return options
+  }
+
+  async function resolveReportItem(report): Promise<ReportItem> {
+    if (typeof report.item === 'string') {
+      return reportItemsDb.get(report.item)
+    }
+
+    return report.item
   }
 
   async function createReport(
@@ -153,49 +182,62 @@ const reportResolvers = db => {
       reportData,
       reportItem,
     }: {
-      reportData: ManualReportDataInput
+      reportData: ReportDataInput
       reportItem: ReportItem
     }
   ): Promise<Report> {
     const reportItemInsert = await reportItemsDb.add(reportItem)
-    const reporterId = await reporterDb.table()
-      .where('name', 'manual-reporter')
-      .select('id')
-
-    console.log(reportItemInsert, reporterId)
+    const reporterId = get(
+      reportData,
+      'reporter',
+      await reporterDb
+        .table()
+        .where('name', 'manual-reporter')
+        .select('id')
+        .first()
+    )
 
     const report = reportFactory(
-      {
-        ...reportData,
-        reporter: get(reporterId, '[0].id', get(reporterId, '[0]')),
-      },
+      { ...reportData, reporter: reporterId },
       get(reportItemInsert, '[0]')
     )
 
-    const reportId = await reportsDb.add(report)
+    const reportRecord = await reportsDb.add(report, ['id', 'created_at', 'updated_at'])
 
-    if(reportId.length > 0) {
-      report.id = reportId[0]
+    if (reportRecord.length > 0) {
+      merge(report, get(reportRecord, '[0]', {}))
     }
 
     return report
   }
 
   async function removeReport(_, { reportId }): Promise<boolean> {
-    return reportsDb.remove(reportId) > 0
+    const removed = await reportsDb.remove(reportId)
+    return removed.length > 0
   }
 
   async function setStatus(_, { reportId, newStatus }): Promise<Report> {
-    return reportsDb.update(reportId, { status: newStatus })
+    const updated = await reportsDb.update(reportId, { status: newStatus }, [
+      'id',
+      'status',
+      'updated_at',
+    ])
+    return updated[0]
   }
 
   async function setPriority(_, { reportId, newPriority }): Promise<Report> {
-    return reportsDb.update(reportId, { priority: newPriority })
+    const updated = await reportsDb.update(reportId, { priority: newPriority }, [
+      'id',
+      'priority',
+      'updated_at',
+    ])
+    return updated[0]
   }
 
   return {
     reportsConnection,
     allReports,
+    resolveReportItem,
     reportFilterOptions,
     createReport,
     setStatus,

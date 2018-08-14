@@ -10,29 +10,29 @@ async function createDb<RecordType extends RecordTypeContract>(tableName) {
     const table = knex(tableName)
 
     if (id) {
-      return table.where('id', id)
+      return table.where('id', id).first()
     }
 
-    return table.select('*')
+    return table.select()
   }
 
-  async function add(item) {
+  async function add(item, returning = 'id') {
     const table = knex(tableName)
 
     try {
-      return table.insert(item, 'id').catch(err => {})
+      return table.insert(item, returning).catch(err => {})
     } catch(err) {
       return []
     }
   }
 
-  async function update(id, newValues) {
+  async function update(id, newValues, returning = 'id') {
     const table = knex(tableName)
 
     try {
       return table
         .where('id', id)
-        .update(newValues, 'id')
+        .update(newValues, returning)
     } catch(err) {
       return []
     }

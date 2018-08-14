@@ -64,7 +64,8 @@ class MissingRoadsMap extends React.Component<Props, any> {
   }
 
   onCreateIssue = async (lat, lon, feature) => {
-    const { mutate } = this.props
+    const { mutate, queryData } = this.props
+    const reporterId = get(queryData, 'reporter.id', null)
     const featureJson = window.atob(feature)
 
     await mutate({
@@ -72,6 +73,7 @@ class MissingRoadsMap extends React.Component<Props, any> {
         reportData: {
           title: `Missing road`,
           message: `There should be a road here.`,
+          reporter: reporterId
         },
         reportItem: {
           lat: parseFloat(lat),
