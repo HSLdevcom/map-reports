@@ -25,7 +25,7 @@ export default () => (
       <SubmitReport />
     </Sidebar>
     <MapArea>
-      <ReportsMap useBounds={false} />
+      <ReportsMap useBounds={false} useVectorLayers />
     </MapArea>
   </CreateReportView>
 )

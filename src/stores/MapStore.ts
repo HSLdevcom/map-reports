@@ -1,4 +1,4 @@
-import { action, extendObservable } from 'mobx'
+import { action, extendObservable, observable } from 'mobx'
 import routes from '../routes'
 import { Location } from '../../types/Location'
 import { get } from 'lodash'
@@ -23,7 +23,7 @@ const MapStore = (state, initialState) => {
   })
 
   return {
-    setClickedLocation,
+    setClickedLocation
   }
 }
 

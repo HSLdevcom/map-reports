@@ -163,8 +163,6 @@ const reportResolvers = db => {
       }
     }
 
-    console.log(options)
-
     return options
   }
 

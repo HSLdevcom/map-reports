@@ -24,6 +24,8 @@ import 'leaflet/dist/leaflet.css'
 import { AnyFunction } from '../../types/AnyFunction'
 import styled from 'styled-components'
 import MarkerClusterGroup from './MarkerClusterGroup'
+import MapboxGlLayer from './MapboxGlLayer'
+import get from 'lodash/get'
 
 const attribution = `Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,
 <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>,
@@ -40,6 +42,8 @@ interface Props {
   geoJSON?: any
   pointToLayer?: AnyFunction
   onEachFeature?: AnyFunction
+  useVectorLayers?: boolean,
+  children?: any,
   Map?: {
     setClickedLocation: (location: Location) => void
     setMapLocation: (location: LatLngExpression) => void
@@ -92,6 +96,7 @@ function calculateMarkerBounds(markers) {
 @observer
 class Map extends React.Component<Props, any> {
   mapRef = React.createRef()
+  glRef= React.createRef()
   viewportTrackEnabled = true
 
   state = {
@@ -150,11 +155,16 @@ class Map extends React.Component<Props, any> {
   }
 
   onMapClick = (event: LeafletMouseEvent) => {
-    const { Map: MapStore, onMapClick = () => {} } = this.props
+    const { useVectorLayers, Map: MapStore, onMapClick = () => {} } = this.props
     const { lat, lng } = event.latlng
 
     MapStore.setClickedLocation({ lat, lon: lng })
-    onMapClick(event)
+
+    if(useVectorLayers && this.glRef.current) {
+      onMapClick(event, get(this, 'glRef.current.leafletElement', null))
+    } else {
+      onMapClick(event)
+    }
   }
 
   centerOnHelsinki = e => {
@@ -179,8 +189,19 @@ class Map extends React.Component<Props, any> {
     })
   }
 
+  componentDidCatch(err) {
+    console.log(err)
+  }
+
   render() {
-    const { markers = [], geoJSON, pointToLayer, onEachFeature } = this.props
+    const {
+      markers = [],
+      geoJSON,
+      pointToLayer,
+      onEachFeature,
+      useVectorLayers = false,
+      children,
+    } = this.props
     const { center, zoom, bounds } = this.state
 
     return (
@@ -194,13 +215,18 @@ class Map extends React.Component<Props, any> {
           ref={this.mapRef}
           minZoom={10}
           maxZoom={18}>
-          <TileLayer
-            zoomOffset={-1}
-            tileSize={512}
-            attribution={attribution}
-            retina="@2x"
-            url={url}
-          />
+          {useVectorLayers ? (
+            // @ts-ignore
+            <MapboxGlLayer ref={this.glRef} />
+          ) : (
+            <TileLayer
+              zoomOffset={-1}
+              tileSize={512}
+              attribution={attribution}
+              retina="@2x"
+              url={url}
+            />
+          )}
           {geoJSON && (
             <MarkerClusterGroup>
               <GeoJSON
@@ -229,6 +255,7 @@ class Map extends React.Component<Props, any> {
               )}
             </MarkerClusterGroup>
           )}
+          { children }
         </LeafletMap>
         <CenterButton onClick={this.centerOnHelsinki}>Center on Helsinki</CenterButton>
       </MapContainer>

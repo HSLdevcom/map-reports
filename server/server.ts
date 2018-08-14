@@ -8,6 +8,7 @@ import UnconnectedStopsReporter from './reporters/UnconnectedStopsReporter'
 import MissingRoadsReporter from './reporters/MissingRoadsReporter'
 import runReporters from './reporters/runReporters'
 import registerReporters from './reporters/registerReporters'
+import hslMapStyle from 'hsl-map-style'
 
 (async () => {
   /**
@@ -42,9 +43,27 @@ import registerReporters from './reporters/registerReporters'
    * Start server
    */
 
+  // create vector map style
+  const style = hslMapStyle.generateStyle({
+    glyphsUrl: "https://kartat.hsldev.com/",
+    components: {
+      text_fisv: { enabled: true },
+      routes: { enabled: true },
+      stops: { enabled: true },
+      citybikes: { enabled: true },
+      icons: { enabled: true },
+      print: { enabled: false },
+      municipal_borders: { enabled: false },
+    }
+  });
+
   const app = Express()
 
   app.use('/dist', Express.static(path.join(__dirname, '../dist')))
+  app.get('/style.json', (req, res) => {
+    res.set("Content-Type", "application/json");
+    res.send(style);
+  })
   app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../dist/index.html')))
 
   const server = createServer(db)

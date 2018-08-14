@@ -68,6 +68,8 @@ class MissingRoadsMap extends React.Component<Props, any> {
     const reporterId = get(queryData, 'reporter.id', null)
     const featureJson = window.atob(feature)
 
+    console.log(featureJson)
+
     await mutate({
       variables: {
         reportData: {
@@ -79,7 +81,7 @@ class MissingRoadsMap extends React.Component<Props, any> {
           lat: parseFloat(lat),
           lon: parseFloat(lon),
           data: featureJson,
-          entityIdentifier: 'missing_road', // TODO: Find a good entity identifier
+          entityIdentifier: get(featureJson, 'LINK_ID', 'no-identifier'),
           recommendedMapZoom: 16,
           type: 'road',
         },
