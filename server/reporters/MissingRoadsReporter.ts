@@ -8,7 +8,7 @@ const MissingRoadsReporter = async () => {
     path.join(__dirname, 'assets/osm_puuttuvat_tiet.geojson')
   )
 
-  return JSON.stringify(missingRoadsGeoJson)
+  return missingRoadsGeoJson
 }
 
 export default MissingRoadsReporter

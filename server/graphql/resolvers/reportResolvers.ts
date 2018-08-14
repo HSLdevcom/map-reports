@@ -167,9 +167,9 @@ const reportResolvers = db => {
     const report = reportFactory(
       {
         ...reportData,
-        reporter: reporterId[0],
+        reporter: get(reporterId, '[0].id', get(reporterId, '[0]')),
       },
-      reportItemInsert[0]
+      get(reportItemInsert, '[0]')
     )
 
     const reportId = await reportsDb.add(report)

@@ -1,8 +1,20 @@
 const reporterResolvers = (db) => {
   const reporterDb = db.table('reporter')
 
-  async function allReporters() {
-    return reporterDb.get()
+  async function allReporters(_?, args?) {
+    const { onlyWithGeoJSON = false } = args
+    const reporters = await reporterDb.get()
+
+    if(onlyWithGeoJSON) {
+      return reporters.filter(r => r.geoJSON && Object.keys(r.geoJSON).length > 0)
+    }
+
+    return reporters
+  }
+
+  async function getReporter(_, { reporterId = '' }) {
+    const reporter = await reporterDb.get(reporterId)
+    return reporter[0]
   }
 
   async function resolveReportReporter(report) {
@@ -12,6 +24,7 @@ const reporterResolvers = (db) => {
 
   return {
     allReporters,
+    getReporter,
     resolveReportReporter,
   }
 }

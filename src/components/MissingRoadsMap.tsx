@@ -14,7 +14,7 @@ import * as L from 'leaflet'
 import middleOfLine from '../helpers/middleOfLine'
 import { DatasetView } from '../../types/DatasetView'
 import { AnyFunction } from '../../types/AnyFunction'
-import { Dataset } from '../../types/Dataset'
+import { Reporter } from '../../types/Reporter'
 const MapArea = styled.div`
   height: calc(100vh - 3rem);
 `
@@ -26,16 +26,16 @@ injectGlobal`
 `
 
 const datasetQuery = gql`
-  query datasetData($id: String!) {
-    dataset(id: $id) {
+  query datasetData($id: ID!) {
+    reporter(reporterId: $id) {
       id
-      label
+      name
       geoJSON
     }
   }
 `
 
-const createStopReportMutation = gql`
+const createRoadReportMutation = gql`
   mutation createStopReport($reportData: InputReport!, $reportItem: InputReportItem!) {
     createReport(reportData: $reportData, reportItem: $reportItem) {
       ...ReportFields
@@ -46,13 +46,13 @@ const createStopReportMutation = gql`
 
 const enhance = compose(
   query({ query: datasetQuery, getVariables: ({ datasetId }) => ({ id: datasetId }) }),
-  mutate({ mutation: createStopReportMutation }),
+  mutate({ mutation: createRoadReportMutation }),
   observer
 )
 
 interface Props extends DatasetView {
   mutate?: AnyFunction
-  queryData?: { dataset: Dataset },
+  queryData?: { reporter: Reporter },
   loading?: boolean
 }
 
@@ -74,13 +74,12 @@ class MissingRoadsMap extends React.Component<Props, any> {
           message: `There should be a road here.`,
         },
         reportItem: {
-          location: {
-            lat: parseFloat(lat),
-            lon: parseFloat(lon),
-          },
-          feature: featureJson,
+          lat: parseFloat(lat),
+          lon: parseFloat(lon),
+          data: featureJson,
+          entityIdentifier: 'missing_road', // TODO: Find a good entity identifier
           recommendedMapZoom: 16,
-          type: 'general',
+          type: 'road',
         },
       },
     })
@@ -89,7 +88,7 @@ class MissingRoadsMap extends React.Component<Props, any> {
   render() {
     const { queryData, loading } = this.props
 
-    const missingRoadsDataset = get(queryData, 'dataset', null)
+    const missingRoadsDataset = get(queryData, 'reporter', null)
 
     if (!missingRoadsDataset || loading) {
       return 'Loading...'

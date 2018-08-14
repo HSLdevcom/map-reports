@@ -12,17 +12,17 @@ import { marker, popup } from 'leaflet'
 import MarkerIcon from './MarkerIcon'
 import { DatasetView } from '../../types/DatasetView'
 import { AnyFunction } from '../../types/AnyFunction'
-import { Dataset } from '../../types/Dataset'
+import { Reporter } from '../../types/Reporter'
 
 const MapArea = styled.div`
   height: calc(100vh - 3rem);
 `
 
 const datasetQuery = gql`
-  query datasetData($id: String!) {
-    dataset(id: $id) {
+  query datasetData($id: ID!) {
+    reporter(reporterId: $id) {
       id
-      label
+      name
       geoJSON
     }
   }
@@ -45,7 +45,7 @@ const enhance = compose(
 
 interface Props extends DatasetView {
   mutate?: AnyFunction
-  queryData?: { dataset: Dataset }
+  queryData?: { reporter: Reporter }
   loading?: boolean
 }
 
@@ -66,11 +66,9 @@ class UnconnectedStopsMap extends React.Component<Props, any> {
           message: `JORE stop ${stopId} is not connected to an OSM stop.`,
         },
         reportItem: {
-          location: {
-            lat: parseFloat(lat),
-            lon: parseFloat(lon),
-          },
-          stopCode: stopId,
+          lat: parseFloat(lat),
+          lon: parseFloat(lon),
+          entityIdentifier: stopId,
           recommendedMapZoom: 18,
           type: 'stop',
         },
@@ -81,7 +79,7 @@ class UnconnectedStopsMap extends React.Component<Props, any> {
   render() {
     const { queryData, loading } = this.props
 
-    const unconnectedStopsDataset = get(queryData, 'dataset', null)
+    const unconnectedStopsDataset = get(queryData, 'reporter', null)
 
     if (!unconnectedStopsDataset || loading) {
       return 'Loading...'

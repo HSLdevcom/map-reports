@@ -33,7 +33,7 @@ const UnconnectedStopsReporter = async () => {
     include: ['stop_code'],
   })
 
-  return JSON.stringify(stopsGeoJson)
+  return stopsGeoJson
 }
 
 export default UnconnectedStopsReporter

@@ -14,6 +14,7 @@ const createResolvers = (db): any => {
 
       // Reporters
       reporters: reporters.allReporters,
+      reporter: reporters.getReporter
     },
     Mutation: {
       // Reports
@@ -25,6 +26,11 @@ const createResolvers = (db): any => {
     Report: {
       reporter: reporters.resolveReportReporter,
     },
+    Reporter: {
+      geoJSON: (reporter) => {
+        return JSON.stringify(reporter.geoJSON)
+      }
+    }
   }
 }
 

@@ -12,9 +12,9 @@ import { get } from 'lodash'
 
 const datasetOptionsQuery = gql`
   {
-    datasets {
+    reporters(onlyWithGeoJSON: true) {
       id
-      label
+      name
     }
   }
 `
@@ -38,13 +38,15 @@ const enhance = compose(
 )
 
 const datasetMaps = {
-  missing_roads: MissingRoadsMap,
-  unconnected_stops: UnconnectedStopsMap,
+  'missing-roads-reporter': MissingRoadsMap,
+  'unconnected-stops-reporter': UnconnectedStopsMap,
 }
 
 class InspectDatasets extends React.Component<any, any> {
   onChangeDataset = e => {
-    const { actions: { UI } } = this.props
+    const {
+      actions: { UI },
+    } = this.props
     UI.selectDataset(e.target.value)
   }
 
@@ -55,7 +57,11 @@ class InspectDatasets extends React.Component<any, any> {
       return 'Loading...'
     }
 
-    const MapComponent = get(datasetMaps, state.selectedDataset, null)
+    const selectedDataset = queryData.reporters.find(
+      ({ id }) => id === state.selectedDataset
+    )
+
+    const MapComponent = get(datasetMaps, get(selectedDataset, 'name', ''), null)
 
     return (
       <DatasetsWrapper>
@@ -67,7 +73,7 @@ class InspectDatasets extends React.Component<any, any> {
           <Select value={state.selectedDataset} onChange={this.onChangeDataset}>
             {[
               { value: '', label: 'Valitse kartta' },
-              ...queryData.datasets.map(({ id, label }) => ({ value: id, label })),
+              ...queryData.reporters.map(({ id, name }) => ({ value: id, label: name })),
             ]}
           </Select>
         </OptionsBox>

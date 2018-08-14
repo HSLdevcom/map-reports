@@ -11,7 +11,8 @@ const rootTypeDefs = gql`
       sort: SortParams
       filter: [FilterParams]
     ): ReportsConnection
-    reporters: [Reporter]
+    reporters(onlyWithGeoJSON: Boolean): [Reporter]
+    reporter(reporterId: ID): Reporter
   }
 
   type Mutation {

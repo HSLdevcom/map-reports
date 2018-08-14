@@ -10,7 +10,7 @@ export default async (reporters, database) => {
 
       console.log(`Running reporter ${reporter.name} with id ${reporterId}`)
 
-      const result = reporter.run()
+      const result = await reporter.run()
       await reporterDb.update(reporterId, { geoJSON: result })
     }
   }
