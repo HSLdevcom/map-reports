@@ -11,7 +11,7 @@ export default async (reporters, database) => {
     }))
 
   if(newRecords) {
-    return reporterDb.table.insert(newRecords, 'id')
+    return reporterDb.add(newRecords)
   }
 
   return []

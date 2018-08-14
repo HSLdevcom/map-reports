@@ -158,7 +158,7 @@ const reportResolvers = db => {
     }
   ): Promise<Report> {
     const reportItemInsert = await reportItemsDb.add(reportItem)
-    const reporterId = await reporterDb.table
+    const reporterId = await reporterDb.table()
       .where('name', 'manual-reporter')
       .select('id')
 
@@ -172,7 +172,12 @@ const reportResolvers = db => {
       reportItemInsert[0]
     )
 
-    await reportsDb.add(report)
+    const reportId = await reportsDb.add(report)
+
+    if(reportId.length > 0) {
+      report.id = reportId[0]
+    }
+
     return report
   }
 

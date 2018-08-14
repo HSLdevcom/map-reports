@@ -5,8 +5,10 @@ interface RecordTypeContract {
   id: string
 }
 
-async function createDb<RecordType extends RecordTypeContract>(table) {
+async function createDb<RecordType extends RecordTypeContract>(tableName) {
   async function get(id: string = null) {
+    const table = knex(tableName)
+
     if (id) {
       return table.where('id', id)
     }
@@ -15,6 +17,8 @@ async function createDb<RecordType extends RecordTypeContract>(table) {
   }
 
   async function add(item) {
+    const table = knex(tableName)
+
     try {
       return table.insert(item, 'id').catch(err => {})
     } catch(err) {
@@ -23,6 +27,8 @@ async function createDb<RecordType extends RecordTypeContract>(table) {
   }
 
   async function update(id, newValues) {
+    const table = knex(tableName)
+
     try {
       return table
         .where('id', id)
@@ -32,21 +38,9 @@ async function createDb<RecordType extends RecordTypeContract>(table) {
     }
   }
 
-  async function updateOrAdd(id, item) {
-    try {
-      const record = table.where('id', id).select('id')
-
-      if (record) {
-        return table.where('id', id).update(item, 'id')
-      }
-
-      return table.insert(item, 'id')
-    } catch(err) {
-      return []
-    }
-  }
-
   async function remove(id) {
+    const table = knex(tableName)
+
     try {
       return table
         .where('id', id)
@@ -60,9 +54,8 @@ async function createDb<RecordType extends RecordTypeContract>(table) {
     get,
     add,
     update,
-    updateOrAdd,
     remove,
-    table,
+    table: () => knex(tableName),
   }
 }
 
@@ -73,9 +66,9 @@ const database = async () => {
   await migrate()
 
   const tables = {
-    report: await createDb(knex('Reports')),
-    reportItem: await createDb(knex('ReportedItems')),
-    reporter: await createDb(knex('Reporters')),
+    report: await createDb('Reports'),
+    reportItem: await createDb('ReportedItems'),
+    reporter: await createDb('Reporters'),
   }
 
   function table(tableName) {
