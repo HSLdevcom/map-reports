@@ -10,11 +10,12 @@ import { ReportFragment } from '../fragments/ReportFragment'
 import { mutate } from '../helpers/Mutation'
 import * as prettyJson from 'prettyjson'
 import * as L from 'leaflet'
-
+import { GeoJSON } from 'react-leaflet/es'
 import middleOfLine from '../helpers/middleOfLine'
 import { DatasetView } from '../../types/DatasetView'
 import { AnyFunction } from '../../types/AnyFunction'
 import { Reporter } from '../../types/Reporter'
+
 const MapArea = styled.div`
   height: calc(100vh - 3rem);
 `
@@ -52,7 +53,7 @@ const enhance = compose(
 
 interface Props extends DatasetView {
   mutate?: AnyFunction
-  queryData?: { reporter: Reporter },
+  queryData?: { reporter: Reporter }
   loading?: boolean
 }
 
@@ -68,14 +69,12 @@ class MissingRoadsMap extends React.Component<Props, any> {
     const reporterId = get(queryData, 'reporter.id', null)
     const featureJson = window.atob(feature)
 
-    console.log(featureJson)
-
     await mutate({
       variables: {
         reportData: {
           title: `Missing road`,
           message: `There should be a road here.`,
-          reporter: reporterId
+          reporter: reporterId,
         },
         reportItem: {
           lat: parseFloat(lat),
@@ -89,6 +88,47 @@ class MissingRoadsMap extends React.Component<Props, any> {
     })
   }
 
+  featureToLayer = (feature, layer) => {
+    const type = get(feature, 'geometry.type', 'MultiLineString')
+    let line
+
+    if (type === 'LineString') {
+      line = get(feature, 'geometry.coordinates')
+    }
+
+    if (type === 'MultiLineString') {
+      line = get(feature, 'geometry.coordinates[0]')
+    }
+
+    const lineMiddle = middleOfLine(line)
+
+    const lat = lineMiddle[1]
+    const lon = lineMiddle[0]
+    // Stringify feature and base64 encode it to make it work inline
+    const featureJson = window.btoa(JSON.stringify(feature))
+
+    /**
+     * The geojson layer does not support React-leaflets React components, so we
+     * have to do this with plain HTML. __handleMissingRoadClick is a global
+     * that points to onCreateIssue() in this component. Make sure to feed
+     * it only strings, as numbers may get converted to characters.
+     */
+
+    const popupContent = `
+      <div>
+        <pre class="feature-props"><code>
+          ${prettyJson.render(feature.properties)}
+        </code></pre>
+        <p>
+          <button onclick="__handleMissingRoadClick('${lat}', '${lon}', '${featureJson}')">
+            Create report
+          </button>
+        </p>
+      </div>
+    `
+    layer.bindPopup(L.popup({ minWidth: 250 }).setContent(popupContent))
+  }
+
   render() {
     const { queryData, loading } = this.props
 
@@ -100,49 +140,12 @@ class MissingRoadsMap extends React.Component<Props, any> {
 
     return (
       <MapArea>
-        <Map
-          onEachFeature={(feature, layer) => {
-            const type = get(feature, 'geometry.type', 'MultiLineString')
-            let line
-
-            if (type === 'LineString') {
-              line = get(feature, 'geometry.coordinates')
-            }
-
-            if (type === 'MultiLineString') {
-              line = get(feature, 'geometry.coordinates[0]')
-            }
-
-            const lineMiddle = middleOfLine(line)
-
-            const lat = lineMiddle[1]
-            const lon = lineMiddle[0]
-            // Stringify feature and base64 encode it to make it work inline
-            const featureJson = window.btoa(JSON.stringify(feature))
-
-            /**
-             * The geojson layer does not support React-leaflets React components, so we
-             * have to do this with plain HTML. __handleMissingRoadClick is a global
-             * that points to onCreateIssue() in this component. Make sure to feed
-             * it only strings, as numbers may get converted to characters.
-             */
-
-            const popupContent = `
-              <div>
-                <pre class="feature-props"><code>
-                  ${prettyJson.render(feature.properties)}
-                </code></pre>
-                <p>
-                  <button onclick="__handleMissingRoadClick('${lat}', '${lon}', '${featureJson}')">
-                    Create report
-                  </button>
-                </p>
-              </div>
-            `
-            layer.bindPopup(L.popup({ minWidth: 250 }).setContent(popupContent))
-          }}
-          geoJSON={JSON.parse(missingRoadsDataset.geoJSON)}
-        />
+        <Map>
+          <GeoJSON
+            data={JSON.parse(missingRoadsDataset.geoJSON)}
+            onEachFeature={this.featureToLayer}
+          />
+        </Map>
       </MapArea>
     )
   }

@@ -63,20 +63,6 @@ const client = new ApolloClient({
       if (networkError) console.error(`[Network error]: ${networkError}`)
     }),
     requestLink,
-    withClientState({
-      defaults: {
-        isConnected: true,
-      },
-      resolvers: {
-        Mutation: {
-          updateNetworkStatus: (_, { isConnected }, { cache }) => {
-            cache.writeData({ data: { isConnected } })
-            return null
-          },
-        },
-      },
-      cache,
-    }),
     new HttpLink({ uri: process.env.API_URL || '/graphql' }),
   ]),
   cache,

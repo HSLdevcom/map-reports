@@ -1,17 +1,30 @@
-import { withLeaflet, MapLayer } from 'react-leaflet/es'
+import { withLeaflet, MapLayer, GridLayer } from 'react-leaflet/es'
 import L from 'leaflet'
 import 'mapbox-gl-leaflet'
 
 @withLeaflet
-class MapboxGlLayer extends MapLayer {
+class MapboxGlLayer extends GridLayer {
+  gl
+
   createLeafletElement({ children, leaflet: { map } }) {
     // @ts-ignore
-    const gl = L.mapboxGL({
+    this.gl = L.mapboxGL({
       style: '/style.json',
       accessToken: 'none',
     }).addTo(map)
 
-    return gl
+    return this.gl
+  }
+
+  updateLeafletElement(fromProps, toProps) {
+    //console.log(fromProps, toProps)
+    //console.dir(this.gl._offset)
+
+    return {}
+  }
+
+  onRemove() {
+    console.log('derp')
   }
 }
 

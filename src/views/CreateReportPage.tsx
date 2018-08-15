@@ -2,12 +2,12 @@ import * as React from 'react'
 import styled from 'styled-components'
 import SubmitReport from '../components/SubmitReport'
 import ReportsMap from '../components/ReportsMap'
-import { get, intersection } from 'lodash'
+import { get } from 'lodash'
 import { inject, observer } from 'mobx-react'
 import { app } from 'mobx-app'
-import { InsHTMLAttributes } from 'react'
-import { Popup } from 'react-leaflet/es'
+import { Popup, GeoJSON, Circle } from 'react-leaflet/es'
 import { ReportActions } from '../../types/ReportActions'
+import { circle } from 'leaflet'
 
 const CreateReportView = styled.div`
   height: 100%;
@@ -90,15 +90,17 @@ function getIdentifyingPropName(properties) {
 
 interface Props {
   Report?: ReportActions
+  Map?: any
   state?: any
 }
 
-@inject(app('Report'))
+@inject(app('Report', 'Map'))
 @observer
 class CreateReportPage extends React.Component<Props, any> {
   state = {
     availableFeatures: [],
     popupPosition: null,
+    highlightGeoJson: null,
   }
 
   getFeatureOptions = renderedFeatures => {
@@ -114,8 +116,6 @@ class CreateReportPage extends React.Component<Props, any> {
         feature.properties,
         identifyingPropName
       )
-
-      console.log(identifyingPropName, identifyingPropValue)
 
       if (
         identifyingPropName &&
@@ -145,16 +145,30 @@ class CreateReportPage extends React.Component<Props, any> {
     })
   }
 
-  useAsEntity = (identifier, type, data) => e => {
+  onFeatureHover = (feature = null) => e => {
+    this.setState({
+      highlightGeoJson: feature,
+    })
+  }
+
+  useAsEntity = (identifier, type, feature) => e => {
     e.preventDefault()
 
-    const { Report } = this.props
+    const { Report, Map } = this.props
     Report.setDraftEntity(identifier, type)
-    Report.setDraftData(data)
+    Report.setDraftData(feature.properties)
+
+    if (feature.geometry.type === 'Point') {
+      // Set marker to point coordinates. Geojson uses lon/lat, not the other way around.
+      Map.setClickedLocation({
+        lat: feature.geometry.coordinates[1],
+        lon: feature.geometry.coordinates[0],
+      })
+    }
   }
 
   render() {
-    const { availableFeatures = [], popupPosition } = this.state
+    const { availableFeatures = [], popupPosition, highlightGeoJson } = this.state
 
     return (
       <CreateReportView>
@@ -166,7 +180,8 @@ class CreateReportPage extends React.Component<Props, any> {
             {availableFeatures.length > 0 &&
               popupPosition && (
                 <Popup
-                  minWidth={300}
+                  minWidth={200}
+                  maxWidth={500}
                   key={JSON.stringify(popupPosition)}
                   autoClose={false}
                   closeOnClick={false}
@@ -180,14 +195,20 @@ class CreateReportPage extends React.Component<Props, any> {
                       </tr>
                     </thead>
                     <tbody>
-                      {availableFeatures.map(feature => {
+                      {availableFeatures.map((feature, idx) => {
                         const propName = getIdentifyingPropName(feature.properties)
                         const entityIdentifier =
                           getIdentifyingPropValue(feature.properties, propName) ||
                           'unknown'
 
                         return (
-                          <tr>
+                          <tr
+                            style={{ cursor: 'pointer' }}
+                            onMouseOver={this.onFeatureHover(feature)}
+                            onMouseOut={this.onFeatureHover(null)}
+                            key={`feature_row_${idx}_${
+                              feature.layer.id
+                            }_${propName}_${entityIdentifier}`}>
                             <td>{feature.layer.id}</td>
                             <td>{entityIdentifier}</td>
                             <td>
@@ -195,7 +216,7 @@ class CreateReportPage extends React.Component<Props, any> {
                                 onClick={this.useAsEntity(
                                   entityIdentifier,
                                   propName,
-                                  feature.properties
+                                  feature
                                 )}>
                                 Select
                               </button>
@@ -203,10 +224,33 @@ class CreateReportPage extends React.Component<Props, any> {
                           </tr>
                         )
                       })}
+                      <tr>
+                        <td>Muu</td>
+                        <td>Muu virhe</td>
+                        <td>
+                          <button onClick={this.useAsEntity('other', 'other', {})}>
+                            Select
+                          </button>
+                        </td>
+                      </tr>
                     </tbody>
                   </table>
                 </Popup>
               )}
+            {highlightGeoJson && (
+              <GeoJSON
+                data={highlightGeoJson}
+                style={() => ({ color: '#00ff99' })}
+                pointToLayer={(feature, latlng) =>
+                  circle(latlng, {
+                    radius: 8,
+                    color: '#00ff99',
+                    fillColor: '#00ff00',
+                    fillOpacity: 0.5,
+                  })
+                }
+              />
+            )}
           </ReportsMap>
         </MapArea>
       </CreateReportView>

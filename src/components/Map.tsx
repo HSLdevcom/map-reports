@@ -197,8 +197,6 @@ class Map extends React.Component<Props, any> {
     const {
       markers = [],
       geoJSON,
-      pointToLayer,
-      onEachFeature,
       useVectorLayers = false,
       children,
     } = this.props
@@ -226,15 +224,6 @@ class Map extends React.Component<Props, any> {
               retina="@2x"
               url={url}
             />
-          )}
-          {geoJSON && (
-            <MarkerClusterGroup>
-              <GeoJSON
-                data={geoJSON}
-                onEachFeature={onEachFeature}
-                pointToLayer={pointToLayer}
-              />
-            </MarkerClusterGroup>
           )}
           {markers.length > 0 && (
             <MarkerClusterGroup>

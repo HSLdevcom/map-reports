@@ -9,10 +9,12 @@ import styled from 'styled-components'
 import { ReportFragment } from '../fragments/ReportFragment'
 import { mutate } from '../helpers/Mutation'
 import { marker, popup } from 'leaflet'
+import { GeoJSON } from 'react-leaflet/es'
 import MarkerIcon from './MarkerIcon'
 import { DatasetView } from '../../types/DatasetView'
 import { AnyFunction } from '../../types/AnyFunction'
 import { Reporter } from '../../types/Reporter'
+import MarkerClusterGroup from './MarkerClusterGroup'
 
 const MapArea = styled.div`
   height: calc(100vh - 3rem);
@@ -65,7 +67,7 @@ class UnconnectedStopsMap extends React.Component<Props, any> {
         reportData: {
           title: `Unconnected stop ${stopId}`,
           message: `JORE stop ${stopId} is not connected to an OSM stop.`,
-          reporter: reporterId
+          reporter: reporterId,
         },
         reportItem: {
           lat: parseFloat(lat),
@@ -76,6 +78,35 @@ class UnconnectedStopsMap extends React.Component<Props, any> {
         },
       },
     })
+  }
+
+  pointToLayer = ({ properties }, latlng) => {
+    const stopId = get(properties, 'stop_code', '[Unknown stop]')
+    const lat = latlng.lat
+    const lon = latlng.lng
+
+    /**
+     * The markers created by the geojson layer do not support React-leaflets
+     * React components, so we have to do this with plain HTML.
+     * __handleUnconnectedStopMarkerClick is a global that points to onCreateIssue() in this component.
+     * Make sure to feed it only strings, as numbers may get converted to characters.
+     */
+
+    const popupContent = `
+      <div>
+        <div>
+          Stop: ${stopId}
+        </div>
+        <button onclick="__handleUnconnectedStopMarkerClick('${stopId}', '${lat}', '${lon}')">
+          Create report
+        </button>
+      </div>
+    `
+    const bubble = popup({ minWidth: 150 }).setContent(popupContent)
+
+    return marker(latlng, {
+      icon: MarkerIcon({ type: 'general' }),
+    }).bindPopup(bubble)
   }
 
   render() {
@@ -89,38 +120,14 @@ class UnconnectedStopsMap extends React.Component<Props, any> {
 
     return (
       <MapArea>
-        <Map
-          pointToLayer={({ properties }, latlng) => {
-            const stopId = get(properties, 'stop_code', '[Unknown stop]')
-            const lat = latlng.lat
-            const lon = latlng.lng
-
-            /**
-             * The markers created by the geojson layer do not support React-leaflets
-             * React components, so we have to do this with plain HTML.
-             * __handleUnconnectedStopMarkerClick is a global that points to onCreateIssue() in this component.
-             * Make sure to feed it only strings, as numbers may get converted to characters.
-             */
-
-            const popupContent = `
-              <div>
-                <div>
-                  Stop: ${stopId}
-                </div>
-                <button onclick="__handleUnconnectedStopMarkerClick('${stopId}', '${lat}', '${lon}')">
-                  Create report
-                </button>
-              </div>
-            `
-
-            const bubble = popup({ minWidth: 150 }).setContent(popupContent)
-
-            return marker(latlng, {
-              icon: MarkerIcon({ type: 'general' }),
-            }).bindPopup(bubble)
-          }}
-          geoJSON={JSON.parse(unconnectedStopsDataset.geoJSON)}
-        />
+        <Map>
+          <MarkerClusterGroup>
+            <GeoJSON
+              data={JSON.parse(unconnectedStopsDataset.geoJSON)}
+              pointToLayer={this.pointToLayer}
+            />
+          </MarkerClusterGroup>
+        </Map>
       </MapArea>
     )
   }
