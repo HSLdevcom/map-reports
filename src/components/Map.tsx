@@ -42,8 +42,8 @@ interface Props {
   geoJSON?: any
   pointToLayer?: AnyFunction
   onEachFeature?: AnyFunction
-  useVectorLayers?: boolean,
-  children?: any,
+  useVectorLayers?: boolean
+  children?: any
   Map?: {
     setClickedLocation: (location: Location) => void
     setMapLocation: (location: LatLngExpression) => void
@@ -96,8 +96,7 @@ function calculateMarkerBounds(markers) {
 @observer
 class Map extends React.Component<Props, any> {
   mapRef = React.createRef()
-  glRef= React.createRef()
-  viewportTrackEnabled = true
+  glRef = React.createRef()
 
   state = {
     center: defaultMapLocation,
@@ -160,7 +159,7 @@ class Map extends React.Component<Props, any> {
 
     MapStore.setClickedLocation({ lat, lon: lng })
 
-    if(useVectorLayers && this.glRef.current) {
+    if (useVectorLayers && this.glRef.current) {
       onMapClick(event, this.state.zoom, get(this, 'glRef.current.leafletElement', null))
     } else {
       onMapClick(event, this.state.zoom)
@@ -177,7 +176,7 @@ class Map extends React.Component<Props, any> {
   }
 
   trackViewport = ({ center: viewportCenter, zoom: viewportZoom }) => {
-    if (!this.viewportTrackEnabled || !viewportCenter) {
+    if (!viewportCenter) {
       return
     }
 
@@ -189,17 +188,8 @@ class Map extends React.Component<Props, any> {
     })
   }
 
-  componentDidCatch(err) {
-    console.log(err)
-  }
-
   render() {
-    const {
-      markers = [],
-      geoJSON,
-      useVectorLayers = false,
-      children,
-    } = this.props
+    const { markers = [], useVectorLayers = false, children, useBounds } = this.props
     const { center, zoom, bounds } = this.state
 
     return (
@@ -208,7 +198,7 @@ class Map extends React.Component<Props, any> {
           center={center}
           zoom={zoom}
           onViewportChange={this.trackViewport}
-          bounds={bounds}
+          bounds={useBounds ? bounds : undefined}
           onClick={this.onMapClick}
           ref={this.mapRef}
           minZoom={10}
@@ -244,7 +234,7 @@ class Map extends React.Component<Props, any> {
               )}
             </MarkerClusterGroup>
           )}
-          { children }
+          {children}
         </LeafletMap>
         <CenterButton onClick={this.centerOnHelsinki}>Center on Helsinki</CenterButton>
       </MapContainer>

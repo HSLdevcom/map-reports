@@ -4403,10 +4403,6 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-mapbox-gl-leaflet@^0.0.3:
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/mapbox-gl-leaflet/-/mapbox-gl-leaflet-0.0.3.tgz#c50a61b1fcbc1f6b23293c0ba1fb1cb100128aaf"
-
 mapbox-gl@^0.47.0:
   version "0.47.0"
   resolved "https://registry.yarnpkg.com/mapbox-gl/-/mapbox-gl-0.47.0.tgz#c72f1d3462037f0bb5b8dc25cc8a029513f2b7cd"

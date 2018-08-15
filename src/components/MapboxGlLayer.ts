@@ -1,6 +1,5 @@
 import { withLeaflet, MapLayer, GridLayer } from 'react-leaflet/es'
-import L from 'leaflet'
-import 'mapbox-gl-leaflet'
+import mapboxLeaflet from '../helpers/MapboxGlLeaflet'
 
 @withLeaflet
 class MapboxGlLayer extends GridLayer {
@@ -8,23 +7,12 @@ class MapboxGlLayer extends GridLayer {
 
   createLeafletElement({ children, leaflet: { map } }) {
     // @ts-ignore
-    this.gl = L.mapboxGL({
+    this.gl = mapboxLeaflet({
       style: '/style.json',
       accessToken: 'none',
     }).addTo(map)
 
     return this.gl
-  }
-
-  updateLeafletElement(fromProps, toProps) {
-    //console.log(fromProps, toProps)
-    //console.dir(this.gl._offset)
-
-    return {}
-  }
-
-  onRemove() {
-    console.log('derp')
   }
 }
 

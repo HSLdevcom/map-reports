@@ -120,7 +120,7 @@ class UnconnectedStopsMap extends React.Component<Props, any> {
 
     return (
       <MapArea>
-        <Map>
+        <Map useVectorLayers>
           <MarkerClusterGroup>
             <GeoJSON
               data={JSON.parse(unconnectedStopsDataset.geoJSON)}

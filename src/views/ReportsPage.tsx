@@ -67,7 +67,11 @@ class ReportsPage extends React.Component<Props, any> {
           <ReportsList reports={reports} fetchMore={fetchMore} refetchReports={refetch} />
         </Sidebar>
         <MapArea>
-          <ReportsMap reports={reports} onMapClick={() => Report.focusReport(null)} />
+          <ReportsMap
+            useVectorLayers
+            reports={reports}
+            onMapClick={() => Report.focusReport(null)}
+          />
         </MapArea>
       </ReportsView>
     )

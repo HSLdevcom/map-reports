@@ -40,10 +40,9 @@ const blacklistedLayers = [
 ]
 
 // For combining props, we need to use a delimiter that should never show up in the values.
-const delimiter = '/'
+const delimiter = '|'
 const identifyingProp = [
-  `routeId${delimiter}direction`,
-  'routeId',
+  `routeId`,
   'stopId',
   'name',
   'house_num',
@@ -57,8 +56,8 @@ function getIdentifyingPropValue(item, propName) {
   for (const propIndex in props) {
     const prop = props[propIndex]
 
-    if (prop) {
-      values.push(item[prop])
+    if (prop && item[prop]) {
+      values.push(item[prop].split('/')[0])
     }
   }
 
