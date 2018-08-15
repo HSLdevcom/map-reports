@@ -161,9 +161,9 @@ class Map extends React.Component<Props, any> {
     MapStore.setClickedLocation({ lat, lon: lng })
 
     if(useVectorLayers && this.glRef.current) {
-      onMapClick(event, get(this, 'glRef.current.leafletElement', null))
+      onMapClick(event, this.state.zoom, get(this, 'glRef.current.leafletElement', null))
     } else {
-      onMapClick(event)
+      onMapClick(event, this.state.zoom)
     }
   }
 

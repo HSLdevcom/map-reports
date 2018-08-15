@@ -1,5 +1,4 @@
 import { ReporterMeta } from './Reporter'
-import { Location } from './Location'
 
 export enum ReportStatus {
   NEW = 'NEW',
@@ -16,11 +15,12 @@ export enum ReportPriority {
 }
 
 export interface ReportItem {
-  location: Location
-  feature?: string
+  lat: number
+  lon: number
+  data?: string
   type: string
   recommendedMapZoom?: number
-  stopCode?: string
+  entityIdentifier: string
 }
 
 export interface Report<ItemType = ReportItem> {
@@ -33,4 +33,12 @@ export interface Report<ItemType = ReportItem> {
   item: ItemType | string
   created_at?: number
   updated_at?: number
+}
+
+export interface ReportDraft {
+  title: string,
+  message?: string,
+  entityIdentifier: string,
+  type: string,
+  data?: string
 }

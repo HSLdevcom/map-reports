@@ -7,9 +7,8 @@ import { app } from 'mobx-app'
 import { get } from 'lodash'
 import { Marker, MarkerState } from '../../types/Marker'
 import { ReportActions } from '../../types/ReportActions'
-import { LatLng, latLng, marker } from 'leaflet'
-import GeoJSON from 'react-leaflet/es/GeoJSON'
-import MarkerIcon from './MarkerIcon'
+import { LatLng, latLng } from 'leaflet'
+import { AnyFunction } from '../../types/AnyFunction'
 
 interface Props extends RendersReports {
   state?: any
@@ -17,25 +16,40 @@ interface Props extends RendersReports {
   Map?: any
   useBounds?: boolean
   useVectorLayers?: boolean
+  onMapClick?: AnyFunction
 }
 
 @inject(app('Report'))
 @observer
 class ReportsMap extends React.Component<Props, any> {
-  state = {
-    renderGeoJson: [],
+  featuresAtPoint = (glMap, point, size) => {
+    const width = size
+    const height = size
+
+    const queryBbox = [
+      [point.x - width / 2, point.y - height / 2],
+      [point.x + width / 2, point.y + height / 2],
+    ]
+
+    return glMap.queryRenderedFeatures(queryBbox)
   }
 
-  renderGeoJson = (geoJson = []) => {
-    this.setState({
-      renderGeoJson: geoJson,
-    })
+  onMapClick = (event, zoom, { _glMap }) => {
+    const { onMapClick } = this.props
+    const { layerPoint: point } = event
+
+    if (_glMap && zoom > 14) {
+      const renderedFeatures = this.featuresAtPoint(_glMap, point, 2 * zoom)
+      onMapClick(event, zoom, renderedFeatures)
+    } else {
+      onMapClick(event, zoom, [])
+    }
   }
 
-  render() {
-    const { reports = [], state, Report, useBounds, useVectorLayers = false } = this.props
+  getReportMarkers = (): Marker[] => {
+    const { state, reports = [], Report } = this.props
 
-    const markers: Marker[] = reports
+    return reports
       .filter(report => !!get(report, 'item.lat', 0))
       // @ts-ignore
       .map(({ item: { lat, lon, type, recommendedMapZoom = 16 }, message, id }) => {
@@ -50,8 +64,8 @@ class ReportsMap extends React.Component<Props, any> {
             state.focusedReport === id && state.mapMode !== MapModes.pick
               ? MarkerState.focus
               : isInactive
-                ? MarkerState.inactive
-                : MarkerState.default,
+              ? MarkerState.inactive
+              : MarkerState.default,
           id,
           zoom: recommendedMapZoom,
           type,
@@ -60,6 +74,17 @@ class ReportsMap extends React.Component<Props, any> {
           onClick: () => Report.focusReport(id),
         }
       })
+  }
+
+  render() {
+    const {
+      state,
+      useBounds,
+      useVectorLayers = false,
+      children,
+    } = this.props
+
+    const markers: Marker[] = this.getReportMarkers()
 
     if (state.mapMode === MapModes.pick && state.lastClickedLocation !== null) {
       markers.push({
@@ -72,44 +97,14 @@ class ReportsMap extends React.Component<Props, any> {
       })
     }
 
-    // TODO: Figure out the geojson and the querying.
-
     return (
       <Map
         useVectorLayers={useVectorLayers}
         useBounds={useBounds}
         focusedMarker={state.focusedReport}
-        onMapClick={({ layerPoint: point }, glMap) => {
-          const width = 30
-          const height = 30
-
-          if (glMap) {
-            this.renderGeoJson(
-              glMap._glMap.queryRenderedFeatures([
-                [point.x - width / 2, point.y - height / 2],
-                [point.x + width / 2, point.y + height / 2],
-              ])
-            )
-          }
-
-          Report.focusReport(null)
-        }}
+        onMapClick={this.onMapClick}
         markers={markers}>
-        {this.state.renderGeoJson.length > 0 && (
-          <GeoJSON
-            pointToLayer={(props, latlng) =>
-              marker(latlng, {
-                icon: MarkerIcon({ type: 'general' }),
-              })
-            }
-            key={this.state.renderGeoJson.length + 'geojson' + Math.random()}
-            data={{
-              type: 'FeatureCollection',
-              features: this.state.renderGeoJson,
-            }}
-            style={() => ({ color: '#ff0000' })}
-          />
-        )}
+        {children}
       </Map>
     )
   }
