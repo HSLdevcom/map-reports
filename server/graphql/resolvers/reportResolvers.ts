@@ -185,6 +185,7 @@ const reportResolvers = db => {
     }
   ): Promise<Report> {
     const reportItemInsert = await reportItemsDb.add(reportItem)
+
     const reporterId = get(
       reportData,
       'reporter',
@@ -196,15 +197,12 @@ const reportResolvers = db => {
     )
 
     const report = reportFactory(
-      { ...reportData, reporter: reporterId },
+      { ...reportData, reporter: get(reporterId, 'id', reporterId) },
       get(reportItemInsert, '[0]')
     )
 
     const reportRecord = await reportsDb.add(report, ['id', 'created_at', 'updated_at'])
-
-    if (reportRecord.length > 0) {
-      merge(report, get(reportRecord, '[0]', {}))
-    }
+    merge(report, get(reportRecord, '[0]', {}))
 
     return report
   }

@@ -8,12 +8,14 @@ export const ReportFragment = gql`
     status
     priority
     item {
+      id
       type
       recommendedMapZoom
       data
       lat
       lon
       entityIdentifier
+      __typename
     }
     created_at
     updated_at

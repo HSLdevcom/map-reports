@@ -14,7 +14,7 @@ const createResolvers = (db): any => {
 
       // Reporters
       reporters: reporters.allReporters,
-      reporter: reporters.getReporter
+      reporter: reporters.getReporter,
     },
     Mutation: {
       // Reports
@@ -25,13 +25,22 @@ const createResolvers = (db): any => {
     },
     Report: {
       reporter: reporters.resolveReportReporter,
-      item: reports.resolveReportItem
+      item: reports.resolveReportItem,
+    },
+    ReportItem: {
+      data: reportItem => {
+        try {
+          return JSON.stringify(reportItem.data)
+        } catch (err) {
+          return '{}'
+        }
+      },
     },
     Reporter: {
-      geoJSON: (reporter) => {
+      geoJSON: reporter => {
         return JSON.stringify(reporter.geoJSON)
-      }
-    }
+      },
+    },
   }
 }
 
