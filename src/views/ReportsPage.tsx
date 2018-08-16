@@ -9,6 +9,7 @@ import { app } from 'mobx-app'
 import { inject, observer } from 'mobx-react'
 import { query } from '../helpers/Query'
 import { AnyFunction } from '../../types/AnyFunction'
+import { ReportActions } from '../../types/ReportActions'
 
 const ReportsView = styled.div`
   height: 100%;
@@ -32,9 +33,10 @@ type Props = {
   queryData?: any
   fetchMore?: AnyFunction
   refetch?: AnyFunction
+  Report?: ReportActions
 }
 
-@inject(app('state'))
+@inject(app('Report'))
 @query({
   query: reportsQuery,
   getVariables: ({ state }) => ({
@@ -54,7 +56,7 @@ class ReportsPage extends React.Component<Props, any> {
   }
 
   render() {
-    const { queryData, fetchMore, refetch } = this.props
+    const { queryData, fetchMore, refetch, Report } = this.props
 
     const queryName = 'reportsConnection'
     const reports = get(queryData, `${queryName}.edges`, []).map(edge => edge.node)
@@ -65,7 +67,11 @@ class ReportsPage extends React.Component<Props, any> {
           <ReportsList reports={reports} fetchMore={fetchMore} refetchReports={refetch} />
         </Sidebar>
         <MapArea>
-          <ReportsMap reports={reports} />
+          <ReportsMap
+            useVectorLayers
+            reports={reports}
+            onMapClick={() => Report.focusReport(null)}
+          />
         </MapArea>
       </ReportsView>
     )

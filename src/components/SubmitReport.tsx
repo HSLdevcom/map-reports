@@ -6,7 +6,7 @@ import gql from 'graphql-tag'
 import { ReportFragment } from '../fragments/ReportFragment'
 import { AnyFunction } from '../../types/AnyFunction'
 import updateReportsConnection from '../helpers/updateReportsConnection'
-import { Report } from '../../types/Report'
+import { Report, ReportDraft } from '../../types/Report'
 import { RouterType } from 'pathricia'
 import routes from '../routes'
 import { ReportActions } from '../../types/ReportActions'
@@ -29,7 +29,7 @@ type Props = {
   }
   state?: {
     lastClickedLocation?: Location
-    reportDraft: Report
+    reportDraft: ReportDraft
   }
   router?: RouterType
   actions?: {
@@ -49,7 +49,7 @@ const FormGroup = styled.div`
 
 const Input = styled(TextField)``
 
-const LocationDisplay = styled.div`
+const ValueDisplay = styled.div`
   margin-bottom: 1rem;
 `
 
@@ -85,7 +85,7 @@ class SubmitReport extends React.Component<Props, any> {
     e.preventDefault()
 
     const { mutate, state, router, actions } = this.props
-    const { title, message } = state.reportDraft
+    const { title, message, entityIdentifier, data, type } = state.reportDraft
     const location = state.lastClickedLocation
 
     mutate({
@@ -96,8 +96,9 @@ class SubmitReport extends React.Component<Props, any> {
         },
         reportItem: {
           ...location,
-          entityIdentifier: 'general',
-          type: 'general',
+          entityIdentifier,
+          type,
+          data,
           recommendedMapZoom: 16,
         },
       },
@@ -109,8 +110,10 @@ class SubmitReport extends React.Component<Props, any> {
 
   render() {
     const { state } = this.props
-    const { title, message } = state.reportDraft
+    const { title, message, entityIdentifier, data, type } = state.reportDraft
     const location = state.lastClickedLocation
+
+    // TODO: make submit and save work.
 
     return (
       <CreateReportForm onSubmit={this.onSubmit}>
@@ -138,12 +141,24 @@ class SubmitReport extends React.Component<Props, any> {
         </FormGroup>
         <Divider />
         <FormGroup>
-          <LocationDisplay>
+          <ValueDisplay>
             Location: <code>{JSON.stringify(toJS(location))}</code>
-          </LocationDisplay>
+          </ValueDisplay>
           <Button variant="outlined" type="button" onClick={this.pickCurrentLocation}>
             Use current location
           </Button>
+        </FormGroup>
+        <Divider />
+        <FormGroup>
+          <ValueDisplay>
+            {type}: <code>{entityIdentifier}</code>
+          </ValueDisplay>
+          <ValueDisplay>
+            Properties:{' '}
+            <pre>
+              <code>{JSON.stringify(JSON.parse(data), null, 2)}</code>
+            </pre>
+          </ValueDisplay>
         </FormGroup>
         <Divider />
         <FormGroup>

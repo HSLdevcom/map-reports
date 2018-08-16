@@ -5,6 +5,9 @@ import { get } from 'lodash'
 const emptyReport = {
   title: '',
   message: '',
+  entityIdentifier: 'unknown',
+  type: 'general',
+  data: '{}'
 }
 
 const ReportStore = (state, initialState): ReportActions => {
@@ -20,6 +23,15 @@ const ReportStore = (state, initialState): ReportActions => {
 
   const createReport = action(() => {
     reportState.reportDraft = emptyReport
+  })
+
+  const setDraftEntity = action((entityIdentifier, type) => {
+    reportState.reportDraft.entityIdentifier = entityIdentifier
+    reportState.reportDraft.type = type
+  })
+
+  const setDraftData = action((data) => {
+    reportState.reportDraft.data = JSON.stringify(data)
   })
 
   const sortReports = action(
@@ -64,6 +76,8 @@ const ReportStore = (state, initialState): ReportActions => {
 
   return {
     createReport,
+    setDraftEntity,
+    setDraftData,
     sortReports,
     addReportsFilter,
     setFilterValues,
