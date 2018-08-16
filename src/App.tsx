@@ -17,18 +17,18 @@ const Root = styled.div`
   height: 100vh;
 `
 
-const Header = styled(AppBar)``
 
+const Header = styled(AppBar)``
 const AppViews = styled.div``
 
-const App = observer(({ state, actions, router }) => (
-  <ApolloProvider client={client}>
-    <Provider state={state} actions={actions} router={router}>
-      <Root>
-        <Header position="static">
-          <Nav />
-        </Header>
+const App = observer(
+  ({ state, actions, router }) => (
+
+    <ApolloProvider client={client}>
+    <Provider state={state} actions={actions} router={router}><Root>
+        <Header position="static"><Nav /></Header>
         <AppViews>
+
           <Route path={routes.REPORTS} component={ReportsPage} />
           <Route path={routes.CREATE_REPORT} component={CreateReportPage} />
           <Route path={routes.INSPECT_DATASETS} component={InspectDatasets} />
@@ -36,6 +36,7 @@ const App = observer(({ state, actions, router }) => (
       </Root>
     </Provider>
   </ApolloProvider>
-))
+)
+)
 
 export default hot(module)(App)
