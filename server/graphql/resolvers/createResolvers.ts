@@ -1,9 +1,11 @@
 import reportResolvers from './reportResolvers'
 import reporterResolvers from './reporterResolvers'
+import inspectionResolvers from './inspectionResolvers'
 
 const createResolvers = (db): any => {
   const reports = reportResolvers(db)
   const reporters = reporterResolvers(db)
+  const inspections = inspectionResolvers(db)
 
   return {
     Query: {
@@ -15,6 +17,7 @@ const createResolvers = (db): any => {
       // Reporters
       reporters: reporters.allReporters,
       reporter: reporters.getReporter,
+      inspections: inspections.allInspections,
     },
     Mutation: {
       // Reports
@@ -22,6 +25,7 @@ const createResolvers = (db): any => {
       removeReport: reports.removeReport,
       setStatus: reports.setStatus,
       setPriority: reports.setPriority,
+      createInspection: inspections.createInspection,
     },
     Report: {
       reporter: reporters.resolveReportReporter,

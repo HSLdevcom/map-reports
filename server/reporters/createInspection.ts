@@ -1,21 +1,7 @@
-enum InspectionType {
-  CRON = 'cron',
-  ONETIME = 'one-time',
-  MANUAL = 'manual',
+import { InspectionSpec } from '../../types/Inspection'
+
+function createInspection(inspectionSpec: InspectionSpec) {
+  return inspectionSpec
 }
 
-enum DatasetType {
-  GEOJSON = 'geojson',
-  CSV = 'csv',
-}
-
-interface InspectionSpec {
-  name: string
-  type: InspectionType
-  datasetType: DatasetType
-  datasetUri?: string
-  cron?: string
-  convertData?: string
-}
-
-function createInspection(inspectionSpec: InspectionSpec) {}
+export default createInspection

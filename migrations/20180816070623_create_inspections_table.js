@@ -19,6 +19,7 @@ exports.up = async function(knex) {
     table.string('datasetUri')
     table.string('cron')
     table.jsonb('convertData')
+    table.timestamps(true, true)
   })
 }
 
