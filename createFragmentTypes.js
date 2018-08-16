@@ -23,9 +23,7 @@ got(`http://localhost:1234/graphql`, {
   const data = result.body.data
 
   // here we're filtering out any type information unrelated to unions or interfaces
-  const filteredData = data.__schema.types.filter(
-    type => type.possibleTypes !== null,
-  )
+  const filteredData = data.__schema.types.filter(type => type.possibleTypes !== null)
 
   data.__schema.types = filteredData
 
