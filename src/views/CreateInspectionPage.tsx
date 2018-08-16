@@ -55,7 +55,7 @@ class CreateInspectionPage extends React.Component<any, InspectionSpec> {
   onChange = field => e => {
     this.setState({
       ...this.state,
-      [field]: e.target.value,
+      [field]: get(e, 'target.value', e),
     })
   }
 
@@ -75,8 +75,18 @@ class CreateInspectionPage extends React.Component<any, InspectionSpec> {
     const { name, type, datasetType, datasetUri, cron, convertData } = this.state
 
     return (
-      <form onSubmit={this.onSubmit} style={{ width: '100%' }}>
-        <Grid container spacing={0} style={{ maxWidth: '100%' }}>
+      <form onSubmit={this.onSubmit}>
+        <Grid container spacing={24}>
+          <Grid item xs={12}>
+            <Typography variant="subheading">Inspections</Typography>
+            {get(queryData, 'inspections', []).map(inspection => (
+              <div key={`inspection_${inspection.id}`}>
+                <pre>
+                  <code>{JSON.stringify(inspection, null, 2)}</code>
+                </pre>
+              </div>
+            ))}
+          </Grid>
           <Grid item xs={12}>
             <TextField
               label="Inspection name"
@@ -116,7 +126,13 @@ class CreateInspectionPage extends React.Component<any, InspectionSpec> {
               <TextField label="Cron" value={cron} onChange={this.onChange('cron')} />
             </Grid>
           )}
-          {datasetType === DatasetType.CSV && <CSVtoGeoJSON datasetUri={datasetUri} />}
+          {datasetType === DatasetType.CSV && (
+            <CSVtoGeoJSON
+              value={convertData}
+              onChange={this.onChange('convertData')}
+              datasetUri={datasetUri}
+            />
+          )}
           <Grid item xs={12}>
             <Button type="submit" variant="raised">
               Create inspection

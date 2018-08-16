@@ -5,7 +5,7 @@ import { observer } from 'mobx-react'
 import { action, computed, observable, toJS } from 'mobx'
 import { Divider, Grid, Typography, InputLabel, FormControl } from '@material-ui/core'
 import Select from '../helpers/Select'
-import { map, get, omit } from 'lodash'
+import { map, get, omit, set } from 'lodash'
 
 enum GeometryType {
   'Point' = 'Point',
@@ -72,29 +72,8 @@ class SelectPointProps extends React.Component<any, any> {
 class CSVtoGeoJSON extends React.Component<any, any> {
   @observable.ref
   dataSample: any = null
-
   @observable
   lastFetchedUrl: string = ''
-
-  @observable.ref
-  geoJsonMapping: any = {
-    include: [],
-  }
-
-  @computed
-  get geoJsonFeature() {
-    let geoJsonObject = {}
-
-    try {
-      geoJsonObject = geoJson.parse(toJS(this.dataSample), {
-        ...toJS(this.geoJsonMapping),
-      })
-    } catch (err) {
-      geoJsonObject = {}
-    }
-
-    return JSON.stringify(geoJsonObject, null, 2)
-  }
 
   @action
   setDataSample = sample => (this.dataSample = sample)
@@ -135,31 +114,35 @@ class CSVtoGeoJSON extends React.Component<any, any> {
     }
   }
 
-  addGeometry = (type: GeometryType) =>
-    action((coordinateProps: string | string[]) => {
-      if (!coordinateProps) {
-        this.geoJsonMapping = omit(this.geoJsonMapping, type)
-      } else {
-        this.geoJsonMapping = {
-          ...this.geoJsonMapping,
-          [type]: coordinateProps,
-        }
-      }
-    })
+  createGeoJsonFeature(value) {
+    let geoJsonObject = {}
 
-  @action
-  includeProperty = prop => {
-    this.geoJsonMapping = {
-      ...this.geoJsonMapping,
-      include: [...this.geoJsonMapping.include, prop],
+    try {
+      geoJsonObject = geoJson.parse(toJS(this.dataSample), JSON.parse(value))
+    } catch (err) {
+      geoJsonObject = {}
+    }
+
+    return JSON.stringify(geoJsonObject, null, 2)
+  }
+
+  addGeometry = (type: GeometryType) => (coordinateProps: string | string[]) => {
+    const { value, onChange } = this.props
+    const parsedVal = JSON.parse(value)
+
+    if (!coordinateProps) {
+      onChange(JSON.stringify(omit(parsedVal, type)))
+    } else {
+      onChange(JSON.stringify(set(parsedVal, type, coordinateProps)))
     }
   }
 
   render() {
+    const { value } = this.props
+
     if (this.dataSample) {
       const dataSampleOptions = map(this.dataSample, (value, key) => key)
-
-      console.log(toJS(this.geoJsonMapping))
+      const parsedVal = JSON.parse(value)
 
       return (
         <div>
@@ -168,11 +151,11 @@ class CSVtoGeoJSON extends React.Component<any, any> {
             <code>{JSON.stringify(this.dataSample, null, 2)}</code>
           </pre>
           <Divider />
-          {Object.keys(this.geoJsonMapping).length > 1 && (
+          {value && (
             <React.Fragment>
               <Typography variant="subheading">GeoJSON feature</Typography>
               <pre>
-                <code>{this.geoJsonFeature}</code>
+                <code>{this.createGeoJsonFeature(value)}</code>
               </pre>
               <Divider />
             </React.Fragment>
@@ -188,7 +171,7 @@ class CSVtoGeoJSON extends React.Component<any, any> {
               <InputLabel>Add polygon</InputLabel>
               <Select
                 name="select_polygon_prop"
-                value={get(this, 'geoJsonMapping.Polygon', '')}
+                value={get(parsedVal, 'Polygon', '')}
                 onChange={e => this.addGeometry(GeometryType.Polygon)(e.target.value)}
                 options={[
                   { value: '', label: 'Select polygon prop' },
@@ -200,7 +183,7 @@ class CSVtoGeoJSON extends React.Component<any, any> {
               <InputLabel>Add LineString</InputLabel>
               <Select
                 name="select_linestring_prop"
-                value={get(this, 'geoJsonMapping.LineString', '')}
+                value={get(parsedVal, 'LineString', '')}
                 onChange={e => this.addGeometry(GeometryType.LineString)(e.target.value)}
                 options={[
                   { value: '', label: 'Select LineString prop' },
@@ -212,7 +195,7 @@ class CSVtoGeoJSON extends React.Component<any, any> {
               <InputLabel>Add MultiLineString</InputLabel>
               <Select
                 name="select_multilinestring_prop"
-                value={get(this, 'geoJsonMapping.MultiLineString', '')}
+                value={get(parsedVal, 'MultiLineString', '')}
                 onChange={e =>
                   this.addGeometry(GeometryType.MultiLineString)(e.target.value)
                 }
