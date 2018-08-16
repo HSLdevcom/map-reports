@@ -12,6 +12,7 @@ import InspectDatasets from './views/InspectDatasets'
 import client from './helpers/graphqlClient'
 import { ApolloProvider } from 'react-apollo'
 import { Provider } from 'mobx-react'
+import CreateInspectionPage from './views/CreateInspectionPage'
 
 const Root = styled.div`
   height: 100vh;
@@ -31,6 +32,7 @@ const App = observer(({ state, actions, router }) => (
           <Route path={routes.REPORTS} component={ReportsPage} />
           <Route path={routes.CREATE_REPORT} component={CreateReportPage} />
           <Route path={routes.INSPECT_DATASETS} component={InspectDatasets} />
+          <Route path={routes.CREATE_INSPECTION} component={CreateInspectionPage} />
         </AppViews>
       </Root>
     </Provider>

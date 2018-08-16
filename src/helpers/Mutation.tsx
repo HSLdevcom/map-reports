@@ -45,21 +45,30 @@ export const Mutation = observer(
         )
       }}
     </ApolloMutation>
-  ),
+  )
 )
 
 type MutateProps = {
   mutation: any
   update?: AnyFunction
+  refetchQueries?: Array<{ query: any; variables?: any }>
 }
 
 export const mutate = ({
   mutation: staticMutation,
   update: staticUpdate,
+  refetchQueries: staticRefetchQueries,
 }: MutateProps): Function => Component => ({
   mutation = staticMutation,
   update = staticUpdate,
+  refetchQueries = staticRefetchQueries,
   ...rest
 }: MutateProps) => (
-  <Mutation mutation={mutation} update={update} component={Component} {...rest} />
+  <Mutation
+    mutation={mutation}
+    update={update}
+    component={Component}
+    refetchQueries={refetchQueries}
+    {...rest}
+  />
 )

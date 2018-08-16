@@ -1,8 +1,9 @@
-import createInspectionFromSpec from '../../reporters/createInspection'
+import createInspectionFromSpec from '../../inspections/createInspection'
 import { get } from 'lodash'
+import runInspections from '../../inspections/runInspections'
 
 const inspectionResolvers = db => {
-  const inspectionsDb = db.table('inspections')
+  const inspectionsDb = db.table('inspection')
 
   async function allInspections() {
     return inspectionsDb.get()
@@ -15,7 +16,11 @@ const inspectionResolvers = db => {
       'created_at',
       'updated_at',
     ])
-    return { ...inspectionObj, ...get(inserted, '[0]', {}) }
+
+    const insertedInspection = { ...inspectionObj, ...get(inserted, '[0]', {}) }
+    await runInspections([insertedInspection], inspectionsDb)
+
+    return insertedInspection
   }
 
   return {

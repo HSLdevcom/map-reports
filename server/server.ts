@@ -9,8 +9,8 @@ import MissingRoadsReporter from './reporters/MissingRoadsReporter'
 import runReporters from './reporters/runReporters'
 import registerReporters from './reporters/registerReporters'
 import hslMapStyle from 'hsl-map-style'
-
-(async () => {
+import fs from 'fs-extra'
+;(async () => {
   /**
    * Set up database
    */
@@ -26,14 +26,16 @@ import hslMapStyle from 'hsl-map-style'
       name: 'unconnected-stops-reporter',
       type: 'automatic',
       run: UnconnectedStopsReporter,
-    }, {
+    },
+    {
       name: 'missing-roads-reporter',
       type: 'automatic',
-      run: MissingRoadsReporter
-    }, {
+      run: MissingRoadsReporter,
+    },
+    {
       name: 'manual-reporter',
-      type: 'manual'
-    }
+      type: 'manual',
+    },
   ]
 
   await registerReporters(reporters, db)
@@ -45,7 +47,7 @@ import hslMapStyle from 'hsl-map-style'
 
   // create vector map style
   const style = hslMapStyle.generateStyle({
-    glyphsUrl: "https://kartat.hsldev.com/",
+    glyphsUrl: 'https://kartat.hsldev.com/',
     components: {
       text_fisv: { enabled: true },
       routes: { enabled: true },
@@ -54,15 +56,23 @@ import hslMapStyle from 'hsl-map-style'
       icons: { enabled: true },
       print: { enabled: false },
       municipal_borders: { enabled: false },
-    }
-  });
+    },
+  })
 
   const app = Express()
 
   app.use('/dist', Express.static(path.join(__dirname, '../dist')))
   app.get('/style.json', (req, res) => {
-    res.set("Content-Type", "application/json");
-    res.send(style);
+    res.set('Content-Type', 'application/json')
+    res.send(style)
+  })
+  app.get('/datasets/:name', async (req, res) => {
+    const { name } = req.params
+
+    const dataset = await fs.readJSON(path.join(__dirname, 'datasets/', name))
+
+    res.set('Content-Type', 'application/json')
+    res.send(dataset)
   })
   app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../dist/index.html')))
 

@@ -1,6 +1,7 @@
 import reportResolvers from './reportResolvers'
 import reporterResolvers from './reporterResolvers'
 import inspectionResolvers from './inspectionResolvers'
+import { Inspection } from 'bluebird'
 
 const createResolvers = (db): any => {
   const reports = reportResolvers(db)
@@ -43,6 +44,14 @@ const createResolvers = (db): any => {
     Reporter: {
       geoJSON: reporter => {
         return JSON.stringify(reporter.geoJSON)
+      },
+    },
+    Inspection: {
+      geoJSON: inspection => {
+        return JSON.stringify(inspection.geoJSON)
+      },
+      convertData: inspection => {
+        return JSON.stringify(inspection.convertData)
       },
     },
   }

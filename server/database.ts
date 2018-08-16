@@ -20,8 +20,9 @@ async function createDb<RecordType extends RecordTypeContract>(tableName) {
     const table = knex(tableName)
 
     try {
-      return table.insert(item, returning).catch(err => {})
+      return table.insert(item, returning)
     } catch (err) {
+      console.log(err)
       return []
     }
   }
@@ -65,7 +66,7 @@ const database = async () => {
     report: await createDb('Reports'),
     reportItem: await createDb('ReportedItems'),
     reporter: await createDb('Reporters'),
-    inspections: await createDb('Inspections'),
+    inspection: await createDb('Inspections'),
   }
 
   function table(tableName) {

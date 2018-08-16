@@ -30,6 +30,7 @@ const inspectionTypeDefs = gql`
     datasetUri: String
     cron: String
     convertData: String
+    geoJSON: String
     created_at: String!
     updated_at: String!
   }

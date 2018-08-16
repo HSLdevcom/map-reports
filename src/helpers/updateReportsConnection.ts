@@ -19,15 +19,16 @@ const updateReportsConnection = (store, { data }) => {
         })
       ),
       node: operationResult,
-      __typename: 'ReportsEdge'
+      __typename: 'ReportsEdge',
     }
 
     let cachedData
 
     try {
       cachedData = store.readQuery({ query, variables })
-    } catch (e) {
-      console.log(e)
+    } catch (err) {
+      console.log(err)
+      return
     }
 
     cachedData[queryProp].edges.unshift(resultData)

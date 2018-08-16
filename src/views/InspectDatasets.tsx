@@ -1,7 +1,6 @@
 import * as React from 'react'
 import gql from 'graphql-tag'
 import { inject, observer } from 'mobx-react'
-import { compose } from 'react-apollo'
 import { query } from '../helpers/Query'
 import styled from 'styled-components'
 import { Card, Typography } from '@material-ui/core'
@@ -31,17 +30,14 @@ const OptionsBox = styled(Card)`
   padding: 1rem;
 `
 
-const enhance = compose(
-  inject('actions', 'state', 'router'),
-  query({ query: datasetOptionsQuery, fetchPolicy: 'cache-first' }),
-  observer
-)
-
 const datasetMaps = {
   'missing-roads-reporter': MissingRoadsMap,
   'unconnected-stops-reporter': UnconnectedStopsMap,
 }
 
+@inject('actions', 'state', 'router')
+@query({ query: datasetOptionsQuery, fetchPolicy: 'cache-first' })
+@observer
 class InspectDatasets extends React.Component<any, any> {
   onChangeDataset = e => {
     const {
@@ -82,4 +78,4 @@ class InspectDatasets extends React.Component<any, any> {
   }
 }
 
-export default enhance(InspectDatasets)
+export default InspectDatasets
