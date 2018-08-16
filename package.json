@@ -13,10 +13,15 @@
     "precommit": "lint-staged"
   },
   "lint-staged": {
-    "*.{ts,tsx,js}": [
-      "tslint --fix",
-      "prettier --write",
-      "git add"
+    "linters": {
+      "*.{ts,tsx,js}": [
+        "tslint --fix",
+        "prettier --write",
+        "git add"
+      ]
+    },
+    "ignore": [
+      "postgres-data/"
     ]
   },
   "dependencies": {
