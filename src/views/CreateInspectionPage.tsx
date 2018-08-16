@@ -8,6 +8,7 @@ import { InspectionFragment } from '../fragments/InspectionFragment'
 import { Button, Grid, InputLabel, TextField, Typography } from '@material-ui/core'
 import { get, map } from 'lodash'
 import Select from '../helpers/Select'
+import CSVtoGeoJSON from '../components/CSVtoGeoJSON'
 
 const allInspectionsQuery = gql`
   query allInspections {
@@ -27,16 +28,18 @@ const createInspectionMutation = gql`
   ${InspectionFragment}
 `
 
+const updateInspectionsList = (cache, { data: { createInspection } }) => {
+  const { inspections } = cache.readQuery({ query: allInspectionsQuery })
+  cache.writeQuery({
+    query: allInspectionsQuery,
+    data: { inspections: inspections.concat([createInspection]) },
+  })
+}
+
 @query({ query: allInspectionsQuery })
 @mutate({
   mutation: createInspectionMutation,
-  update: (cache, { data: { createInspection } }) => {
-    const { inspections } = cache.readQuery({ query: allInspectionsQuery })
-    cache.writeQuery({
-      query: allInspectionsQuery,
-      data: { inspections: inspections.concat([createInspection]) },
-    })
-  },
+  update: updateInspectionsList,
 })
 @observer
 class CreateInspectionPage extends React.Component<any, InspectionSpec> {
@@ -72,18 +75,8 @@ class CreateInspectionPage extends React.Component<any, InspectionSpec> {
     const { name, type, datasetType, datasetUri, cron, convertData } = this.state
 
     return (
-      <form onSubmit={this.onSubmit}>
-        <Grid container spacing={24}>
-          <Grid item xs={12}>
-            <Typography variant="subheading">Inspections</Typography>
-            {get(queryData, 'inspections', []).map(inspection => (
-              <div key={`inspection_${inspection.id}`}>
-                <pre>
-                  <code>{JSON.stringify(inspection, null, 2)}</code>
-                </pre>
-              </div>
-            ))}
-          </Grid>
+      <form onSubmit={this.onSubmit} style={{ width: '100%' }}>
+        <Grid container spacing={0} style={{ maxWidth: '100%' }}>
           <Grid item xs={12}>
             <TextField
               label="Inspection name"
@@ -123,16 +116,7 @@ class CreateInspectionPage extends React.Component<any, InspectionSpec> {
               <TextField label="Cron" value={cron} onChange={this.onChange('cron')} />
             </Grid>
           )}
-          {datasetType === DatasetType.CSV && (
-            <Grid item xs={12}>
-              <TextField
-                multiline
-                label="Convert CSV to geojson"
-                value={convertData}
-                onChange={this.onChange('convertData')}
-              />
-            </Grid>
-          )}
+          {datasetType === DatasetType.CSV && <CSVtoGeoJSON datasetUri={datasetUri} />}
           <Grid item xs={12}>
             <Button type="submit" variant="raised">
               Create inspection
