@@ -9,7 +9,15 @@
     "server:dev": "nodemon --delay 1 --signal SIGTERM --watch 'server/**/*' --exec 'ts-node --project tsconfig.server.json' server/server.ts",
     "knex": "PG_CONNECTION_STRING=postgres://postgres:mysecretpassword@localhost:5432/postgres knex",
     "start": "concurrently 'yarn run server:dev' 'yarn run watch'",
-    "production": "forever start -c \"ts-node --project tsconfig.server.json\" server/server.ts -l server.log -o server-out.log -e server-err.log && forever -f logs 0"
+    "production": "forever start -c \"ts-node --project tsconfig.server.json\" server/server.ts -l server.log -o server-out.log -e server-err.log && forever -f logs 0",
+    "precommit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js}": [
+      "tslint --fix",
+      "prettier --write",
+      "git add"
+    ]
   },
   "dependencies": {
     "@mapbox/geojson-merge": "^1.0.2",
@@ -87,6 +95,8 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
+    "husky": "^0.14.3",
+    "lint-staged": "^7.2.2",
     "nodemon": "^1.17.5",
     "parcel-bundler": "1.9.7",
     "prettier": "^1.13.7",

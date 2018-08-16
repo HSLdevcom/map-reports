@@ -18,7 +18,6 @@ const Root = styled.div`
 `
 
 const Header = styled(AppBar)``
-
 const AppViews = styled.div``
 
 const App = observer(({ state, actions, router }) => (
