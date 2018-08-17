@@ -138,8 +138,7 @@ const MapboxLeaflet = L.GridLayer.extend({
       return
     }
 
-    const size = this._map.getSize(),
-      container = this._glContainer,
+    const container = this._glContainer,
       gl = this._glMap,
       topLeft = this._map.containerPointToLayerPoint([0, 0])
 
@@ -147,29 +146,8 @@ const MapboxLeaflet = L.GridLayer.extend({
 
     const center = this._map.getCenter()
 
-    // gl.setView([center.lat, center.lng], this._map.getZoom() - 1, 0);
-    // calling setView directly causes sync issues because it uses requestAnimFrame
-
-    const tr = gl.transform
-    tr.center = mapboxgl.LngLat.convert([center.lng, center.lat])
-    tr.zoom = this._map.getZoom() - 1
-
-    if (gl.transform.width !== size.x || gl.transform.height !== size.y) {
-      container.style.width = size.x + 'px'
-      container.style.height = size.y + 'px'
-      if (gl._resize !== null && gl._resize !== undefined) {
-        gl._resize()
-      } else {
-        gl.resize()
-      }
-    } else {
-      // older versions of mapbox-gl surfaced update publicly
-      if (gl._update !== null && gl._update !== undefined) {
-        gl._update()
-      } else {
-        gl.update()
-      }
-    }
+    gl.setCenter([center.lng, center.lat])
+    gl.setZoom(this._map.getZoom() - 1)
   },
 
   // update the map constantly during a pinch zoom

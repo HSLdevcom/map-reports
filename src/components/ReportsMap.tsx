@@ -34,12 +34,17 @@ class ReportsMap extends React.Component<Props, any> {
     return glMap.queryRenderedFeatures(queryBbox)
   }
 
-  onMapClick = (event, zoom, { _glMap }) => {
+  onMapClick = (event, zoom, { _glMap, _offset }) => {
     const { onMapClick } = this.props
     const { layerPoint: point } = event
 
     if (_glMap && zoom > 14) {
-      const renderedFeatures = this.featuresAtPoint(_glMap, point, 2 * zoom)
+      const offsetPoint = {
+        x: point.x - _offset.x,
+        y: point.y - _offset.y,
+      }
+
+      const renderedFeatures = this.featuresAtPoint(_glMap, offsetPoint, 2 * zoom)
       onMapClick(event, zoom, renderedFeatures)
     } else {
       onMapClick(event, zoom, [])
