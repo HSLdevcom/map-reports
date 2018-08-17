@@ -95,15 +95,6 @@ function calculateMarkerBounds(markers) {
 @inject(app('Map'))
 @observer
 class Map extends React.Component<Props, any> {
-  mapRef = React.createRef()
-  glRef = React.createRef()
-
-  state = {
-    center: defaultMapLocation,
-    zoom: defaultMapZoom,
-    bounds: null,
-  }
-
   static getDerivedStateFromProps({ useBounds, markers }) {
     if (useBounds && markers && markers.length > 0) {
       const bounds = calculateMarkerBounds(markers)
@@ -116,6 +107,14 @@ class Map extends React.Component<Props, any> {
     return {
       bounds: null,
     }
+  }
+  mapRef = React.createRef()
+  glRef = React.createRef()
+
+  state = {
+    center: defaultMapLocation,
+    zoom: defaultMapZoom,
+    bounds: null,
   }
 
   componentDidUpdate({ focusedMarker: prevFocusedMarker }: Props) {

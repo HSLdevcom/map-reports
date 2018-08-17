@@ -3,7 +3,7 @@ import * as L from 'leaflet'
 const mapboxgl = window.mapboxgl
 
 // @ts-ignore
-L.MapboxGL = L.Layer.extend({
+const MapboxLeaflet = L.GridLayer.extend({
   options: {},
 
   initialize(options) {
@@ -25,7 +25,7 @@ L.MapboxGL = L.Layer.extend({
      * @returns {Function} debounced function
      * @private
      */
-    const throttle = function(fn, time, context) {
+    const throttle = function(fn, context) {
       let lock, args, wrapperFn, later
 
       later = function() {
@@ -44,7 +44,7 @@ L.MapboxGL = L.Layer.extend({
         } else {
           // call and lock until later
           fn.apply(context, arguments)
-          setTimeout(later, time)
+          requestAnimationFrame(later)
           lock = true
         }
       }
@@ -53,7 +53,7 @@ L.MapboxGL = L.Layer.extend({
     }
 
     // setup throttling the update event when panning
-    this._throttledUpdate = throttle(L.Util.bind(this._update, this), 16, this)
+    this._throttledUpdate = throttle(L.Util.bind(this._update, this), this)
   },
 
   onAdd(map) {
@@ -75,12 +75,7 @@ L.MapboxGL = L.Layer.extend({
 
   onRemove(map) {
     if (this._map.options.zoomAnimation) {
-      L.DomEvent.off(
-        this._map._proxy,
-        L.DomUtil.TRANSITION_END,
-        this._transitionEnd,
-        this
-      )
+      L.DomEvent.off(this._map, L.DomUtil.TRANSITION_END, this._transitionEnd, this)
     }
 
     this.getPane().removeChild(this._glContainer)
@@ -152,13 +147,6 @@ L.MapboxGL = L.Layer.extend({
 
     const center = this._map.getCenter()
 
-    // gl.setView([center.lat, center.lng], this._map.getZoom() - 1, 0);
-    // calling setView directly causes sync issues because it uses requestAnimFrame
-
-    const tr = gl.transform
-    tr.center = mapboxgl.LngLat.convert([center.lng, center.lat])
-    tr.zoom = this._map.getZoom() - 1
-
     if (gl.transform.width !== size.x || gl.transform.height !== size.y) {
       container.style.width = size.x + 'px'
       container.style.height = size.y + 'px'
@@ -168,12 +156,8 @@ L.MapboxGL = L.Layer.extend({
         gl.resize()
       }
     } else {
-      // older versions of mapbox-gl surfaced update publicly
-      if (gl._update !== null && gl._update !== undefined) {
-        gl._update()
-      } else {
-        gl.update()
-      }
+      gl.setCenter([center.lng, center.lat])
+      gl.setZoom(this._map.getZoom() - 1)
     }
   },
 
@@ -258,5 +242,5 @@ L.MapboxGL = L.Layer.extend({
 
 export default function(options) {
   // @ts-ignore
-  return new L.MapboxGL(options)
+  return new MapboxLeaflet(options)
 }

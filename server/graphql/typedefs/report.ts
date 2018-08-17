@@ -38,7 +38,6 @@ const reportTypeDefs = gql`
     id: ID!
     title: String!
     message: String
-    reporter: Reporter!
     status: ReportStatus!
     priority: ReportPriority!
     item: ReportItem!
@@ -49,7 +48,6 @@ const reportTypeDefs = gql`
   input InputReport {
     title: String!
     message: String
-    reporter: ID
   }
 
   type ReportsEdge {

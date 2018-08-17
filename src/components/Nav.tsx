@@ -10,12 +10,12 @@ const enhance = compose(
 )
 
 const Nav = enhance(({ state, router }) => {
-
   return (
     <Tabs value={state.route} onChange={(e, route) => router.go(route)}>
       <Tab value={routes.REPORTS} label="Dashboard" />
       <Tab value={routes.CREATE_REPORT} label="Create report" />
       <Tab value={routes.INSPECT_DATASETS} label="Inspect datasets" />
+      <Tab value={routes.CREATE_INSPECTION} label="Create inspection" />
     </Tabs>
   )
 })

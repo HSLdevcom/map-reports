@@ -20,8 +20,9 @@ async function createDb<RecordType extends RecordTypeContract>(tableName) {
     const table = knex(tableName)
 
     try {
-      return table.insert(item, returning).catch(err => {})
-    } catch(err) {
+      return table.insert(item, returning)
+    } catch (err) {
+      console.log(err)
       return []
     }
   }
@@ -30,10 +31,8 @@ async function createDb<RecordType extends RecordTypeContract>(tableName) {
     const table = knex(tableName)
 
     try {
-      return table
-        .where('id', id)
-        .update(newValues, returning)
-    } catch(err) {
+      return table.where('id', id).update(newValues, returning)
+    } catch (err) {
       return []
     }
   }
@@ -42,10 +41,8 @@ async function createDb<RecordType extends RecordTypeContract>(tableName) {
     const table = knex(tableName)
 
     try {
-      return table
-        .where('id', id)
-        .delete()
-    } catch(err) {
+      return table.where('id', id).delete()
+    } catch (err) {
       return []
     }
   }
@@ -69,6 +66,7 @@ const database = async () => {
     report: await createDb('Reports'),
     reportItem: await createDb('ReportedItems'),
     reporter: await createDb('Reporters'),
+    inspection: await createDb('Inspections'),
   }
 
   function table(tableName) {

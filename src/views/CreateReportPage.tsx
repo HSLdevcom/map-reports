@@ -41,13 +41,7 @@ const blacklistedLayers = [
 
 // For combining props, we need to use a delimiter that should never show up in the values.
 const delimiter = '|'
-const identifyingProp = [
-  `routeId`,
-  'stopId',
-  'name',
-  'house_num',
-  'type',
-]
+const identifyingProp = [`routeId`, 'stopId', 'name', 'house_num', 'type']
 
 function getIdentifyingPropValue(item, propName) {
   const values = []
@@ -155,9 +149,9 @@ class CreateReportPage extends React.Component<Props, any> {
 
     const { Report, Map } = this.props
     Report.setDraftEntity(identifier, type)
-    Report.setDraftData(feature.properties)
+    Report.setDraftData(get(feature, 'properties', {}))
 
-    if (feature.geometry.type === 'Point') {
+    if (get(feature, 'geometry.type', '') === 'Point') {
       // Set marker to point coordinates. Geojson uses lon/lat, not the other way around.
       Map.setClickedLocation({
         lat: feature.geometry.coordinates[1],

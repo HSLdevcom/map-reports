@@ -1,9 +1,9 @@
 import reportResolvers from './reportResolvers'
-import reporterResolvers from './reporterResolvers'
+import inspectionResolvers from './inspectionResolvers'
 
 const createResolvers = (db): any => {
   const reports = reportResolvers(db)
-  const reporters = reporterResolvers(db)
+  const inspections = inspectionResolvers(db)
 
   return {
     Query: {
@@ -12,9 +12,9 @@ const createResolvers = (db): any => {
       reportFilterOptions: reports.reportFilterOptions,
       reportsConnection: reports.reportsConnection,
 
-      // Reporters
-      reporters: reporters.allReporters,
-      reporter: reporters.getReporter,
+      // Inspections
+      inspections: inspections.allInspections,
+      inspection: inspections.getInspection,
     },
     Mutation: {
       // Reports
@@ -22,9 +22,9 @@ const createResolvers = (db): any => {
       removeReport: reports.removeReport,
       setStatus: reports.setStatus,
       setPriority: reports.setPriority,
+      createInspection: inspections.createInspection,
     },
     Report: {
-      reporter: reporters.resolveReportReporter,
       item: reports.resolveReportItem,
     },
     ReportItem: {
@@ -36,9 +36,12 @@ const createResolvers = (db): any => {
         }
       },
     },
-    Reporter: {
-      geoJSON: reporter => {
-        return JSON.stringify(reporter.geoJSON)
+    Inspection: {
+      geoJSON: inspection => {
+        return JSON.stringify(inspection.geoJSON)
+      },
+      geoJSONProps: inspection => {
+        return JSON.stringify(inspection.geoJSONProps)
       },
     },
   }

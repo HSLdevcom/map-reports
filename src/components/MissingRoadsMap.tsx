@@ -14,7 +14,7 @@ import { GeoJSON } from 'react-leaflet/es'
 import middleOfLine from '../helpers/middleOfLine'
 import { DatasetView } from '../../types/DatasetView'
 import { AnyFunction } from '../../types/AnyFunction'
-import { Reporter } from '../../types/Reporter'
+import { Inspection } from '../../types/Inspection'
 
 const MapArea = styled.div`
   height: calc(100vh - 3rem);
@@ -28,7 +28,7 @@ injectGlobal`
 
 const datasetQuery = gql`
   query datasetData($id: ID!) {
-    reporter(reporterId: $id) {
+    inspection(inspectionId: $id) {
       id
       name
       geoJSON
@@ -36,7 +36,7 @@ const datasetQuery = gql`
   }
 `
 
-const createRoadReportMutation = gql`
+const createReportMutation = gql`
   mutation createStopReport($reportData: InputReport!, $reportItem: InputReportItem!) {
     createReport(reportData: $reportData, reportItem: $reportItem) {
       ...ReportFields
@@ -47,13 +47,13 @@ const createRoadReportMutation = gql`
 
 const enhance = compose(
   query({ query: datasetQuery, getVariables: ({ datasetId }) => ({ id: datasetId }) }),
-  mutate({ mutation: createRoadReportMutation }),
+  mutate({ mutation: createReportMutation }),
   observer
 )
 
 interface Props extends DatasetView {
   mutate?: AnyFunction
-  queryData?: { reporter: Reporter }
+  queryData?: { inspection: Inspection }
   loading?: boolean
 }
 

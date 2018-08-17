@@ -137,6 +137,8 @@ class ReportItem extends React.Component<Props, any> {
   render() {
     const { report, onClick } = this.props
 
+    const itemData = get(JSON.parse(get(report, 'item.data', '{}')), 'properties', '')
+
     return (
       <Report type={get(report, 'item.type', 'manual')} onClick={onClick}>
         <ReportHeading onClick={this.onHeadingClick}>
@@ -150,9 +152,6 @@ class ReportItem extends React.Component<Props, any> {
           </Button>
         </ReportHeading>
         <ReportBody>
-          <h4>
-            {typeof report.reporter === 'string' ? report.reporter : report.reporter.name}
-          </h4>
           <div>
             <ReportStatus report={report} readOnly={false} />
           </div>
@@ -162,13 +161,7 @@ class ReportItem extends React.Component<Props, any> {
         </ReportBody>
         <SlideDown closed={!this.state.isOpen}>
           {report.message && <ReportContent>{report.message}</ReportContent>}
-          {get(report, 'item.feature', '') && (
-            <ReportContent json>
-              {prettyJson.render(
-                JSON.parse(get(report, 'item.feature', '{}')).properties
-              )}
-            </ReportContent>
-          )}
+          {itemData && <ReportContent json>{prettyJson.render(itemData)}</ReportContent>}
         </SlideDown>
       </Report>
     )

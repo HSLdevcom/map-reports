@@ -1,5 +1,6 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
+import { AppContainer } from 'react-hot-loader'
 import { configure, toJS } from 'mobx'
 import 'normalize.css'
 import { createStore } from 'mobx-app'
@@ -39,7 +40,7 @@ const mountNode = document.getElementById('app')
 
 let state
 let actions
-let prevState = {}
+const prevState = {}
 
 function initStore(initialState = {}) {
   const stores = createStore(
@@ -59,7 +60,9 @@ function render() {
   const App = require('./App').default
 
   ReactDOM.render(
-    <App state={state} actions={actions} router={router} />,
+    <AppContainer>
+      <App state={state} actions={actions} router={router} />
+    </AppContainer>,
     mountNode
   )
 }
@@ -71,11 +74,11 @@ declare const module: any
 
 if (module.hot) {
   module.hot.accept(() => {
-    initStore(prevState)
+    // initStore(prevState)
     render()
   })
 
-  module.hot.dispose(() => {
+  /*module.hot.dispose(() => {
     prevState = toJS(state)
-  })
+  })*/
 }

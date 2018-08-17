@@ -1,27 +1,31 @@
 import { ApolloClient } from 'apollo-client'
-import { defaultDataIdFromObject, InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory'
+import {
+  defaultDataIdFromObject,
+  InMemoryCache,
+  IntrospectionFragmentMatcher,
+} from 'apollo-cache-inmemory'
 import { HttpLink } from 'apollo-link-http'
 import { onError } from 'apollo-link-error'
-import { withClientState } from 'apollo-link-state'
 import { ApolloLink, Observable } from 'apollo-link'
 import fragmentTypes from '../../fragmentTypes.json'
 
 const fragmentMatcher = new IntrospectionFragmentMatcher({
-  introspectionQueryResultData: fragmentTypes
+  introspectionQueryResultData: fragmentTypes,
 })
 
 const cache = new InMemoryCache({
   fragmentMatcher,
-  dataIdFromObject: (obj) => {
-    switch(obj.__typename) {
+  dataIdFromObject: obj => {
+    switch (obj.__typename) {
       case 'Report':
       case 'ReportItem':
       case 'Reporter':
+      case 'Inspection':
         return obj.id
       default:
         return defaultDataIdFromObject(obj)
     }
-  }
+  },
 })
 
 const request = async operation => {
@@ -46,7 +50,9 @@ const requestLink = new ApolloLink(
         .catch(observer.error.bind(observer))
 
       return () => {
-        if (handle) handle.unsubscribe()
+        if (handle) {
+          handle.unsubscribe()
+        }
       }
     })
 )
@@ -54,13 +60,16 @@ const requestLink = new ApolloLink(
 const client = new ApolloClient({
   link: ApolloLink.from([
     onError(({ graphQLErrors, networkError }) => {
-      if (graphQLErrors)
+      if (graphQLErrors) {
         graphQLErrors.map(({ message, locations, path }) =>
           console.error(
             `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
           )
         )
-      if (networkError) console.error(`[Network error]: ${networkError}`)
+      }
+      if (networkError) {
+        console.error(`[Network error]: ${networkError}`)
+      }
     }),
     requestLink,
     new HttpLink({ uri: process.env.API_URL || '/graphql' }),
