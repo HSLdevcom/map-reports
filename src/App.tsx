@@ -1,4 +1,3 @@
-import { hot } from 'react-hot-loader'
 import * as React from 'react'
 import styled from 'styled-components'
 import Route from './helpers/Route'
@@ -39,4 +38,4 @@ const App = observer(({ state, actions, router }) => (
   </ApolloProvider>
 ))
 
-export default hot(module)(App)
+export default App

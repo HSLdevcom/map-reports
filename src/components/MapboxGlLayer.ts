@@ -1,19 +1,16 @@
 import { withLeaflet, MapLayer, GridLayer } from 'react-leaflet/es'
 import mapboxLeaflet from '../helpers/MapboxGlLeaflet'
 
-@withLeaflet
-class MapboxGlLayer extends GridLayer {
-  gl
-
+class MapboxGlLayer extends MapLayer {
   createLeafletElement({ children, leaflet: { map } }) {
     // @ts-ignore
-    this.gl = mapboxLeaflet({
+    const gl = mapboxLeaflet({
       style: '/style.json',
       accessToken: 'none',
-    }).addTo(map)
+    })
 
-    return this.gl
+    return gl
   }
 }
 
-export default MapboxGlLayer
+export default withLeaflet(MapboxGlLayer)

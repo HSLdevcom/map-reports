@@ -74,6 +74,8 @@ class CreateInspectionPage extends React.Component<any, InspectionSpec> {
     const { queryData } = this.props
     const { name, type, datasetType, datasetUri, cron, convertData } = this.state
 
+    // TODO refactor this component
+
     return (
       <form onSubmit={this.onSubmit}>
         <Grid container spacing={24}>

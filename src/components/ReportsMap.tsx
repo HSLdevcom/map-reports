@@ -15,7 +15,7 @@ interface Props extends RendersReports {
   Report?: ReportActions
   Map?: any
   useBounds?: boolean
-  useVectorLayers?: boolean
+  useVectorLayers?: boolean | string
   onMapClick?: AnyFunction
 }
 
@@ -49,40 +49,37 @@ class ReportsMap extends React.Component<Props, any> {
   getReportMarkers = (): Marker[] => {
     const { state, reports = [], Report } = this.props
 
-    return reports
-      .filter(report => !!get(report, 'item.lat', 0))
-      // @ts-ignore
-      .map(({ item: { lat, lon, type, recommendedMapZoom = 16 }, message, id }) => {
-        const isInactive =
-          (state.focusedReport !== null && state.focusedReport !== id) ||
-          state.mapMode === MapModes.pick
+    return (
+      reports
+        .filter(report => !!get(report, 'item.lat', 0))
+        // @ts-ignore
+        .map(({ item: { lat, lon, type, recommendedMapZoom = 16 }, message, id }) => {
+          const isInactive =
+            (state.focusedReport !== null && state.focusedReport !== id) ||
+            state.mapMode === MapModes.pick
 
-        const markerPosition: LatLng = latLng(lat, lon)
+          const markerPosition: LatLng = latLng(lat, lon)
 
-        return {
-          state:
-            state.focusedReport === id && state.mapMode !== MapModes.pick
-              ? MarkerState.focus
-              : isInactive
-              ? MarkerState.inactive
-              : MarkerState.default,
-          id,
-          zoom: recommendedMapZoom,
-          type,
-          position: markerPosition,
-          message,
-          onClick: () => Report.focusReport(id),
-        }
-      })
+          return {
+            state:
+              state.focusedReport === id && state.mapMode !== MapModes.pick
+                ? MarkerState.focus
+                : isInactive
+                  ? MarkerState.inactive
+                  : MarkerState.default,
+            id,
+            zoom: recommendedMapZoom,
+            type,
+            position: markerPosition,
+            message,
+            onClick: () => Report.focusReport(id),
+          }
+        })
+    )
   }
 
   render() {
-    const {
-      state,
-      useBounds,
-      useVectorLayers = false,
-      children,
-    } = this.props
+    const { state, useBounds, useVectorLayers = false, children } = this.props
 
     const markers: Marker[] = this.getReportMarkers()
 

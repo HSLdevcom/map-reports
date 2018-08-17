@@ -41,13 +41,7 @@ const blacklistedLayers = [
 
 // For combining props, we need to use a delimiter that should never show up in the values.
 const delimiter = '|'
-const identifyingProp = [
-  `routeId`,
-  'stopId',
-  'name',
-  'house_num',
-  'type',
-]
+const identifyingProp = [`routeId`, 'stopId', 'name', 'house_num', 'type']
 
 function getIdentifyingPropValue(item, propName) {
   const values = []
@@ -175,7 +169,10 @@ class CreateReportPage extends React.Component<Props, any> {
           <SubmitReport />
         </Sidebar>
         <MapArea>
-          <ReportsMap useBounds={false} useVectorLayers onMapClick={this.onMapClick}>
+          <ReportsMap
+            useBounds={false}
+            useVectorLayers="create_report"
+            onMapClick={this.onMapClick}>
             {availableFeatures.length > 0 &&
               popupPosition && (
                 <Popup

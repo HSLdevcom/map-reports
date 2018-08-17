@@ -42,7 +42,7 @@ interface Props {
   geoJSON?: any
   pointToLayer?: AnyFunction
   onEachFeature?: AnyFunction
-  useVectorLayers?: boolean
+  useVectorLayers?: boolean | string
   children?: any
   Map?: {
     setClickedLocation: (location: Location) => void
@@ -95,15 +95,6 @@ function calculateMarkerBounds(markers) {
 @inject(app('Map'))
 @observer
 class Map extends React.Component<Props, any> {
-  mapRef = React.createRef()
-  glRef = React.createRef()
-
-  state = {
-    center: defaultMapLocation,
-    zoom: defaultMapZoom,
-    bounds: null,
-  }
-
   static getDerivedStateFromProps({ useBounds, markers }) {
     if (useBounds && markers && markers.length > 0) {
       const bounds = calculateMarkerBounds(markers)
@@ -116,6 +107,14 @@ class Map extends React.Component<Props, any> {
     return {
       bounds: null,
     }
+  }
+  mapRef = React.createRef()
+  glRef = React.createRef()
+
+  state = {
+    center: defaultMapLocation,
+    zoom: defaultMapZoom,
+    bounds: null,
   }
 
   componentDidUpdate({ focusedMarker: prevFocusedMarker }: Props) {
@@ -188,6 +187,10 @@ class Map extends React.Component<Props, any> {
     })
   }
 
+  componentDidCatch(err) {
+    console.log(err)
+  }
+
   render() {
     const { markers = [], useVectorLayers = false, children, useBounds } = this.props
     const { center, zoom, bounds } = this.state
@@ -205,7 +208,7 @@ class Map extends React.Component<Props, any> {
           maxZoom={18}>
           {useVectorLayers ? (
             // @ts-ignore
-            <MapboxGlLayer ref={this.glRef} />
+            <MapboxGlLayer ref={this.glRef} key={`vector_layer_${useVectorLayers}`} />
           ) : (
             <TileLayer
               zoomOffset={-1}

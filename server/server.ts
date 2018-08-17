@@ -62,10 +62,12 @@ import fs from 'fs-extra'
   const app = Express()
 
   app.use('/dist', Express.static(path.join(__dirname, '../dist')))
+
   app.get('/style.json', (req, res) => {
     res.set('Content-Type', 'application/json')
     res.send(style)
   })
+
   app.get('/datasets/:name', async (req, res) => {
     const { name } = req.params
 
@@ -74,6 +76,7 @@ import fs from 'fs-extra'
     res.set('Content-Type', 'application/json')
     res.send(dataset)
   })
+
   app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../dist/index.html')))
 
   const server = createServer(db)
