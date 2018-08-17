@@ -40,7 +40,6 @@
     "@types/react-dom": "^16.0.6",
     "@types/react-leaflet": "^1.1.6",
     "@types/uuid": "^3.4.3",
-    "Buffer": "^0.0.0",
     "apollo-cache-inmemory": "^1.2.5",
     "apollo-client": "^2.3.5",
     "apollo-link": "^1.2.2",

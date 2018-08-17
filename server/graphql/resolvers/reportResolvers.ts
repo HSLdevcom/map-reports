@@ -6,7 +6,7 @@ import {
   ReportPriority as ReportPriorityEnum,
   ReportStatus as ReportStatusEnum,
 } from '../../../shared/types/Report'
-import createCursor from '../../util/createCursor'
+import createCursor from '../../../shared/utils/createCursor'
 import { ReportDataInput } from '../../../shared/types/CreateReportData'
 import { createReport as reportFactory } from '../../reports/createReport'
 import pFilter from 'p-filter'

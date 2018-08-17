@@ -1,6 +1,6 @@
 import { get } from 'lodash'
 import { emptyArguments, reportsQuery } from '../queries/reportsQuery'
-import createCursor from '../../server/util/createCursor'
+import createCursor from '../../shared/utils/createCursor'
 import { toJS } from 'mobx'
 
 // The first function needs props (and state) and will return the update function.
@@ -10,6 +10,7 @@ const updateReportsConnection = ({ state }) => (store, { data }) => {
   const operationResult = get(data, operationName, null)
 
   if (operationResult) {
+    // Use the same variables as were used the previous time this query was run.
     const variables = !state
       ? emptyArguments
       : {
@@ -21,6 +22,7 @@ const updateReportsConnection = ({ state }) => (store, { data }) => {
     const query = reportsQuery
 
     const resultData = {
+      // Create a cursor for the item that should be the same as what the server creates.
       cursor: createCursor(operationResult, {
         filter: variables.filter,
         sort: variables.sort,
