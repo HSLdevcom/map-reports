@@ -138,7 +138,8 @@ const MapboxLeaflet = L.GridLayer.extend({
       return
     }
 
-    const container = this._glContainer,
+    const size = this._map.getSize(),
+      container = this._glContainer,
       gl = this._glMap,
       topLeft = this._map.containerPointToLayerPoint([0, 0])
 
@@ -146,8 +147,18 @@ const MapboxLeaflet = L.GridLayer.extend({
 
     const center = this._map.getCenter()
 
-    gl.setCenter([center.lng, center.lat])
-    gl.setZoom(this._map.getZoom() - 1)
+    if (gl.transform.width !== size.x || gl.transform.height !== size.y) {
+      container.style.width = size.x + 'px'
+      container.style.height = size.y + 'px'
+      if (gl._resize !== null && gl._resize !== undefined) {
+        gl._resize()
+      } else {
+        gl.resize()
+      }
+    } else {
+      gl.setCenter([center.lng, center.lat])
+      gl.setZoom(this._map.getZoom() - 1)
+    }
   },
 
   // update the map constantly during a pinch zoom
