@@ -90,8 +90,6 @@ class CreateInspectionPage extends React.Component<any, Inspection> {
       entityIdentifier,
     } = this.state
 
-    // TODO refactor this component
-
     return (
       <form onSubmit={this.onSubmit}>
         <FormSection>

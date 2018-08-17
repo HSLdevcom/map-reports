@@ -7,6 +7,7 @@ import { Divider, FormGroup, InputLabel, TextField, Typography } from '@material
 import Select from '../helpers/Select'
 import neatCsv from 'neat-csv'
 import { AnyFunction } from '../../shared/types/AnyFunction'
+import fetchSampleAsGeoJSON from '../helpers/fetchSampleAsGeoJSON'
 
 interface Props {
   value: string
@@ -38,39 +39,9 @@ class EntityIdentifierFromGeoJSON extends React.Component<Props, any> {
   sampleData = async () => {
     const { datasetUri = '', mapToGeoJSON } = this.props
 
-    let url = datasetUri
-
-    try {
-      url = new URL(datasetUri).href
-    } catch (err) {
-      url = ''
-    }
-
-    if (url && (url !== this.lastFetchedUrl || !this.dataSample)) {
-      this.setLastFetched(url)
-
-      const datasetReq = await fetch(url)
-      const datasetText = await datasetReq.text()
-      let dataset
-
-      try {
-        dataset = JSON.parse(datasetText)
-      } catch (err) {
-        dataset = await neatCsv(datasetText)
-        dataset = geoJson.parse(dataset, JSON.parse(mapToGeoJSON))
-      }
-
-      // http://localhost:1234/datasets/osm_puuttuvat_tiet.geojson
-
-      const sample = get(
-        dataset,
-        'features[0].properties',
-        get(dataset, 'properties', get(dataset, '[0]', false))
-      )
-
-      if (sample) {
-        this.setDataSample(sample)
-      }
+    if (datasetUri !== this.lastFetchedUrl || !this.dataSample) {
+      const sample = await fetchSampleAsGeoJSON(datasetUri, mapToGeoJSON)
+      this.setDataSample(sample)
     }
   }
 

@@ -1,71 +1,18 @@
 import * as React from 'react'
-import neatCsv from 'neat-csv'
 import geoJson from 'geojson'
 import { observer } from 'mobx-react'
-import { action, computed, observable, toJS } from 'mobx'
-import { Divider, Grid, Typography, InputLabel, FormControl } from '@material-ui/core'
+import { action, observable, toJS } from 'mobx'
+import { Divider, Grid, Typography, InputLabel } from '@material-ui/core'
 import Select from '../helpers/Select'
 import { map, get, omit, set } from 'lodash'
+import SelectPointProps from '../helpers/SelectPointProps'
+import fetchSampleCsv from '../helpers/fetchSampleCsv'
 
 enum GeometryType {
   'Point' = 'Point',
   'LineString' = 'LineString',
   'MultiLineString' = 'MultiLineString',
   'Polygon' = 'Polygon',
-}
-
-@observer
-class SelectPointProps extends React.Component<any, any> {
-  state = {
-    lat: 0,
-    lng: 0,
-  }
-
-  setPointProp = (prop: 'lat' | 'lng') => e => {
-    this.setState({
-      [prop]: e.target.value,
-    })
-  }
-
-  componentDidUpdate(_, { lat: prevLat, lng: prevLng }) {
-    const { lat, lng } = this.state
-    const { onSelected } = this.props
-
-    if (lat && lng && (lat !== prevLat || lng !== prevLng)) {
-      onSelected([lat, lng])
-    }
-  }
-
-  render() {
-    const { lat, lng } = this.state
-    const { options } = this.props
-
-    return (
-      <FormControl>
-        <InputLabel>Add point</InputLabel>
-        <div>
-          <Select
-            name="add_point_lat"
-            value={lat}
-            options={[
-              { value: 0, label: 'Select lat prop' },
-              ...options.filter(opt => opt.value !== lng),
-            ]}
-            onChange={this.setPointProp('lat')}
-          />
-          <Select
-            name="add_point_lng"
-            value={lng}
-            options={[
-              { value: 0, label: 'Select lng prop' },
-              ...options.filter(opt => opt.value !== lat),
-            ]}
-            onChange={this.setPointProp('lng')}
-          />
-        </div>
-      </FormControl>
-    )
-  }
 }
 
 @observer
@@ -91,25 +38,8 @@ class CSVtoGeoJSON extends React.Component<any, any> {
   sampleData = async () => {
     const { datasetUri = '' } = this.props
 
-    let url = datasetUri
-
-    try {
-      url = new URL(datasetUri).href
-    } catch (err) {
-      url = ''
-    }
-
-    if (url && url !== this.lastFetchedUrl) {
-      this.setLastFetched(url)
-
-      const datasetReq = await fetch(url)
-      const datasetCsv = await datasetReq.text()
-      const dataset = await neatCsv(datasetCsv)
-
-      const sample = Array.isArray(dataset)
-        ? dataset[0]
-        : dataset[Object.keys(dataset)[0]]
-
+    if (datasetUri !== this.lastFetchedUrl) {
+      const sample = await fetchSampleCsv(datasetUri)
       this.setDataSample(sample)
     }
   }
@@ -167,44 +97,25 @@ class CSVtoGeoJSON extends React.Component<any, any> {
                 options={dataSampleOptions}
               />
             </Grid>
-            <Grid item xs={3}>
-              <InputLabel>Add polygon</InputLabel>
-              <Select
-                name="select_polygon_prop"
-                value={get(parsedVal, 'Polygon', '')}
-                onChange={e => this.addGeometry(GeometryType.Polygon)(e.target.value)}
-                options={[
-                  { value: '', label: 'Select polygon prop' },
-                  ...dataSampleOptions,
-                ]}
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <InputLabel>Add LineString</InputLabel>
-              <Select
-                name="select_linestring_prop"
-                value={get(parsedVal, 'LineString', '')}
-                onChange={e => this.addGeometry(GeometryType.LineString)(e.target.value)}
-                options={[
-                  { value: '', label: 'Select LineString prop' },
-                  ...dataSampleOptions,
-                ]}
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <InputLabel>Add MultiLineString</InputLabel>
-              <Select
-                name="select_multilinestring_prop"
-                value={get(parsedVal, 'MultiLineString', '')}
-                onChange={e =>
-                  this.addGeometry(GeometryType.MultiLineString)(e.target.value)
-                }
-                options={[
-                  { value: '', label: 'Select MultiLineString prop' },
-                  ...dataSampleOptions,
-                ]}
-              />
-            </Grid>
+            {/* Add selects for the rest of the geometry types. Assume that Point is first in the enum and skip it. */}
+            {Object.keys(GeometryType)
+              .slice(1)
+              .map((geometryType, idx) => (
+                <Grid key={`select_geometry_${geometryType}_${idx}`} item xs={3}>
+                  <InputLabel>Add {geometryType}</InputLabel>
+                  <Select
+                    name={`select_${geometryType}_prop`}
+                    value={get(parsedVal, geometryType, '')}
+                    onChange={e =>
+                      this.addGeometry(GeometryType[geometryType])(e.target.value)
+                    }
+                    options={[
+                      { value: '', label: `Select ${geometryType} prop` },
+                      ...dataSampleOptions,
+                    ]}
+                  />
+                </Grid>
+              ))}
           </Grid>
         </div>
       )
