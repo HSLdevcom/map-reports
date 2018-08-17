@@ -18,10 +18,10 @@ import {
   latLngBounds,
   popup,
 } from 'leaflet'
-import { Location } from '../../types/Location'
-import { MarkerState } from '../../types/Marker'
+import { Location } from '../../shared/types/Location'
+import { MarkerState } from '../../shared/types/Marker'
 import 'leaflet/dist/leaflet.css'
-import { AnyFunction } from '../../types/AnyFunction'
+import { AnyFunction } from '../../shared/types/AnyFunction'
 import styled from 'styled-components'
 import MarkerClusterGroup from './MarkerClusterGroup'
 import MapboxGlLayer from './MapboxGlLayer'

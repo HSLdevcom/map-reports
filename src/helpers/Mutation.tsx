@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Mutation as ApolloMutation } from 'react-apollo'
 import { get } from 'lodash'
 import { observer } from 'mobx-react'
-import { AnyFunction } from '../../types/AnyFunction'
+import { AnyFunction } from '../../shared/types/AnyFunction'
 
 type Props = {
   onCompleted?: any
@@ -10,7 +10,7 @@ type Props = {
   update?: AnyFunction
   component: any
   variables?: object
-  refetchQueries?: any[]
+  refetchQueries?: any[] | AnyFunction
 }
 
 export const Mutation = observer(
@@ -24,10 +24,13 @@ export const Mutation = observer(
     ...rest
   }: Props) => (
     <ApolloMutation
-      refetchQueries={refetchQueries}
+      refetchQueries={
+        typeof refetchQueries === 'function' ? refetchQueries(rest) : refetchQueries
+      }
       onCompleted={onCompleted}
       mutation={mutation}
-      update={update}
+      // If update is a function of length 1, assume that it takes props as args and returns the update function.
+      update={typeof update === 'function' && update.length === 1 ? update(rest) : update}
       variables={variables}>
       {(mutate, { loading, error, data = {} }): React.ReactNode => {
         const queryName = Object.keys(data)[0]
@@ -51,7 +54,7 @@ export const Mutation = observer(
 type MutateProps = {
   mutation: any
   update?: AnyFunction
-  refetchQueries?: Array<{ query: any; variables?: any }>
+  refetchQueries?: Array<{ query: any; variables?: any }> | AnyFunction
 }
 
 export const mutate = ({

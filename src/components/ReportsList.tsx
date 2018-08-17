@@ -1,13 +1,13 @@
 import * as React from 'react'
 import { observer, inject } from 'mobx-react'
-import { RendersReports } from '../../types/RendersReports'
+import { RendersReports } from '../../shared/types/RendersReports'
 import FilterReports from './FilterReports'
 import { app } from 'mobx-app'
-import { Report as ReportType } from '../../types/Report'
-import { ReportActions } from '../../types/ReportActions'
+import { Report as ReportType } from '../../shared/types/Report'
+import { ReportActions } from '../../shared/types/ReportActions'
 import styled from 'styled-components'
 import Report from './Report'
-import { AnyFunction } from '../../types/AnyFunction'
+import { AnyFunction } from '../../shared/types/AnyFunction'
 import SortReports from './SortReports'
 
 const List = styled.div`
@@ -20,10 +20,10 @@ interface Props extends RendersReports {
       key: string
       direction: string
     }
-    filterReports: {
+    filterReports: Array<{
       key: string
       value: string
-    }[]
+    }>
   }
   refetchReports: AnyFunction
   reports: ReportType[]

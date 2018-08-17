@@ -15,13 +15,15 @@ const fragmentMatcher = new IntrospectionFragmentMatcher({
 
 const cache = new InMemoryCache({
   fragmentMatcher,
-  dataIdFromObject: obj => {
+  dataIdFromObject: (obj: any) => {
     switch (obj.__typename) {
       case 'Report':
       case 'ReportItem':
       case 'Reporter':
       case 'Inspection':
         return obj.id
+      case 'ReportsEdge':
+        return obj.cursor
       default:
         return defaultDataIdFromObject(obj)
     }

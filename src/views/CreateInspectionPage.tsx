@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { DatasetType, Inspection, InspectionType } from '../../types/Inspection'
+import { DatasetType, Inspection, InspectionType } from '../../shared/types/Inspection'
 import { mutate } from '../helpers/Mutation'
 import { observer } from 'mobx-react'
 import gql from 'graphql-tag'

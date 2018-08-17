@@ -6,7 +6,7 @@ import { map, get } from 'lodash'
 import { Divider, FormGroup, InputLabel, TextField, Typography } from '@material-ui/core'
 import Select from '../helpers/Select'
 import neatCsv from 'neat-csv'
-import { AnyFunction } from '../../types/AnyFunction'
+import { AnyFunction } from '../../shared/types/AnyFunction'
 
 interface Props {
   value: string

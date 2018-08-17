@@ -10,12 +10,12 @@ import { mutate } from '../helpers/Mutation'
 import { marker } from 'leaflet'
 import { GeoJSON, Popup } from 'react-leaflet/es'
 import MarkerIcon from './MarkerIcon'
-import { DatasetView } from '../../types/DatasetView'
-import { AnyFunction } from '../../types/AnyFunction'
+import { DatasetView } from '../../shared/types/DatasetView'
+import { AnyFunction } from '../../shared/types/AnyFunction'
 import MarkerClusterGroup from './MarkerClusterGroup'
 import middleOfLine from '../helpers/middleOfLine'
 import * as L from 'leaflet'
-import { Inspection } from '../../types/Inspection'
+import { Inspection } from '../../shared/types/Inspection'
 
 const MapArea = styled.div`
   height: calc(100vh - 3rem);

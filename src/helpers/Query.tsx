@@ -3,7 +3,7 @@ import { Query as ApolloQuery } from 'react-apollo'
 import { createPaginator } from './paginate'
 import { has, get } from 'lodash'
 import { observer } from 'mobx-react'
-import { AnyFunction } from '../../types/AnyFunction'
+import { AnyFunction } from '../../shared/types/AnyFunction'
 import { FetchPolicy } from 'apollo-client'
 
 export const Query = observer(

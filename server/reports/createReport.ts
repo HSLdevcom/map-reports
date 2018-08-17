@@ -1,7 +1,7 @@
 import { merge } from 'lodash'
-import { Report, ReportPriority, ReportStatus } from '../../types/Report'
+import { Report, ReportPriority, ReportStatus } from '../../shared/types/Report'
 import { generate } from 'shortid'
-import { ReportDataInput } from '../../types/CreateReportData'
+import { ReportDataInput } from '../../shared/types/CreateReportData'
 
 export function createReport(reportData: ReportDataInput, reportItemId: string): Report {
   // Merge the received report data with some defaults for potentially
@@ -11,7 +11,7 @@ export function createReport(reportData: ReportDataInput, reportItemId: string):
       priority: ReportPriority.LOW,
       status: ReportStatus.NEW,
       message: '',
-      item: reportItemId
+      item: reportItemId,
     },
     reportData
   )

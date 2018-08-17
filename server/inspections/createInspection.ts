@@ -1,4 +1,4 @@
-import { Inspection } from '../../types/Inspection'
+import { Inspection } from '../../shared/types/Inspection'
 
 function createInspection(inspectionSpec: Inspection) {
   return inspectionSpec

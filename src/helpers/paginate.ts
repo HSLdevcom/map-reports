@@ -1,5 +1,5 @@
 import { get } from 'lodash'
-import { AnyFunction } from '../../types/AnyFunction'
+import { AnyFunction } from '../../shared/types/AnyFunction'
 
 export function createPaginator(
   data,

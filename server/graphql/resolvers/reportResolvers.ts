@@ -5,9 +5,9 @@ import {
   ReportItem,
   ReportPriority as ReportPriorityEnum,
   ReportStatus as ReportStatusEnum,
-} from '../../../types/Report'
+} from '../../../shared/types/Report'
 import createCursor from '../../util/createCursor'
-import { ReportDataInput } from '../../../types/CreateReportData'
+import { ReportDataInput } from '../../../shared/types/CreateReportData'
 import { createReport as reportFactory } from '../../reports/createReport'
 import pFilter from 'p-filter'
 
@@ -116,7 +116,7 @@ const reportResolvers = db => {
 
     const reportEdges = requestedReports.map(report => ({
       node: report,
-      cursor: createCursor(report, { sort, filter }),
+      cursor: createCursor(report, { filter, sort }),
     }))
 
     const sliceStart = reportEdges.findIndex(edge => edge.cursor === cursor) + 1
