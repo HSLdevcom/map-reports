@@ -42,7 +42,7 @@ interface Props {
   geoJSON?: any
   pointToLayer?: AnyFunction
   onEachFeature?: AnyFunction
-  useVectorLayers?: boolean | string
+  useVectorLayers?: boolean
   children?: any
   Map?: {
     setClickedLocation: (location: Location) => void
@@ -187,10 +187,6 @@ class Map extends React.Component<Props, any> {
     })
   }
 
-  componentDidCatch(err) {
-    console.log(err)
-  }
-
   render() {
     const { markers = [], useVectorLayers = false, children, useBounds } = this.props
     const { center, zoom, bounds } = this.state
@@ -208,7 +204,7 @@ class Map extends React.Component<Props, any> {
           maxZoom={18}>
           {useVectorLayers ? (
             // @ts-ignore
-            <MapboxGlLayer ref={this.glRef} key={`vector_layer_${useVectorLayers}`} />
+            <MapboxGlLayer ref={this.glRef} />
           ) : (
             <TileLayer
               zoomOffset={-1}

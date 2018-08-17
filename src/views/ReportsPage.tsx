@@ -68,7 +68,7 @@ class ReportsPage extends React.Component<Props, any> {
         </Sidebar>
         <MapArea>
           <ReportsMap
-            useVectorLayers="list_reports"
+            useVectorLayers
             reports={reports}
             onMapClick={() => Report.focusReport(null)}
           />

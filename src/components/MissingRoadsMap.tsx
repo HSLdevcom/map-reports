@@ -14,7 +14,7 @@ import { GeoJSON } from 'react-leaflet/es'
 import middleOfLine from '../helpers/middleOfLine'
 import { DatasetView } from '../../types/DatasetView'
 import { AnyFunction } from '../../types/AnyFunction'
-import { Reporter } from '../../types/Reporter'
+import { Inspection } from '../../types/Inspection'
 
 const MapArea = styled.div`
   height: calc(100vh - 3rem);
@@ -53,7 +53,7 @@ const enhance = compose(
 
 interface Props extends DatasetView {
   mutate?: AnyFunction
-  queryData?: { reporter: Reporter }
+  queryData?: { inspection: Inspection }
   loading?: boolean
 }
 

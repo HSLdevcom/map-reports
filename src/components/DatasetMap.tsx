@@ -12,10 +12,10 @@ import { GeoJSON, Popup } from 'react-leaflet/es'
 import MarkerIcon from './MarkerIcon'
 import { DatasetView } from '../../types/DatasetView'
 import { AnyFunction } from '../../types/AnyFunction'
-import { Reporter } from '../../types/Reporter'
 import MarkerClusterGroup from './MarkerClusterGroup'
 import middleOfLine from '../helpers/middleOfLine'
 import * as L from 'leaflet'
+import { Inspection } from '../../types/Inspection'
 
 const MapArea = styled.div`
   height: calc(100vh - 3rem);
@@ -42,8 +42,9 @@ const createReportMutation = gql`
 
 interface Props extends DatasetView {
   mutate?: AnyFunction
-  queryData?: { reporter: Reporter }
+  queryData?: { inspection: Inspection }
   loading?: boolean
+  useVectorLayers?: boolean
 }
 
 @query({ query: datasetQuery, getVariables: ({ datasetId }) => ({ id: datasetId }) })
@@ -77,38 +78,25 @@ class DatasetMap extends React.Component<Props, any> {
   }
 
   pointToLayer = ({ properties }, latlng) => {
-    const lat = latlng.lat
-    const lon = latlng.lng
-
-    const pointMarker = marker(latlng, {
+    return marker(latlng, {
       icon: MarkerIcon({ type: 'general' }),
     })
-
-    return pointMarker
   }
 
   featureToLayer = (feature, layer) => {
     const type = get(feature, 'geometry.type', 'MultiLineString')
-    let point
+
+    let coordinates =
+      type === 'LineString' || type === 'Point'
+        ? get(feature, 'geometry.coordinates', [])
+        : get(feature, 'geometry.coordinates[0]', [])
 
     if (type !== 'Point') {
-      let line
-
-      if (type === 'LineString') {
-        line = get(feature, 'geometry.coordinates')
-      }
-
-      if (type === 'MultiLineString') {
-        line = get(feature, 'geometry.coordinates[0]')
-      }
-
-      point = middleOfLine(line)
-    } else {
-      point = get(feature, 'geometry.coordinates')
+      coordinates = middleOfLine(coordinates)
     }
 
-    const lat = point[1]
-    const lon = point[0]
+    const lat = coordinates[1]
+    const lon = coordinates[0]
 
     this.showPopup(lat, lon, layer)
   }
@@ -116,19 +104,16 @@ class DatasetMap extends React.Component<Props, any> {
   showPopup = (lat, lon, layer) => {
     const popupContent = `
       <div>
-        <p>
-          <button onclick="__handleClick('${lat}', '${lon}')">
-            Create report
-          </button>
-        </p>
+        <button onclick="__handleClick('${lat}', '${lon}')">
+          Create report
+        </button>
       </div>
     `
     layer.bindPopup(L.popup({ minWidth: 250 }).setContent(popupContent))
   }
 
   render() {
-    const { queryData, loading } = this.props
-
+    const { queryData, loading, useVectorLayers = true } = this.props
     let geoJson = get(queryData, 'inspection.geoJSON', null)
 
     if (!geoJson || loading) {
@@ -136,11 +121,10 @@ class DatasetMap extends React.Component<Props, any> {
     }
 
     geoJson = JSON.parse(geoJson)
-    console.log(geoJson)
 
     return (
       <MapArea>
-        <Map useVectorLayers>
+        <Map useVectorLayers={useVectorLayers}>
           <MarkerClusterGroup>
             <GeoJSON
               data={geoJson}

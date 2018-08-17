@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { DatasetType, InspectionSpec, InspectionType } from '../../types/Inspection'
+import { DatasetType, Inspection, InspectionType } from '../../types/Inspection'
 import { mutate } from '../helpers/Mutation'
 import { observer } from 'mobx-react'
 import gql from 'graphql-tag'
@@ -49,7 +49,7 @@ const FormSection = styled.div`
   update: updateInspectionsList,
 })
 @observer
-class CreateInspectionPage extends React.Component<any, InspectionSpec> {
+class CreateInspectionPage extends React.Component<any, Inspection> {
   state = {
     name: 'New inspection',
     type: InspectionType.MANUAL,

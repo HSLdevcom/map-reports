@@ -1,6 +1,6 @@
-import { InspectionSpec } from '../../types/Inspection'
+import { Inspection } from '../../types/Inspection'
 
-function createInspection(inspectionSpec: InspectionSpec) {
+function createInspection(inspectionSpec: Inspection) {
   return inspectionSpec
 }
 

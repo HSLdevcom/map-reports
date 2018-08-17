@@ -169,10 +169,7 @@ class CreateReportPage extends React.Component<Props, any> {
           <SubmitReport />
         </Sidebar>
         <MapArea>
-          <ReportsMap
-            useBounds={false}
-            useVectorLayers="create_report"
-            onMapClick={this.onMapClick}>
+          <ReportsMap useBounds={false} useVectorLayers onMapClick={this.onMapClick}>
             {availableFeatures.length > 0 &&
               popupPosition && (
                 <Popup

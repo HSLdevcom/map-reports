@@ -10,7 +10,7 @@ export enum DatasetType {
   NONE = 'none',
 }
 
-export interface InspectionSpec {
+export interface Inspection {
   name: string
   type: InspectionType
   datasetType: DatasetType
