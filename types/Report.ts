@@ -1,5 +1,3 @@
-import { ReporterMeta } from './Reporter'
-
 export enum ReportStatus {
   NEW = 'NEW',
   ACCEPTED = 'ACCEPTED',
@@ -27,7 +25,6 @@ export interface Report<ItemType = ReportItem> {
   id?: string
   title: string
   message?: string
-  reporter: ReporterMeta | string
   status: ReportStatus
   priority: ReportPriority
   item: ItemType | string
@@ -36,9 +33,9 @@ export interface Report<ItemType = ReportItem> {
 }
 
 export interface ReportDraft {
-  title: string,
-  message?: string,
-  entityIdentifier: string,
-  type: string,
+  title: string
+  message?: string
+  entityIdentifier: string
+  type: string
   data?: string
 }

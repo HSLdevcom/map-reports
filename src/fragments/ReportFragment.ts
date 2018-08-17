@@ -19,12 +19,6 @@ export const ReportFragment = gql`
     }
     created_at
     updated_at
-    reporter {
-      id
-      name
-      type
-      __typename
-    }
     __typename
   }
 `

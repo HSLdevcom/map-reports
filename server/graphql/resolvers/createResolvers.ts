@@ -19,6 +19,7 @@ const createResolvers = (db): any => {
       reporters: reporters.allReporters,
       reporter: reporters.getReporter,
       inspections: inspections.allInspections,
+      inspection: inspections.getInspection,
     },
     Mutation: {
       // Reports
@@ -29,7 +30,6 @@ const createResolvers = (db): any => {
       createInspection: inspections.createInspection,
     },
     Report: {
-      reporter: reporters.resolveReportReporter,
       item: reports.resolveReportItem,
     },
     ReportItem: {

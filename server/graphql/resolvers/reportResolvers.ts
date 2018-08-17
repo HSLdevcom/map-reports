@@ -186,20 +186,7 @@ const reportResolvers = db => {
   ): Promise<Report> {
     const reportItemInsert = await reportItemsDb.add(reportItem)
 
-    const reporterId = get(
-      reportData,
-      'reporter',
-      await reporterDb
-        .table()
-        .where('name', 'manual-reporter')
-        .select('id')
-        .first()
-    )
-
-    const report = reportFactory(
-      { ...reportData, reporter: get(reporterId, 'id', reporterId) },
-      get(reportItemInsert, '[0]')
-    )
+    const report = reportFactory(reportData, get(reportItemInsert, '[0]'))
 
     const reportRecord = await reportsDb.add(report, ['id', 'created_at', 'updated_at'])
     merge(report, get(reportRecord, '[0]', {}))

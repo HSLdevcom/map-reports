@@ -12,6 +12,7 @@ const rootTypeDefs = gql`
     ): ReportsConnection
     reporters(onlyWithGeoJSON: Boolean): [Reporter]
     reporter(reporterId: ID): Reporter
+    inspection(inspectionId: ID): Inspection
     inspections: [Inspection]
   }
 

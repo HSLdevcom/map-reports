@@ -5,13 +5,12 @@ import { query } from '../helpers/Query'
 import styled from 'styled-components'
 import { Card, Typography } from '@material-ui/core'
 import Select from '../helpers/Select'
-import MissingRoadsMap from '../components/MissingRoadsMap'
-import UnconnectedStopsMap from '../components/UnconnectedStopsMap'
 import { get } from 'lodash'
+import DatasetMap from '../components/DatasetMap'
 
 const datasetOptionsQuery = gql`
   {
-    reporters(onlyWithGeoJSON: true) {
+    inspections {
       id
       name
     }
@@ -29,11 +28,6 @@ const OptionsBox = styled(Card)`
   width: 20%;
   padding: 1rem;
 `
-
-const datasetMaps = {
-  'missing-roads-reporter': MissingRoadsMap,
-  'unconnected-stops-reporter': UnconnectedStopsMap,
-}
 
 @inject('actions', 'state', 'router')
 @query({ query: datasetOptionsQuery, fetchPolicy: 'cache-first' })
@@ -53,15 +47,9 @@ class InspectDatasets extends React.Component<any, any> {
       return 'Loading...'
     }
 
-    const selectedDataset = queryData.reporters.find(
-      ({ id }) => id === state.selectedDataset
-    )
-
-    const MapComponent = get(datasetMaps, get(selectedDataset, 'name', ''), null)
-
     return (
       <DatasetsWrapper>
-        {MapComponent && <MapComponent datasetId={state.selectedDataset} />}
+        {state.selectedDataset && <DatasetMap datasetId={state.selectedDataset} />}
         <OptionsBox>
           <Typography gutterBottom variant="headline" component="h2">
             Tarkastele ja raportoi
@@ -69,7 +57,10 @@ class InspectDatasets extends React.Component<any, any> {
           <Select value={state.selectedDataset} onChange={this.onChangeDataset}>
             {[
               { value: '', label: 'Valitse kartta' },
-              ...queryData.reporters.map(({ id, name }) => ({ value: id, label: name })),
+              ...queryData.inspections.map(({ id, name }) => ({
+                value: id,
+                label: name,
+              })),
             ]}
           </Select>
         </OptionsBox>

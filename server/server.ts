@@ -4,10 +4,6 @@ import Express from 'express'
 import path from 'path'
 import database from './database'
 import createServer from './graphql/schema'
-import UnconnectedStopsReporter from './reporters/UnconnectedStopsReporter'
-import MissingRoadsReporter from './reporters/MissingRoadsReporter'
-import runReporters from './reporters/runReporters'
-import registerReporters from './reporters/registerReporters'
 import hslMapStyle from 'hsl-map-style'
 import fs from 'fs-extra'
 ;(async () => {
@@ -16,30 +12,6 @@ import fs from 'fs-extra'
    */
 
   const db = await database()
-
-  /**
-   * Set up reporters
-   */
-
-  const reporters = [
-    {
-      name: 'unconnected-stops-reporter',
-      type: 'automatic',
-      run: UnconnectedStopsReporter,
-    },
-    {
-      name: 'missing-roads-reporter',
-      type: 'automatic',
-      run: MissingRoadsReporter,
-    },
-    {
-      name: 'manual-reporter',
-      type: 'manual',
-    },
-  ]
-
-  await registerReporters(reporters, db)
-  await runReporters(reporters, db)
 
   /**
    * Start server

@@ -1,18 +1,26 @@
 import got from 'got'
 import { get } from 'lodash'
+import neatCsv from 'neat-csv'
+import GeoJSON from 'geojson'
 
-export default async (inspections, database) => {
+async function runInspections(inspections, database) {
   async function runGeoJsonInspection(inspection) {
     const geoJsonRequest = await got(inspection.datasetUri)
-    console.log(geoJsonRequest)
     return get(geoJsonRequest, 'data', {})
   }
 
-  for (const inspectionIndex of inspections) {
-    const inspection = inspections[inspectionIndex]
+  async function runCSVInspection(inspection) {
+    const csvRequest = await got(inspection.datasetUri)
+    const csvText = get(csvRequest, 'body', '')
+    const data = await neatCsv(csvText)
 
+    // @ts-ignore
+    return GeoJSON.parse(data, get(inspection, 'convertData', {}))
+  }
+
+  for (const inspection of inspections) {
     if (inspection) {
-      const { datasetType, id, name } = inspection
+      const { datasetType, id, name, convertData } = inspection
       console.log(`Running inspection ${name} with id ${id}`)
 
       let result = {}
@@ -21,9 +29,15 @@ export default async (inspections, database) => {
         result = await runGeoJsonInspection(inspection)
       }
 
+      if (datasetType === 'csv' && convertData) {
+        result = await runCSVInspection(inspection)
+      }
+
       console.log(result)
 
       await database.update(id, { geoJSON: result })
     }
   }
 }
+
+export default runInspections
