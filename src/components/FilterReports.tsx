@@ -3,9 +3,9 @@ import styled from 'styled-components'
 import { inject, Observer, observer } from 'mobx-react'
 import { app } from 'mobx-app'
 import { get } from 'lodash'
-import { Report } from '../../types/Report'
+import { Report } from '../../shared/types/Report'
 import Select from '../helpers/Select'
-import { ReportActions } from '../../types/ReportActions'
+import { ReportActions } from '../../shared/types/ReportActions'
 import { Query } from 'react-apollo'
 import gql from 'graphql-tag'
 import { Button, TextField, Paper } from '@material-ui/core'
@@ -42,8 +42,6 @@ const FilterSearchInput = styled(TextField)`
 const filterableKeys = {
   title: 'search',
   message: 'search',
-  'reporter.id': 'values',
-  'reporter.type': 'values',
   status: 'values',
   priority: 'values',
 }
@@ -51,8 +49,6 @@ const filterableKeys = {
 const filterLabels = {
   title: 'Otsikko',
   message: 'Viesti',
-  'reporter.id': 'Ilmoittaja',
-  'reporter.type': 'Ilmoittajan tyyppi',
   status: 'Vaihe',
   priority: 'Tärkeys',
   created_at: 'Luontipäivämäärä',

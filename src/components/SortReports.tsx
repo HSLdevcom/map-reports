@@ -5,7 +5,7 @@ import Select from '../helpers/Select'
 import { Button } from '@material-ui/core'
 import { inject, observer } from 'mobx-react'
 import { app } from 'mobx-app'
-import { ReportActions } from '../../types/ReportActions'
+import { ReportActions } from '../../shared/types/ReportActions'
 
 const Sorting = styled.div`
   padding: 0 1rem;
@@ -22,12 +22,11 @@ const SortOptions = styled.div`
 
 const SortButton = styled(Button)``
 
-const sortableKeys = ['title', 'reporter', 'status', 'priority', 'created_at', 'updated_at']
+const sortableKeys = ['title', 'status', 'priority', 'created_at', 'updated_at']
 
 const sortLabels = {
   title: 'Otsikko',
   message: 'Viesti',
-  reporter: 'Ilmoittaja',
   status: 'Vaihe',
   priority: 'Tärkeys',
   created_at: 'Luontipäivämäärä',

@@ -1,5 +1,5 @@
 import { action, extendObservable } from 'mobx'
-import { ReportActions } from '../../types/ReportActions'
+import { ReportActions } from '../../shared/types/ReportActions'
 import { get } from 'lodash'
 
 const emptyReport = {
@@ -7,7 +7,7 @@ const emptyReport = {
   message: '',
   entityIdentifier: 'unknown',
   type: 'general',
-  data: '{}'
+  data: '{}',
 }
 
 const ReportStore = (state, initialState): ReportActions => {
@@ -30,7 +30,7 @@ const ReportStore = (state, initialState): ReportActions => {
     reportState.reportDraft.type = type
   })
 
-  const setDraftData = action((data) => {
+  const setDraftData = action(data => {
     reportState.reportDraft.data = JSON.stringify(data)
   })
 

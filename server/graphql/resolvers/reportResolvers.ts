@@ -5,26 +5,18 @@ import {
   ReportItem,
   ReportPriority as ReportPriorityEnum,
   ReportStatus as ReportStatusEnum,
-} from '../../../types/Report'
-import createCursor from '../../util/createCursor'
-import { ReportDataInput } from '../../../types/CreateReportData'
+} from '../../../shared/types/Report'
+import createCursor from '../../../shared/utils/createCursor'
+import { ReportDataInput } from '../../../shared/types/CreateReportData'
 import { createReport as reportFactory } from '../../reports/createReport'
 import pFilter from 'p-filter'
 
-const filterableKeys = [
-  'reporter.id',
-  'reporter.type',
-  'status',
-  'priority',
-  'item.type',
-  'item.entityIdentifier',
-]
+const filterableKeys = ['status', 'priority', 'item.type', 'item.entityIdentifier']
 
 // Get the values that these props should be sorted by.
 // Only props listed here use special values, all
 // others use the value that is in the object.
 const sortValues = {
-  reporter: obj => (obj.reporter.type === 'manual' ? 1 : 0),
   status: obj => Object.values(ReportStatusEnum).indexOf(obj.status),
   priority: obj => Object.values(ReportPriorityEnum).indexOf(obj.priority),
   created_at: obj => +new Date(obj.created_at),
@@ -34,14 +26,9 @@ const sortValues = {
 const reportResolvers = db => {
   const reportsDb = db.table('report')
   const reportItemsDb = db.table('reportItem')
-  const reporterDb = db.table('reporter')
 
   function createRelationResolver() {
     const relations = {
-      reporter: {
-        resolved: [],
-        db: reporterDb,
-      },
       item: {
         resolved: [],
         db: reportItemsDb,
@@ -116,7 +103,7 @@ const reportResolvers = db => {
 
     const reportEdges = requestedReports.map(report => ({
       node: report,
-      cursor: createCursor(report, { sort, filter }),
+      cursor: createCursor(report, { filter, sort }),
     }))
 
     const sliceStart = reportEdges.findIndex(edge => edge.cursor === cursor) + 1

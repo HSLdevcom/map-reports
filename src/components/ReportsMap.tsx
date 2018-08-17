@@ -1,14 +1,14 @@
 import * as React from 'react'
 import Map from './Map'
-import { RendersReports } from '../../types/RendersReports'
+import { RendersReports } from '../../shared/types/RendersReports'
 import { inject, observer } from 'mobx-react'
 import { MapModes } from '../stores/MapStore'
 import { app } from 'mobx-app'
 import { get } from 'lodash'
-import { Marker, MarkerState } from '../../types/Marker'
-import { ReportActions } from '../../types/ReportActions'
+import { Marker, MarkerState } from '../../shared/types/Marker'
+import { ReportActions } from '../../shared/types/ReportActions'
 import { LatLng, latLng } from 'leaflet'
-import { AnyFunction } from '../../types/AnyFunction'
+import { AnyFunction } from '../../shared/types/AnyFunction'
 
 interface Props extends RendersReports {
   state?: any

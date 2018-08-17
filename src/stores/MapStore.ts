@@ -1,6 +1,6 @@
 import { action, extendObservable, observable } from 'mobx'
 import routes from '../routes'
-import { Location } from '../../types/Location'
+import { Location } from '../../shared/types/Location'
 import { get } from 'lodash'
 
 export const enum MapModes {
@@ -12,9 +12,7 @@ const MapStore = (state, initialState) => {
   const mapState = extendObservable(state, {
     lastClickedLocation: get(initialState, 'lastClickedLocation', null),
     get mapMode() {
-      return mapState.route === routes.CREATE_REPORT
-        ? MapModes.pick
-        : MapModes.display
+      return mapState.route === routes.CREATE_REPORT ? MapModes.pick : MapModes.display
     },
   })
 
@@ -23,7 +21,7 @@ const MapStore = (state, initialState) => {
   })
 
   return {
-    setClickedLocation
+    setClickedLocation,
   }
 }
 

@@ -6,7 +6,7 @@ import { get } from 'lodash'
 import { inject, observer } from 'mobx-react'
 import { app } from 'mobx-app'
 import { Popup, GeoJSON, Circle } from 'react-leaflet/es'
-import { ReportActions } from '../../types/ReportActions'
+import { ReportActions } from '../../shared/types/ReportActions'
 import { circle } from 'leaflet'
 
 const CreateReportView = styled.div`

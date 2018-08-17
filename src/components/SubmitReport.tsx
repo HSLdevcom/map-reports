@@ -4,14 +4,15 @@ import { mutate } from '../helpers/Mutation'
 import { action, toJS } from 'mobx'
 import gql from 'graphql-tag'
 import { ReportFragment } from '../fragments/ReportFragment'
-import { AnyFunction } from '../../types/AnyFunction'
-import updateReportsConnection from '../helpers/updateReportsConnection'
-import { Report, ReportDraft } from '../../types/Report'
+import { AnyFunction } from '../../shared/types/AnyFunction'
+import { ReportDraft } from '../../shared/types/Report'
 import { RouterType } from 'pathricia'
 import routes from '../routes'
-import { ReportActions } from '../../types/ReportActions'
+import { ReportActions } from '../../shared/types/ReportActions'
 import { Button, TextField, Divider, Typography } from '@material-ui/core'
 import styled from 'styled-components'
+import { reportsQuery } from '../queries/reportsQuery'
+import updateReportsConnection from '../helpers/updateReportsConnection'
 
 const createReportMutation = gql`
   mutation createReport($reportData: InputReport!, $reportItem: InputReportItem!) {
@@ -56,7 +57,10 @@ const ValueDisplay = styled.div`
 // If we want the router, app() from mobx-app cannot be used.
 // I might fix this in a later mobx-app version.
 @inject('state', 'actions', 'router')
-@mutate({ mutation: createReportMutation, update: updateReportsConnection })
+@mutate({
+  mutation: createReportMutation,
+  update: updateReportsConnection,
+})
 @observer
 class SubmitReport extends React.Component<Props, any> {
   componentDidMount() {

@@ -8,8 +8,8 @@ import { reportsQuery } from '../queries/reportsQuery'
 import { app } from 'mobx-app'
 import { inject, observer } from 'mobx-react'
 import { query } from '../helpers/Query'
-import { AnyFunction } from '../../types/AnyFunction'
-import { ReportActions } from '../../types/ReportActions'
+import { AnyFunction } from '../../shared/types/AnyFunction'
+import { ReportActions } from '../../shared/types/ReportActions'
 
 const ReportsView = styled.div`
   height: 100%;
