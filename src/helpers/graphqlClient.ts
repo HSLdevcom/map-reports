@@ -19,7 +19,6 @@ const cache = new InMemoryCache({
     switch (obj.__typename) {
       case 'Report':
       case 'ReportItem':
-      case 'Reporter':
       case 'Inspection':
         return obj.id
       case 'ReportsEdge':

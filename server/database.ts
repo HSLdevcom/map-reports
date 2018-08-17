@@ -65,7 +65,6 @@ const database = async () => {
   const tables = {
     report: await createDb('Reports'),
     reportItem: await createDb('ReportedItems'),
-    reporter: await createDb('Reporters'),
     inspection: await createDb('Inspections'),
   }
 

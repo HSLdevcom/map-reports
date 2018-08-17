@@ -42,8 +42,6 @@ const FilterSearchInput = styled(TextField)`
 const filterableKeys = {
   title: 'search',
   message: 'search',
-  'reporter.id': 'values',
-  'reporter.type': 'values',
   status: 'values',
   priority: 'values',
 }
@@ -51,8 +49,6 @@ const filterableKeys = {
 const filterLabels = {
   title: 'Otsikko',
   message: 'Viesti',
-  'reporter.id': 'Ilmoittaja',
-  'reporter.type': 'Ilmoittajan tyyppi',
   status: 'Vaihe',
   priority: 'Tärkeys',
   created_at: 'Luontipäivämäärä',

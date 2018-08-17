@@ -22,19 +22,11 @@ const SortOptions = styled.div`
 
 const SortButton = styled(Button)``
 
-const sortableKeys = [
-  'title',
-  'reporter',
-  'status',
-  'priority',
-  'created_at',
-  'updated_at',
-]
+const sortableKeys = ['title', 'status', 'priority', 'created_at', 'updated_at']
 
 const sortLabels = {
   title: 'Otsikko',
   message: 'Viesti',
-  reporter: 'Ilmoittaja',
   status: 'Vaihe',
   priority: 'Tärkeys',
   created_at: 'Luontipäivämäärä',
