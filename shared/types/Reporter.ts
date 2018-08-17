@@ -10,7 +10,5 @@ export interface ReporterMeta {
 export interface Reporter {
   meta: ReporterMeta
   run: () => void
-  schedule: (
-    scheduler: typeof schedule,
-  ) => ScheduledTask | boolean
+  schedule: (scheduler: typeof schedule) => ScheduledTask | boolean
 }

@@ -4,7 +4,7 @@ import { AnyFunction } from './AnyFunction'
 export const enum MarkerState {
   focus,
   inactive,
-  default
+  default,
 }
 
 export interface Marker {
