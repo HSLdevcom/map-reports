@@ -16,5 +16,6 @@ export interface InspectionSpec {
   datasetType: DatasetType
   datasetUri?: string
   cron?: string
-  convertData?: string
+  entityIdentifier: string
+  geoJSONProps?: string
 }

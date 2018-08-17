@@ -9,6 +9,8 @@ import { Button, Grid, InputLabel, TextField, Typography } from '@material-ui/co
 import { get, map } from 'lodash'
 import Select from '../helpers/Select'
 import CSVtoGeoJSON from '../components/CSVtoGeoJSON'
+import EntityIdentifierFromGeoJSON from '../components/EntityIdentifierFromGeoJSON'
+import styled from 'styled-components'
 
 const allInspectionsQuery = gql`
   query allInspections {
@@ -36,6 +38,11 @@ const updateInspectionsList = (cache, { data: { createInspection } }) => {
   })
 }
 
+const FormSection = styled.div`
+  margin: 1rem 0;
+  padding: 0 1rem;
+`
+
 @query({ query: allInspectionsQuery })
 @mutate({
   mutation: createInspectionMutation,
@@ -49,7 +56,8 @@ class CreateInspectionPage extends React.Component<any, InspectionSpec> {
     datasetType: DatasetType.NONE,
     datasetUri: '',
     cron: '',
-    convertData: '{}',
+    entityIdentifier: 'unknown',
+    geoJSONProps: '{}',
   }
 
   onChange = field => e => {
@@ -72,75 +80,89 @@ class CreateInspectionPage extends React.Component<any, InspectionSpec> {
 
   render() {
     const { queryData } = this.props
-    const { name, type, datasetType, datasetUri, cron, convertData } = this.state
+    const {
+      name,
+      type,
+      datasetType,
+      datasetUri,
+      cron,
+      geoJSONProps,
+      entityIdentifier,
+    } = this.state
 
     // TODO refactor this component
 
     return (
       <form onSubmit={this.onSubmit}>
-        <Grid container spacing={24}>
-          <Grid item xs={12}>
-            <Typography variant="subheading">Inspections</Typography>
-            {get(queryData, 'inspections', []).map(inspection => (
-              <div key={`inspection_${inspection.id}`}>
-                <pre>
-                  <code>{JSON.stringify(inspection, null, 2)}</code>
-                </pre>
-              </div>
-            ))}
-          </Grid>
-          <Grid item xs={12}>
+        <FormSection>
+          <Typography variant="subheading">Inspections</Typography>
+          {get(queryData, 'inspections', []).map(inspection => (
+            <div key={`inspection_${inspection.id}`}>{inspection.name}</div>
+          ))}
+        </FormSection>
+        <FormSection>
+          <TextField
+            label="Inspection name"
+            value={name}
+            onChange={this.onChange('name')}
+          />
+        </FormSection>
+        <FormSection>
+          <InputLabel>Inspection type</InputLabel>
+          <Select
+            name="inspection_type"
+            value={type}
+            options={map(InspectionType, (value, label) => ({ value, label }))}
+            onChange={this.onChange('type')}
+          />
+        </FormSection>
+        <FormSection>
+          <InputLabel>Dataset type</InputLabel>
+          <Select
+            name="dataset_type"
+            value={datasetType}
+            options={map(DatasetType, (value, label) => ({ value, label }))}
+            onChange={this.onChange('datasetType')}
+          />
+        </FormSection>
+        {type !== InspectionType.MANUAL && (
+          <FormSection>
             <TextField
-              label="Inspection name"
-              value={name}
-              onChange={this.onChange('name')}
+              label="Dataset uri"
+              value={datasetUri}
+              onChange={this.onChange('datasetUri')}
             />
-          </Grid>
-          <Grid item xs={12}>
-            <InputLabel>Inspection type</InputLabel>
-            <Select
-              name="inspection_type"
-              value={type}
-              options={map(InspectionType, (value, label) => ({ value, label }))}
-              onChange={this.onChange('type')}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <InputLabel>Dataset type</InputLabel>
-            <Select
-              name="dataset_type"
-              value={datasetType}
-              options={map(DatasetType, (value, label) => ({ value, label }))}
-              onChange={this.onChange('datasetType')}
-            />
-          </Grid>
-          {type !== InspectionType.MANUAL && (
-            <Grid item xs={12}>
-              <TextField
-                label="Dataset uri"
-                value={datasetUri}
-                onChange={this.onChange('datasetUri')}
-              />
-            </Grid>
-          )}
-          {type === InspectionType.CRON && (
-            <Grid item xs={12}>
-              <TextField label="Cron" value={cron} onChange={this.onChange('cron')} />
-            </Grid>
-          )}
-          {datasetType === DatasetType.CSV && (
+          </FormSection>
+        )}
+        {type === InspectionType.CRON && (
+          <FormSection>
+            <TextField label="Cron" value={cron} onChange={this.onChange('cron')} />
+          </FormSection>
+        )}
+        {datasetType === DatasetType.CSV && (
+          <FormSection>
             <CSVtoGeoJSON
-              value={convertData}
-              onChange={this.onChange('convertData')}
+              value={geoJSONProps}
+              onChange={this.onChange('geoJSONProps')}
               datasetUri={datasetUri}
             />
-          )}
-          <Grid item xs={12}>
-            <Button type="submit" variant="raised">
-              Create inspection
-            </Button>
-          </Grid>
-        </Grid>
+          </FormSection>
+        )}
+        {type !== InspectionType.MANUAL && (
+          <FormSection>
+            <EntityIdentifierFromGeoJSON
+              value={entityIdentifier}
+              onChange={this.onChange('entityIdentifier')}
+              datasetUri={datasetUri}
+              mapToGeoJSON={geoJSONProps}
+            />
+          </FormSection>
+        )}
+        <FormSection>
+          <Button type="submit" variant="raised">
+            Create inspection
+          </Button>
+        </FormSection>
       </form>
     )
   }

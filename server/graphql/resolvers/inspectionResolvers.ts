@@ -15,6 +15,9 @@ const inspectionResolvers = db => {
 
   async function createInspection(_, { inspection }) {
     const inspectionObj = createInspectionFromSpec(inspection)
+
+    console.log(inspectionObj)
+
     const insertedId = await inspectionsDb.add(inspectionObj)
     const insertedInspection = await inspectionsDb.get(get(insertedId, '[0]', insertedId))
     await runInspections([insertedInspection], inspectionsDb)

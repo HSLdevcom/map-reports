@@ -8,7 +8,8 @@ export const InspectionFragment = gql`
     datasetType
     datasetUri
     cron
-    convertData
+    geoJSONProps
+    entityIdentifier
     created_at
     updated_at
   }

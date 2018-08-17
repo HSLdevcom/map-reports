@@ -50,8 +50,8 @@ const createResolvers = (db): any => {
       geoJSON: inspection => {
         return JSON.stringify(inspection.geoJSON)
       },
-      convertData: inspection => {
-        return JSON.stringify(inspection.convertData)
+      geoJSONProps: inspection => {
+        return JSON.stringify(inspection.geoJSONProps)
       },
     },
   }

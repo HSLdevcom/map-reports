@@ -6,7 +6,7 @@ import GeoJSON from 'geojson'
 async function runInspections(inspections, database) {
   async function runGeoJsonInspection(inspection) {
     const geoJsonRequest = await got(inspection.datasetUri)
-    return get(geoJsonRequest, 'data', {})
+    return get(geoJsonRequest, 'body', {})
   }
 
   async function runCSVInspection(inspection) {
@@ -15,25 +15,24 @@ async function runInspections(inspections, database) {
     const data = await neatCsv(csvText)
 
     // @ts-ignore
-    return GeoJSON.parse(data, get(inspection, 'convertData', {}))
+    return GeoJSON.parse(data, get(inspection, 'geoJSONProps', {}))
   }
 
   for (const inspection of inspections) {
     if (inspection) {
-      const { datasetType, id, name, convertData } = inspection
+      const { datasetType, id, name, geoJSONProps } = inspection
       console.log(`Running inspection ${name} with id ${id}`)
 
       let result = {}
 
       if (datasetType === 'geojson') {
         result = await runGeoJsonInspection(inspection)
+        console.log(result)
       }
 
-      if (datasetType === 'csv' && convertData) {
+      if (datasetType === 'csv' && geoJSONProps) {
         result = await runCSVInspection(inspection)
       }
-
-      console.log(result)
 
       await database.update(id, { geoJSON: result })
     }

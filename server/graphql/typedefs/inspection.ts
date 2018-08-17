@@ -19,7 +19,8 @@ const inspectionTypeDefs = gql`
     datasetType: DatasetType!
     datasetUri: String
     cron: String
-    convertData: String
+    entityIdentifier: String
+    geoJSONProps: String
   }
 
   type Inspection {
@@ -29,7 +30,8 @@ const inspectionTypeDefs = gql`
     datasetType: DatasetType!
     datasetUri: String
     cron: String
-    convertData: String
+    entityIdentifier: String!
+    geoJSONProps: String
     geoJSON: String
     created_at: String!
     updated_at: String!
