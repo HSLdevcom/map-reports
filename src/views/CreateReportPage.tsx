@@ -149,9 +149,9 @@ class CreateReportPage extends React.Component<Props, any> {
 
     const { Report, Map } = this.props
     Report.setDraftEntity(identifier, type)
-    Report.setDraftData(feature.properties)
+    Report.setDraftData(get(feature, 'properties', {}))
 
-    if (feature.geometry.type === 'Point') {
+    if (get(feature, 'geometry.type', '') === 'Point') {
       // Set marker to point coordinates. Geojson uses lon/lat, not the other way around.
       Map.setClickedLocation({
         lat: feature.geometry.coordinates[1],
