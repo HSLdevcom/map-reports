@@ -4,7 +4,7 @@ import { get } from 'lodash'
 const UIStore = router => (state, initialState) => {
   const uiState = extendObservable(state, {
     route: get(initialState, 'route', '/'),
-    selectedDataset: '',
+    selectedDataset: get(initialState, 'selectedDataset', ''),
   })
 
   const selectDataset = action(datasetId => {

@@ -113,14 +113,12 @@ class DatasetMap extends React.Component<Props, any> {
   }
 
   showPopup = (lat, lon, properties, layer) => {
+    const popupData = window.btoa(JSON.stringify(properties))
+
     const popupContent = `
-      <div>
-        <pre><code>
-          ${JSON.stringify(properties, null, 2)}
-        </code></pre>
-        <button onclick="__handleClick('${lat}', '${lon}', '${window.btoa(
-      JSON.stringify(properties)
-    )}')">
+<div>
+<pre><code>${JSON.stringify(properties, null, 2)}</code></pre>
+        <button onclick="__handleClick('${lat}', '${lon}', '${popupData}')">
           Create report
         </button>
       </div>
@@ -145,8 +143,9 @@ class DatasetMap extends React.Component<Props, any> {
             <GeoJSON
               data={geoJson}
               onEachFeature={this.featureToLayer}
-              pointToLayer={this.pointToLayer}
-            />
+              pointToLayer={this.pointToLayer}>
+              <Popup>heyy</Popup>
+            </GeoJSON>
           </MarkerClusterGroup>
         </Map>
       </MapArea>
