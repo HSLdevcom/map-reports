@@ -137,7 +137,7 @@ class ReportItem extends React.Component<Props, any> {
   render() {
     const { report, onClick } = this.props
 
-    const itemData = get(JSON.parse(get(report, 'item.data', '{}')), 'properties', '')
+    const itemData = JSON.parse(get(report, 'item.data', '{}'))
 
     return (
       <Report type={get(report, 'item.type', 'manual')} onClick={onClick}>

@@ -27,6 +27,7 @@ const datasetQuery = gql`
       id
       name
       geoJSON
+      entityIdentifier
     }
   }
 `
@@ -57,8 +58,17 @@ class DatasetMap extends React.Component<Props, any> {
     window.__handleClick = this.onCreateIssue
   }
 
-  onCreateIssue = async (lat, lon) => {
-    const { mutate } = this.props
+  onCreateIssue = async (lat, lon, properties) => {
+    const { mutate, queryData } = this.props
+    let data
+
+    try {
+      data = JSON.parse(window.atob(properties))
+    } catch (err) {
+      data = null
+    }
+
+    const entityIdentifier = get(queryData, 'inspection.entityIdentifier', 'unknown')
 
     await mutate({
       variables: {
@@ -69,15 +79,16 @@ class DatasetMap extends React.Component<Props, any> {
         reportItem: {
           lat: parseFloat(lat),
           lon: parseFloat(lon),
-          entityIdentifier: 'unknown',
+          entityIdentifier: data[entityIdentifier],
           recommendedMapZoom: 18,
+          data: data ? JSON.stringify(data) : '{}',
           type: 'general',
         },
       },
     })
   }
 
-  pointToLayer = ({ properties }, latlng) => {
+  pointToLayer = (_, latlng) => {
     return marker(latlng, {
       icon: MarkerIcon({ type: 'general' }),
     })
@@ -98,13 +109,18 @@ class DatasetMap extends React.Component<Props, any> {
     const lat = coordinates[1]
     const lon = coordinates[0]
 
-    this.showPopup(lat, lon, layer)
+    this.showPopup(lat, lon, feature.properties, layer)
   }
 
-  showPopup = (lat, lon, layer) => {
+  showPopup = (lat, lon, properties, layer) => {
     const popupContent = `
       <div>
-        <button onclick="__handleClick('${lat}', '${lon}')">
+        <pre><code>
+          ${JSON.stringify(properties, null, 2)}
+        </code></pre>
+        <button onclick="__handleClick('${lat}', '${lon}', '${window.btoa(
+      JSON.stringify(properties)
+    )}')">
           Create report
         </button>
       </div>
@@ -129,9 +145,8 @@ class DatasetMap extends React.Component<Props, any> {
             <GeoJSON
               data={geoJson}
               onEachFeature={this.featureToLayer}
-              pointToLayer={this.pointToLayer}>
-              <Popup>hey</Popup>
-            </GeoJSON>
+              pointToLayer={this.pointToLayer}
+            />
           </MarkerClusterGroup>
         </Map>
       </MapArea>
