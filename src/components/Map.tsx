@@ -214,6 +214,12 @@ class Map extends React.Component<Props, any> {
             <LayersControl.BaseLayer name="Vector" checked={useVectorLayers}>
               <MapboxGlLayer ref={this.glRef} />
             </LayersControl.BaseLayer>
+            <LayersControl.BaseLayer name="Aerial">
+              <TileLayer
+                attribution="MML/LUKE"
+                url="http://tiles.kartat.kapsi.fi/ortokuva/{z}/{x}/{y}.jpg"
+              />
+            </LayersControl.BaseLayer>
           </LayersControl>
           <ZoomControl position="topright" />
           {markers.length > 0 && (
