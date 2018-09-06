@@ -30,8 +30,8 @@ const DatasetsWrapper = styled.div`
 
 const OptionsBox = styled(Card)`
   position: absolute;
-  top: 0.7rem;
-  left: 3.5rem;
+  top: 0.75rem;
+  left: 0.75rem;
   width: 20%;
   min-width: 300px;
   padding: 1rem;
@@ -41,10 +41,6 @@ const OptionsBox = styled(Card)`
 @query({ query: datasetOptionsQuery, fetchPolicy: 'cache-first' })
 @observer
 class InspectDatasets extends React.Component<any, any> {
-  state = {
-    useVectorLayers: true,
-  }
-
   onChangeDataset = e => {
     const {
       actions: { UI },
@@ -52,14 +48,7 @@ class InspectDatasets extends React.Component<any, any> {
     UI.selectDataset(e.target.value)
   }
 
-  toggleVectorLayers = () => {
-    this.setState({
-      useVectorLayers: !this.state.useVectorLayers,
-    })
-  }
-
   render() {
-    const { useVectorLayers } = this.state
     const { queryData, loading, state } = this.props
 
     if (!queryData || loading) {
@@ -68,12 +57,7 @@ class InspectDatasets extends React.Component<any, any> {
 
     return (
       <DatasetsWrapper>
-        {state.selectedDataset && (
-          <DatasetMap
-            useVectorLayers={useVectorLayers}
-            datasetId={state.selectedDataset}
-          />
-        )}
+        {state.selectedDataset && <DatasetMap datasetId={state.selectedDataset} />}
         <OptionsBox>
           <Typography gutterBottom variant="headline" component="h2">
             Tarkastele ja raportoi
@@ -87,13 +71,6 @@ class InspectDatasets extends React.Component<any, any> {
               })),
             ]}
           </Select>
-          <Divider />
-          <Switch
-            value="useVectorLayers"
-            checked={useVectorLayers}
-            onChange={this.toggleVectorLayers}
-          />
-          <FormLabel>Use vector map</FormLabel>
         </OptionsBox>
       </DatasetsWrapper>
     )

@@ -15,7 +15,7 @@ interface Props extends RendersReports {
   Report?: ReportActions
   Map?: any
   useBounds?: boolean
-  useVectorLayers?: boolean | string
+  useVectorLayers?: boolean
   onMapClick?: AnyFunction
 }
 

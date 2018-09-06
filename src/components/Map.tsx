@@ -1,25 +1,24 @@
 import * as React from 'react'
-import LeafletMap from 'react-leaflet/es/Map'
-import TileLayer from 'react-leaflet/es/TileLayer'
-import Marker from 'react-leaflet/es/Marker'
-import GeoJSON from 'react-leaflet/es/GeoJSON'
-import Popup from 'react-leaflet/es/Popup'
+import {
+  Map as LeafletMap,
+  TileLayer,
+  Marker as LeafletMarker,
+  Popup,
+  LayersControl,
+  ZoomControl,
+} from 'react-leaflet'
 import { observer, inject } from 'mobx-react'
 import MarkerIcon from './MarkerIcon'
 import { app } from 'mobx-app'
 import {
-  point,
   LatLng,
   latLng,
   LatLngExpression,
   LeafletMouseEvent,
-  divIcon,
-  marker,
   latLngBounds,
-  popup,
 } from 'leaflet'
 import { Location } from '../../shared/types/Location'
-import { MarkerState } from '../../shared/types/Marker'
+import { MarkerState, Marker } from '../../shared/types/Marker'
 import 'leaflet/dist/leaflet.css'
 import { AnyFunction } from '../../shared/types/AnyFunction'
 import styled from 'styled-components'
@@ -108,7 +107,7 @@ class Map extends React.Component<Props, any> {
       bounds: null,
     }
   }
-  mapRef = React.createRef()
+
   glRef = React.createRef()
 
   state = {
@@ -188,7 +187,7 @@ class Map extends React.Component<Props, any> {
   }
 
   render() {
-    const { markers = [], useVectorLayers = false, children, useBounds } = this.props
+    const { markers = [], children, useBounds } = this.props
     const { center, zoom, bounds } = this.state
 
     return (
@@ -199,26 +198,29 @@ class Map extends React.Component<Props, any> {
           onViewportChange={this.trackViewport}
           bounds={useBounds ? bounds : undefined}
           onClick={this.onMapClick}
-          ref={this.mapRef}
+          touchZoom={true}
           minZoom={10}
           maxZoom={18}>
-          {useVectorLayers ? (
-            // @ts-ignore
-            <MapboxGlLayer ref={this.glRef} />
-          ) : (
-            <TileLayer
-              zoomOffset={-1}
-              tileSize={512}
-              attribution={attribution}
-              retina="@2x"
-              url={url}
-            />
-          )}
+          <LayersControl position="topright">
+            <LayersControl.BaseLayer name="Raster" checked>
+              <TileLayer
+                zoomOffset={-1}
+                tileSize={512}
+                attribution={attribution}
+                retina="@2x"
+                url={url}
+              />
+            </LayersControl.BaseLayer>
+            <LayersControl.BaseLayer name="Vector">
+              <MapboxGlLayer ref={this.glRef} />
+            </LayersControl.BaseLayer>
+          </LayersControl>
+          <ZoomControl position="topright" />
           {markers.length > 0 && (
             <MarkerClusterGroup>
               {markers.map(
                 ({ type, position, message, id, state: markerState, onClick }) => (
-                  <Marker
+                  <LeafletMarker
                     onClick={this.onMarkerClick(onClick)}
                     key={`marker_${id}`}
                     position={position}
@@ -228,7 +230,7 @@ class Map extends React.Component<Props, any> {
                       blurred: markerState === MarkerState.inactive,
                     })}>
                     <Popup autoPan={false}>{message}</Popup>
-                  </Marker>
+                  </LeafletMarker>
                 )
               )}
             </MarkerClusterGroup>
