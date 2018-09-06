@@ -187,7 +187,7 @@ class Map extends React.Component<Props, any> {
   }
 
   render() {
-    const { markers = [], children, useBounds } = this.props
+    const { markers = [], children, useBounds, useVectorLayers } = this.props
     const { center, zoom, bounds } = this.state
 
     return (
@@ -202,7 +202,7 @@ class Map extends React.Component<Props, any> {
           minZoom={10}
           maxZoom={18}>
           <LayersControl position="topright">
-            <LayersControl.BaseLayer name="Raster" checked>
+            <LayersControl.BaseLayer name="Raster" checked={!useVectorLayers}>
               <TileLayer
                 zoomOffset={-1}
                 tileSize={512}
@@ -211,7 +211,7 @@ class Map extends React.Component<Props, any> {
                 url={url}
               />
             </LayersControl.BaseLayer>
-            <LayersControl.BaseLayer name="Vector">
+            <LayersControl.BaseLayer name="Vector" checked={useVectorLayers}>
               <MapboxGlLayer ref={this.glRef} />
             </LayersControl.BaseLayer>
           </LayersControl>

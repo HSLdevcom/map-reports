@@ -19,6 +19,21 @@ const Sidebar = styled.div`
   height: calc(100vh - 3rem);
   overflow: auto;
   display: flex;
+  flex-direction: column;
+`
+
+const FeaturesWrapper = styled.div`
+  padding: 1rem;
+`
+
+const FeaturesTable = styled.table`
+  width: 100%;
+
+  thead td {
+    font-weight: bold;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid #efefef;
+  }
 `
 
 const MapArea = styled.div`
@@ -92,7 +107,6 @@ interface Props {
 class CreateReportPage extends React.Component<Props, any> {
   state = {
     availableFeatures: [],
-    popupPosition: null,
     highlightGeoJson: null,
   }
 
@@ -134,11 +148,11 @@ class CreateReportPage extends React.Component<Props, any> {
 
     this.setState({
       availableFeatures,
-      popupPosition: event.latlng,
     })
   }
 
-  onFeatureHover = (feature = null) => e => {
+  onFeatureHover = (feature = null) => () => {
+    console.log(feature)
     this.setState({
       highlightGeoJson: feature,
     })
@@ -161,75 +175,67 @@ class CreateReportPage extends React.Component<Props, any> {
   }
 
   render() {
-    const { availableFeatures = [], popupPosition, highlightGeoJson } = this.state
+    const { availableFeatures = [], highlightGeoJson } = this.state
 
     return (
       <CreateReportView>
         <Sidebar>
           <SubmitReport />
-        </Sidebar>
-        <MapArea>
-          <ReportsMap useBounds={false} useVectorLayers onMapClick={this.onMapClick}>
-            {availableFeatures.length > 0 &&
-              popupPosition && (
-                <Popup
-                  minWidth={200}
-                  maxWidth={500}
-                  key={JSON.stringify(popupPosition)}
-                  autoClose={false}
-                  closeOnClick={false}
-                  position={popupPosition}>
-                  <table>
-                    <thead>
-                      <tr>
-                        <td>Feature</td>
-                        <td>ID</td>
-                        <td>Select</td>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {availableFeatures.map((feature, idx) => {
-                        const propName = getIdentifyingPropName(feature.properties)
-                        const entityIdentifier =
-                          getIdentifyingPropValue(feature.properties, propName) ||
-                          'unknown'
+          {availableFeatures.length !== 0 && (
+            <FeaturesWrapper>
+              <FeaturesTable>
+                <thead>
+                  <tr>
+                    <td>Feature</td>
+                    <td>ID</td>
+                    <td>Select</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  {availableFeatures.map((feature, idx) => {
+                    const propName = getIdentifyingPropName(feature.properties)
+                    const entityIdentifier =
+                      getIdentifyingPropValue(feature.properties, propName) || 'unknown'
 
-                        return (
-                          <tr
-                            style={{ cursor: 'pointer' }}
-                            onMouseOver={this.onFeatureHover(feature)}
-                            onMouseOut={this.onFeatureHover(null)}
-                            key={`feature_row_${idx}_${
-                              feature.layer.id
-                            }_${propName}_${entityIdentifier}`}>
-                            <td>{feature.layer.id}</td>
-                            <td>{entityIdentifier}</td>
-                            <td>
-                              <button
-                                onClick={this.useAsEntity(
-                                  entityIdentifier,
-                                  propName,
-                                  feature
-                                )}>
-                                Select
-                              </button>
-                            </td>
-                          </tr>
-                        )
-                      })}
-                      <tr>
-                        <td>Muu</td>
-                        <td>Muu virhe</td>
+                    return (
+                      <tr
+                        style={{ cursor: 'pointer' }}
+                        onMouseOver={this.onFeatureHover(feature)}
+                        onMouseOut={this.onFeatureHover(null)}
+                        key={`feature_row_${idx}_${
+                          feature.layer.id
+                        }_${propName}_${entityIdentifier}`}>
+                        <td>{feature.layer.id}</td>
+                        <td>{entityIdentifier}</td>
                         <td>
-                          <button onClick={this.useAsEntity('other', 'other', {})}>
+                          <button
+                            onClick={this.useAsEntity(
+                              entityIdentifier,
+                              propName,
+                              feature
+                            )}>
                             Select
                           </button>
                         </td>
                       </tr>
-                    </tbody>
-                  </table>
-                </Popup>
-              )}
+                    )
+                  })}
+                  <tr>
+                    <td>Muu</td>
+                    <td>Muu virhe</td>
+                    <td>
+                      <button onClick={this.useAsEntity('other', 'other', {})}>
+                        Select
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </FeaturesTable>
+            </FeaturesWrapper>
+          )}
+        </Sidebar>
+        <MapArea>
+          <ReportsMap useBounds={false} useVectorLayers onMapClick={this.onMapClick}>
             {highlightGeoJson && (
               <GeoJSON
                 data={highlightGeoJson}

@@ -11,7 +11,6 @@ import routes from '../routes'
 import { ReportActions } from '../../shared/types/ReportActions'
 import { Button, TextField, Divider, Typography } from '@material-ui/core'
 import styled from 'styled-components'
-import { reportsQuery } from '../queries/reportsQuery'
 import updateReportsConnection from '../helpers/updateReportsConnection'
 
 const createReportMutation = gql`
