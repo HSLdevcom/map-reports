@@ -8,6 +8,7 @@ import { app } from 'mobx-app'
 import { Popup, GeoJSON, Circle } from 'react-leaflet/es'
 import { ReportActions } from '../../shared/types/ReportActions'
 import { circle } from 'leaflet'
+import SelectFeatureTable from '../components/SelectFeatureTable'
 
 const CreateReportView = styled.div`
   height: 100%;
@@ -24,16 +25,6 @@ const Sidebar = styled.div`
 
 const FeaturesWrapper = styled.div`
   padding: 1rem;
-`
-
-const FeaturesTable = styled.table`
-  width: 100%;
-
-  thead td {
-    font-weight: bold;
-    padding-bottom: 0.4rem;
-    border-bottom: 1px solid #efefef;
-  }
 `
 
 const MapArea = styled.div`
@@ -152,7 +143,6 @@ class CreateReportPage extends React.Component<Props, any> {
   }
 
   onFeatureHover = (feature = null) => () => {
-    console.log(feature)
     this.setState({
       highlightGeoJson: feature,
     })
@@ -183,54 +173,22 @@ class CreateReportPage extends React.Component<Props, any> {
           <SubmitReport />
           {availableFeatures.length !== 0 && (
             <FeaturesWrapper>
-              <FeaturesTable>
-                <thead>
-                  <tr>
-                    <td>Feature</td>
-                    <td>ID</td>
-                    <td>Select</td>
-                  </tr>
-                </thead>
-                <tbody>
-                  {availableFeatures.map((feature, idx) => {
-                    const propName = getIdentifyingPropName(feature.properties)
-                    const entityIdentifier =
-                      getIdentifyingPropValue(feature.properties, propName) || 'unknown'
+              <SelectFeatureTable
+                onHover={this.onFeatureHover}
+                onSelect={this.useAsEntity}
+                features={availableFeatures.map(feature => {
+                  const propName = getIdentifyingPropName(feature.properties)
+                  const entityIdentifier =
+                    getIdentifyingPropValue(feature.properties, propName) || 'unknown'
 
-                    return (
-                      <tr
-                        style={{ cursor: 'pointer' }}
-                        onMouseOver={this.onFeatureHover(feature)}
-                        onMouseOut={this.onFeatureHover(null)}
-                        key={`feature_row_${idx}_${
-                          feature.layer.id
-                        }_${propName}_${entityIdentifier}`}>
-                        <td>{feature.layer.id}</td>
-                        <td>{entityIdentifier}</td>
-                        <td>
-                          <button
-                            onClick={this.useAsEntity(
-                              entityIdentifier,
-                              propName,
-                              feature
-                            )}>
-                            Select
-                          </button>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                  <tr>
-                    <td>Muu</td>
-                    <td>Muu virhe</td>
-                    <td>
-                      <button onClick={this.useAsEntity('other', 'other', {})}>
-                        Select
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </FeaturesTable>
+                  return {
+                    name: feature.layer.id,
+                    identifierPropName: propName,
+                    identifierPropValue: entityIdentifier,
+                    feature,
+                  }
+                })}
+              />
             </FeaturesWrapper>
           )}
         </Sidebar>
