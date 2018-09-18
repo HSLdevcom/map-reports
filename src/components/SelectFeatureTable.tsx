@@ -28,7 +28,7 @@ export default observer(({ onHover, onSelect, features }) => {
             return (
               <tr
                 style={{ cursor: 'pointer' }}
-                onMouseOver={onHover(item.feature)}
+                onMouseOver={onHover(feature)}
                 onMouseOut={onHover(null)}
                 key={`feature_row_${idx}_${name}_${identifierPropName}_${identifierPropValue}`}>
                 <td>{name}</td>
