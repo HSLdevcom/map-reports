@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { createPortal } from 'react-dom'
 import { query } from '../helpers/Query'
 import gql from 'graphql-tag'
 import Map from './Map'
@@ -16,6 +17,7 @@ import MarkerClusterGroup from './MarkerClusterGroup'
 import middleOfLine from '../helpers/middleOfLine'
 import * as L from 'leaflet'
 import { Inspection } from '../../shared/types/Inspection'
+import { createElement } from 'react'
 
 const MapArea = styled.div`
   height: calc(100vh - 3rem);
@@ -52,6 +54,10 @@ interface Props extends DatasetView {
 @mutate({ mutation: createReportMutation })
 @observer
 class DatasetMap extends React.Component<Props, any> {
+  state = {
+    selectedFeature: null,
+  }
+
   componentDidMount() {
     // Attach the create issue handler to a global so that the inline js can call it.
     // @ts-ignore
@@ -109,21 +115,30 @@ class DatasetMap extends React.Component<Props, any> {
     const lat = coordinates[1]
     const lon = coordinates[0]
 
-    this.showPopup(lat, lon, feature.properties, layer)
+    this.bindPopup(lat, lon, feature.properties, layer)
   }
 
-  showPopup = (lat, lon, properties, layer) => {
-    const popupData = window.btoa(JSON.stringify(properties))
-
-    const popupContent = `
-<div>
-<pre><code>${JSON.stringify(properties, null, 2)}</code></pre>
-        <button onclick="__handleClick('${lat}', '${lon}', '${popupData}')">
-          Create report
-        </button>
-      </div>
-    `
+  bindPopup = (lat, lon, properties, layer) => {
+    const popupContent = document.createElement('div')
     layer.bindPopup(L.popup({ minWidth: 250 }).setContent(popupContent))
+
+    layer.on('popupopen', this.showPopup({ lat, lon, properties }, popupContent))
+    layer.on('popupclose ', this.closePopup)
+  }
+
+  showPopup = (data, element) => e => {
+    this.setState({
+      selectedFeature: {
+        data,
+        element,
+      },
+    })
+  }
+
+  closePopup = () => {
+    this.setState({
+      selectedFeature: null,
+    })
   }
 
   render() {
@@ -134,6 +149,10 @@ class DatasetMap extends React.Component<Props, any> {
       return 'Loading...'
     }
 
+    const { selectedFeature } = this.state
+
+    // TODO: Add submit report form to popup
+
     geoJson = JSON.parse(geoJson)
 
     return (
@@ -143,11 +162,11 @@ class DatasetMap extends React.Component<Props, any> {
             <GeoJSON
               data={geoJson}
               onEachFeature={this.featureToLayer}
-              pointToLayer={this.pointToLayer}>
-              <Popup>heyy</Popup>
-            </GeoJSON>
+              pointToLayer={this.pointToLayer}
+            />
           </MarkerClusterGroup>
         </Map>
+        {selectedFeature && createPortal(<div>heyy</div>, selectedFeature.element)}
       </MapArea>
     )
   }

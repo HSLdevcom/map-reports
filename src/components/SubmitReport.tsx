@@ -116,8 +116,6 @@ class SubmitReport extends React.Component<Props, any> {
     const { title, message, entityIdentifier, data, type } = state.reportDraft
     const location = state.lastClickedLocation
 
-    // TODO: make submit and save work.
-
     return (
       <CreateReportForm onSubmit={this.onSubmit}>
         <Typography variant="headline">Create report</Typography>
