@@ -93,14 +93,10 @@ class DatasetMap extends React.Component<Props, any> {
   }
 
   render() {
-    const {
-      queryData,
-      loading,
-      useVectorLayers = true,
-      datasetId,
-      datasetName,
-    } = this.props
+    const { queryData, loading, useVectorLayers = true, datasetName } = this.props
     let geoJson = get(queryData, 'inspection.geoJSON', null)
+
+    // TODO: Hide features that are already reported.
 
     if (!geoJson || loading) {
       return 'Loading...'
