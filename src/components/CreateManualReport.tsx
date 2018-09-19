@@ -29,9 +29,12 @@ type Props = {
   reportSubject: ReportSubject
 }
 
+const FormWrapper = styled.div`
+  padding: 1rem;
+`
+
 const FormGroup = styled.div`
   margin: 1rem 0;
-  padding: 1rem;
 `
 
 const ValueDisplay = styled.div`
@@ -71,10 +74,8 @@ class CreateManualReport extends React.Component<Props, any> {
     const location = state.lastClickedLocation
 
     return (
-      <div>
-        <FormGroup>
-          <Typography variant="headline">Create report</Typography>
-        </FormGroup>
+      <FormWrapper>
+        <Typography variant="headline">Create report</Typography>
         <FormGroup>
           <ValueDisplay>
             Location: <code>{JSON.stringify(toJS(location))}</code>
@@ -89,7 +90,7 @@ class CreateManualReport extends React.Component<Props, any> {
           reportSubject={reportSubject}
           onSubmitted={this.onSubmitted}
         />
-      </div>
+      </FormWrapper>
     )
   }
 }

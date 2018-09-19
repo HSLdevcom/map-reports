@@ -32,7 +32,6 @@ const ValueDisplay = styled.div`
 
 const CreateReportForm = styled.form`
   width: 100%;
-  padding: 1rem;
 `
 
 interface Props {

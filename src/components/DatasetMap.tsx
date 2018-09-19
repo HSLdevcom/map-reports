@@ -74,15 +74,16 @@ class DatasetMap extends React.Component<Props, any> {
     const popupContent = document.createElement('div')
     layer.bindPopup(L.popup({ minWidth: 250 }).setContent(popupContent))
 
-    layer.on('popupopen', this.showPopup({ lat, lon, properties }, popupContent))
+    layer.on('popupopen', this.showPopup({ lat, lon, properties }, popupContent, layer))
     layer.on('popupclose ', this.closePopup)
   }
 
-  showPopup = (data, element) =>
+  showPopup = (data, element, layer) =>
     action(() => {
       this.selectedFeature = {
         data,
         element,
+        layer,
       }
     })
 
@@ -101,8 +102,6 @@ class DatasetMap extends React.Component<Props, any> {
 
     const { selectedFeature } = this
 
-    // TODO: Add submit report form to popup
-
     geoJson = JSON.parse(geoJson)
 
     return (
@@ -119,6 +118,7 @@ class DatasetMap extends React.Component<Props, any> {
         {selectedFeature &&
           createPortal(
             <CreateReport
+              onSubmitted={() => selectedFeature && selectedFeature.layer.closePopup()}
               reportSubject={{
                 data: JSON.stringify(selectedFeature.data.properties),
                 type: 'general',
