@@ -1,6 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
-import SubmitReport from '../components/SubmitReport'
+import CreateManualReport from '../components/CreateManualReport'
 import ReportsMap from '../components/ReportsMap'
 import { get } from 'lodash'
 import { inject, observer } from 'mobx-react'
@@ -9,6 +9,8 @@ import { Popup, GeoJSON, Circle } from 'react-leaflet/es'
 import { ReportActions } from '../../shared/types/ReportActions'
 import { circle } from 'leaflet'
 import SelectFeatureTable from '../components/SelectFeatureTable'
+import { observable, action } from 'mobx'
+import { ReportSubject } from '../../shared/types/ReportSubject'
 
 const CreateReportView = styled.div`
   height: 100%;
@@ -96,9 +98,17 @@ interface Props {
 @inject(app('Report', 'Map'))
 @observer
 class CreateReportPage extends React.Component<Props, any> {
-  state = {
-    availableFeatures: [],
-    highlightGeoJson: null,
+  @observable
+  availableFeatures = []
+
+  @observable
+  highlightGeoJson = null
+
+  @observable
+  reportSubject: ReportSubject = {
+    entityIdentifier: 'unknown',
+    type: 'general',
+    data: '{}',
   }
 
   getFeatureOptions = renderedFeatures => {
@@ -131,46 +141,40 @@ class CreateReportPage extends React.Component<Props, any> {
     }, [])
   }
 
+  @action
   onMapClick = (event, zoom, renderedFeatures = []) => {
     const { Report } = this.props
     Report.focusReport(null)
+    this.availableFeatures = this.getFeatureOptions(renderedFeatures)
+  }
 
-    const availableFeatures = this.getFeatureOptions(renderedFeatures)
+  onFeatureHover = (feature = null) => action(() => (this.highlightGeoJson = feature))
 
-    this.setState({
-      availableFeatures,
+  useAsEntity = (identifier, type, feature) =>
+    action((e: React.PointerEvent<any>) => {
+      e.preventDefault()
+      const { Map } = this.props
+
+      this.reportSubject.entityIdentifier = identifier
+      this.reportSubject.type = type
+      this.reportSubject.data = JSON.stringify(get(feature, 'properties', {}))
+
+      if (get(feature, 'geometry.type', '') === 'Point') {
+        // Set marker to point coordinates. Geojson uses lon/lat, not the other way around.
+        Map.setClickedLocation({
+          lat: feature.geometry.coordinates[1],
+          lon: feature.geometry.coordinates[0],
+        })
+      }
     })
-  }
-
-  onFeatureHover = (feature = null) => () => {
-    this.setState({
-      highlightGeoJson: feature,
-    })
-  }
-
-  useAsEntity = (identifier, type, feature) => e => {
-    e.preventDefault()
-
-    const { Report, Map } = this.props
-    Report.setDraftEntity(identifier, type)
-    Report.setDraftData(get(feature, 'properties', {}))
-
-    if (get(feature, 'geometry.type', '') === 'Point') {
-      // Set marker to point coordinates. Geojson uses lon/lat, not the other way around.
-      Map.setClickedLocation({
-        lat: feature.geometry.coordinates[1],
-        lon: feature.geometry.coordinates[0],
-      })
-    }
-  }
 
   render() {
-    const { availableFeatures = [], highlightGeoJson } = this.state
+    const { availableFeatures = [], highlightGeoJson } = this
 
     return (
       <CreateReportView>
         <Sidebar>
-          <SubmitReport />
+          <CreateManualReport reportSubject={this.reportSubject} />
           {availableFeatures.length !== 0 && (
             <FeaturesWrapper>
               <SelectFeatureTable

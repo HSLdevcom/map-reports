@@ -2,36 +2,14 @@ import { action, extendObservable } from 'mobx'
 import { ReportActions } from '../../shared/types/ReportActions'
 import { get } from 'lodash'
 
-const emptyReport = {
-  title: '',
-  message: '',
-  entityIdentifier: 'unknown',
-  type: 'general',
-  data: '{}',
-}
-
 const ReportStore = (state, initialState): ReportActions => {
   const reportState = extendObservable(state, {
     focusedReport: get(initialState, 'focusedReport', null),
-    reportDraft: get(initialState, 'reportDraft', emptyReport),
     sortReports: get(initialState, 'sortReports', {
       key: 'created_at',
       direction: 'desc',
     }),
     filterReports: get(initialState, 'filterReports', [{ key: '', value: '' }]),
-  })
-
-  const createReport = action(() => {
-    reportState.reportDraft = emptyReport
-  })
-
-  const setDraftEntity = action((entityIdentifier, type) => {
-    reportState.reportDraft.entityIdentifier = entityIdentifier
-    reportState.reportDraft.type = type
-  })
-
-  const setDraftData = action(data => {
-    reportState.reportDraft.data = JSON.stringify(data)
   })
 
   const sortReports = action(
@@ -75,9 +53,6 @@ const ReportStore = (state, initialState): ReportActions => {
   })
 
   return {
-    createReport,
-    setDraftEntity,
-    setDraftData,
     sortReports,
     addReportsFilter,
     setFilterValues,
