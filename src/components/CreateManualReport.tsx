@@ -86,6 +86,7 @@ class CreateManualReport extends React.Component<Props, any> {
         </FormGroup>
         <Divider />
         <CreateReport
+          title="Manual report"
           location={location}
           reportSubject={reportSubject}
           onSubmitted={this.onSubmitted}

@@ -93,7 +93,13 @@ class DatasetMap extends React.Component<Props, any> {
   }
 
   render() {
-    const { queryData, loading, useVectorLayers = true } = this.props
+    const {
+      queryData,
+      loading,
+      useVectorLayers = true,
+      datasetId,
+      datasetName,
+    } = this.props
     let geoJson = get(queryData, 'inspection.geoJSON', null)
 
     if (!geoJson || loading) {
@@ -118,6 +124,7 @@ class DatasetMap extends React.Component<Props, any> {
         {selectedFeature &&
           createPortal(
             <CreateReport
+              title={`${datasetName || 'Unknown'} dataset report`}
               onSubmitted={() => selectedFeature && selectedFeature.layer.closePopup()}
               reportSubject={{
                 data: JSON.stringify(selectedFeature.data.properties),

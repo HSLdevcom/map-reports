@@ -57,7 +57,15 @@ class InspectDatasets extends React.Component<any, any> {
 
     return (
       <DatasetsWrapper>
-        {state.selectedDataset && <DatasetMap datasetId={state.selectedDataset} />}
+        {state.selectedDataset && (
+          <DatasetMap
+            datasetName={get(
+              queryData.inspections.find(ds => ds.id === state.selectedDataset),
+              'name'
+            )}
+            datasetId={state.selectedDataset}
+          />
+        )}
         <OptionsBox>
           <Typography gutterBottom variant="headline" component="h2">
             Tarkastele ja raportoi
