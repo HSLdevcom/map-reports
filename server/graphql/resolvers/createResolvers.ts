@@ -9,6 +9,7 @@ const createResolvers = (db): any => {
     Query: {
       // Reports
       reports: reports.allReports,
+      reportItems: reports.allReportItems,
       reportFilterOptions: reports.reportFilterOptions,
       reportsConnection: reports.reportsConnection,
 

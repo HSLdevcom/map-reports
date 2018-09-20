@@ -7,7 +7,7 @@ import { mutate } from '../helpers/Mutation'
 import updateReportsConnection from '../helpers/updateReportsConnection'
 import { observer } from 'mobx-react'
 import { observable, action } from 'mobx'
-import { get } from 'lodash'
+import { get, pick } from 'lodash'
 import { AnyFunction } from '../../shared/types/AnyFunction'
 import { Location } from '../../shared/types/Location'
 import { ReportSubject } from '../../shared/types/ReportSubject'
@@ -119,14 +119,16 @@ class CreateReport extends React.Component<Props, any> {
           <ValueDisplay>
             Properties:{' '}
             <pre>
-              <code>{JSON.stringify(get(parsedData, 'tags', parsedData), null, 2)}</code>
+              <code>
+                {JSON.stringify(pick(parsedData, 'tags', 'properties'), null, 2)}
+              </code>
             </pre>
           </ValueDisplay>
         </FormGroup>
         <Divider />
         <FormGroup>
           <Button variant="contained" color="primary" type="submit">
-            Send
+            Create report
           </Button>
         </FormGroup>
       </CreateReportForm>

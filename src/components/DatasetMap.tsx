@@ -4,7 +4,7 @@ import { query } from '../helpers/Query'
 import gql from 'graphql-tag'
 import Map from './Map'
 import { observer } from 'mobx-react'
-import { get } from 'lodash'
+import { get, intersection } from 'lodash'
 import styled from 'styled-components'
 import { marker } from 'leaflet'
 import { GeoJSON, Popup } from 'react-leaflet/es'
@@ -33,6 +33,16 @@ const datasetQuery = gql`
   }
 `
 
+const reportItemsQuery = gql`
+  query reportedItems {
+    reportItems {
+      id
+      entityIdentifier
+      data
+    }
+  }
+`
+
 interface Props extends DatasetView {
   mutate?: AnyFunction
   queryData?: { inspection: Inspection }
@@ -40,6 +50,7 @@ interface Props extends DatasetView {
   useVectorLayers?: boolean
 }
 
+@query({ query: reportItemsQuery })
 @query({ query: datasetQuery, getVariables: ({ datasetId }) => ({ id: datasetId }) })
 @observer
 class DatasetMap extends React.Component<Props, any> {
@@ -106,6 +117,48 @@ class DatasetMap extends React.Component<Props, any> {
     const { selectedFeature } = this
 
     geoJson = JSON.parse(geoJson)
+
+    const reportItems = get(queryData, 'reportItems', []).map(i => ({
+      ...i,
+      data: JSON.parse(i.data),
+    }))
+
+    const identifiers = reportItems.map(i => i.entityIdentifier)
+
+    // Figure out which features are reported already and exclude them from the geojson.
+    const unreportedFeatures = geoJson.features.reduce((unreported, feature) => {
+      const keys = Object.keys(get(feature, 'properties', {}))
+
+      // If there is no identifying data, let it through.
+      if (keys.length === 0) {
+        unreported.push(feature)
+        return unreported
+      }
+
+      const identifyingKeys = intersection(identifiers, keys)
+
+      // If the data doesn't include an identifying key, let it through.
+      if (identifyingKeys.length === 0) {
+        unreported.push(feature)
+        return unreported
+      }
+
+      const entityIdentifier = identifyingKeys[0]
+      const identifyingValue = get(feature, `properties.${entityIdentifier}`)
+
+      const reportedItem = reportItems.find(i => {
+        const properties = get(i, 'data.properties', get(i, 'data', {}))
+        return get(properties, entityIdentifier) === identifyingValue
+      })
+
+      if (!reportedItem) {
+        unreported.push(feature)
+      }
+
+      return unreported
+    }, [])
+
+    geoJson.features = unreportedFeatures
 
     return (
       <MapArea>

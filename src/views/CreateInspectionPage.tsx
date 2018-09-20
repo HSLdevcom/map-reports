@@ -43,6 +43,10 @@ const FormSection = styled.div`
   padding: 0 1rem;
 `
 
+const Field = styled(TextField)`
+  width: 100%;
+`
+
 @query({ query: allInspectionsQuery })
 @mutate({
   mutation: createInspectionMutation,
@@ -125,7 +129,7 @@ class CreateInspectionPage extends React.Component<any, Inspection> {
         </FormSection>
         {type !== InspectionType.MANUAL && (
           <FormSection>
-            <TextField
+            <Field
               label="Dataset uri"
               value={datasetUri}
               onChange={this.onChange('datasetUri')}

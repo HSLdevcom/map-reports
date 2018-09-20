@@ -10,6 +10,7 @@ import createCursor from '../../../shared/utils/createCursor'
 import { ReportDataInput } from '../../../shared/types/CreateReportData'
 import { createReport as reportFactory } from '../../reports/createReport'
 import pFilter from 'p-filter'
+import { func } from 'prop-types'
 
 const filterableKeys = ['status', 'priority', 'item.type', 'item.entityIdentifier']
 
@@ -92,6 +93,10 @@ const reportResolvers = db => {
 
   async function allReports() {
     return reportsDb.get()
+  }
+
+  async function allReportItems() {
+    return reportItemsDb.get()
   }
 
   async function reportsConnection(_, { perPage = 10, cursor = '', sort, filter }) {
@@ -207,6 +212,7 @@ const reportResolvers = db => {
   return {
     reportsConnection,
     allReports,
+    allReportItems,
     resolveReportItem,
     reportFilterOptions,
     createReport,
