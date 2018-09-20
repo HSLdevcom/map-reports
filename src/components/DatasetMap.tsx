@@ -67,21 +67,22 @@ class DatasetMap extends React.Component<Props, any> {
     const lat = coordinates[1]
     const lon = coordinates[0]
 
-    this.bindPopup(lat, lon, feature.properties, layer)
+    this.bindPopup(lat, lon, feature, layer)
   }
 
-  bindPopup = (lat, lon, properties, layer) => {
+  bindPopup = (lat, lon, feature, layer) => {
     const popupContent = document.createElement('div')
     layer.bindPopup(L.popup({ minWidth: 250 }).setContent(popupContent))
 
-    layer.on('popupopen', this.showPopup({ lat, lon, properties }, popupContent, layer))
+    layer.on('popupopen', this.showPopup({ lat, lon }, feature, popupContent, layer))
     layer.on('popupclose ', this.closePopup)
   }
 
-  showPopup = (data, element, layer) =>
+  showPopup = (position, feature, element, layer) =>
     action(() => {
       this.selectedFeature = {
-        data,
+        position,
+        feature,
         element,
         layer,
       }
@@ -123,7 +124,7 @@ class DatasetMap extends React.Component<Props, any> {
               title={`${datasetName || 'Unknown'} dataset report`}
               onSubmitted={() => selectedFeature && selectedFeature.layer.closePopup()}
               reportSubject={{
-                data: JSON.stringify(selectedFeature.data.properties),
+                data: JSON.stringify(selectedFeature.feature),
                 type: 'general',
                 entityIdentifier: get(
                   queryData,
@@ -131,7 +132,7 @@ class DatasetMap extends React.Component<Props, any> {
                   'unknown'
                 ),
               }}
-              location={{ lat: selectedFeature.data.lat, lon: selectedFeature.data.lon }}
+              location={selectedFeature.position}
             />,
             selectedFeature.element
           )}

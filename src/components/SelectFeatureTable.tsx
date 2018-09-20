@@ -1,6 +1,7 @@
 import React from 'react'
 import { observer } from 'mobx-react'
 import styled from 'styled-components'
+import { get, reduce } from 'lodash'
 
 const FeaturesTable = styled.table`
   width: 100%;
@@ -9,6 +10,10 @@ const FeaturesTable = styled.table`
     font-weight: bold;
     padding-bottom: 0.4rem;
     border-bottom: 1px solid #efefef;
+  }
+
+  td {
+    vertical-align: top;
   }
 `
 
@@ -23,32 +28,31 @@ export default observer(({ onHover, onSelect, features }) => {
         </tr>
       </thead>
       <tbody>
-        {features.map(
-          ({ name, identifierPropName, identifierPropValue, feature }, idx) => {
-            return (
-              <tr
-                style={{ cursor: 'pointer' }}
-                onMouseOver={onHover(feature)}
-                onMouseOut={onHover(null)}
-                key={`feature_row_${idx}_${name}_${identifierPropName}_${identifierPropValue}`}>
-                <td>{name}</td>
-                <td>{identifierPropValue}</td>
-                <td>
-                  <button
-                    onClick={onSelect(identifierPropValue, identifierPropName, feature)}>
-                    Select
-                  </button>
-                </td>
-              </tr>
-            )
-          }
-        )}
-        <tr>
+        {features.map(({ name, entityIdentifier, feature }, idx) => {
+          const tags = reduce(
+            get(feature, 'tags', {}),
+            (csv, value, name) => {
+              csv += `${name}=${value}\n`
+              return csv
+            },
+            ''
+          )
+
+          return (
+            <tr
+              onClick={onSelect(entityIdentifier, feature.type, feature)}
+              style={{ cursor: 'pointer' }}
+              onMouseOver={onHover(feature)}
+              onMouseOut={onHover(null)}
+              key={`feature_row_${idx}_${name}_${entityIdentifier}`}>
+              <td>{name}</td>
+              <td>{tags}</td>
+            </tr>
+          )
+        })}
+        <tr onClick={onSelect('other', 'other', {})}>
           <td>Muu</td>
           <td>Muu virhe</td>
-          <td>
-            <button onClick={onSelect('other', 'other', {})}>Select</button>
-          </td>
         </tr>
       </tbody>
     </FeaturesTable>

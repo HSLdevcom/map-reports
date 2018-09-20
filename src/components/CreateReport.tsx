@@ -7,6 +7,7 @@ import { mutate } from '../helpers/Mutation'
 import updateReportsConnection from '../helpers/updateReportsConnection'
 import { observer } from 'mobx-react'
 import { observable, action } from 'mobx'
+import { get } from 'lodash'
 import { AnyFunction } from '../../shared/types/AnyFunction'
 import { Location } from '../../shared/types/Location'
 import { ReportSubject } from '../../shared/types/ReportSubject'
@@ -92,8 +93,10 @@ class CreateReport extends React.Component<Props, any> {
 
   render() {
     const { reportSubject } = this.props
-    const { entityIdentifier, data, type } = reportSubject
+    const { entityIdentifier, data } = reportSubject
     const { message } = this.draft
+
+    const parsedData = JSON.parse(data)
 
     return (
       <CreateReportForm onSubmit={this.onSubmit}>
@@ -111,12 +114,12 @@ class CreateReport extends React.Component<Props, any> {
         <Divider />
         <FormGroup>
           <ValueDisplay>
-            {type}: <code>{entityIdentifier}</code>
+            Identifier: <code>{entityIdentifier}</code>
           </ValueDisplay>
           <ValueDisplay>
             Properties:{' '}
             <pre>
-              <code>{JSON.stringify(JSON.parse(data), null, 2)}</code>
+              <code>{JSON.stringify(get(parsedData, 'tags', parsedData), null, 2)}</code>
             </pre>
           </ValueDisplay>
         </FormGroup>

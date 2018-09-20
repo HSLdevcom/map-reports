@@ -10,6 +10,7 @@ import { inject, observer } from 'mobx-react'
 import { query } from '../helpers/Query'
 import { AnyFunction } from '../../shared/types/AnyFunction'
 import { ReportActions } from '../../shared/types/ReportActions'
+import osmtogeojson from 'osmtogeojson'
 
 const ReportsView = styled.div`
   height: 100%;
@@ -56,10 +57,28 @@ class ReportsPage extends React.Component<Props, any> {
   }
 
   render() {
-    const { queryData, fetchMore, refetch, Report } = this.props
+    const { queryData, fetchMore, refetch, Report, state } = this.props
 
     const queryName = 'reportsConnection'
     const reports = get(queryData, `${queryName}.edges`, []).map(edge => edge.node)
+
+    const focusedReportId = state.focusedReport
+    const focusedReport = reports.find(r => r.id === focusedReportId)
+
+    let highlightGeoJson = null
+
+    if (focusedReport) {
+      const parsedData = JSON.parse(get(focusedReport, 'item.data', '{}'))
+
+      if (parsedData.type === 'way' || parsedData.type === 'node') {
+        highlightGeoJson = osmtogeojson({ elements: [parsedData] })
+      } else if (
+        parsedData.type === 'FeatureCollection' ||
+        parsedData.type === 'Feature'
+      ) {
+        highlightGeoJson = parsedData
+      }
+    }
 
     return (
       <ReportsView>
@@ -68,6 +87,7 @@ class ReportsPage extends React.Component<Props, any> {
         </Sidebar>
         <MapArea>
           <ReportsMap
+            highlightGeoJson={highlightGeoJson}
             useVectorLayers
             reports={reports}
             onMapClick={() => Report.focusReport(null)}

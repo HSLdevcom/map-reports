@@ -43,13 +43,7 @@ const ReportStore = (state, initialState): ReportActions => {
   })
 
   const focusReport = action((reportId: string = null) => {
-    let setVal = reportId
-
-    if (reportState.focusedReport === reportId) {
-      setVal = null
-    }
-
-    reportState.focusedReport = setVal
+    reportState.focusedReport = reportId
   })
 
   return {

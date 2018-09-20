@@ -7,8 +7,9 @@ import { app } from 'mobx-app'
 import { get } from 'lodash'
 import { Marker, MarkerState } from '../../shared/types/Marker'
 import { ReportActions } from '../../shared/types/ReportActions'
-import { LatLng, latLng } from 'leaflet'
+import { LatLng, latLng, LeafletMouseEvent } from 'leaflet'
 import { AnyFunction } from '../../shared/types/AnyFunction'
+import { overpassQuery } from '../helpers/overpassQuery'
 
 interface Props extends RendersReports {
   state?: any
@@ -17,34 +18,20 @@ interface Props extends RendersReports {
   useBounds?: boolean
   useVectorLayers?: boolean
   onMapClick?: AnyFunction
+  highlightGeoJson?: any
 }
 
 @inject(app('Report'))
 @observer
 class ReportsMap extends React.Component<Props, any> {
-  featuresAtPoint = (glMap, point, size) => {
-    const width = size
-    const height = size
-
-    const queryBbox = [
-      [point.x - width / 2, point.y - height / 2],
-      [point.x + width / 2, point.y + height / 2],
-    ]
-
-    return glMap.queryRenderedFeatures(queryBbox)
-  }
-
-  onMapClick = (event, zoom, { _glMap, _offset }) => {
+  onMapClick = async (event: LeafletMouseEvent, zoom) => {
     const { onMapClick } = this.props
-    const { layerPoint: point } = event
+    const {
+      latlng: { lat, lng },
+    } = event
 
-    if (_glMap && zoom > 14) {
-      const offsetPoint = {
-        x: point.x - _offset.x,
-        y: point.y - _offset.y,
-      }
-
-      const renderedFeatures = this.featuresAtPoint(_glMap, offsetPoint, 2 * zoom)
+    if (zoom > 12) {
+      const renderedFeatures = await overpassQuery(lat, lng)
       onMapClick(event, zoom, renderedFeatures)
     } else {
       onMapClick(event, zoom, [])
@@ -84,7 +71,13 @@ class ReportsMap extends React.Component<Props, any> {
   }
 
   render() {
-    const { state, useBounds, useVectorLayers = false, children } = this.props
+    const {
+      state,
+      useBounds,
+      useVectorLayers = false,
+      children,
+      highlightGeoJson,
+    } = this.props
 
     const markers: Marker[] = this.getReportMarkers()
 
@@ -101,6 +94,7 @@ class ReportsMap extends React.Component<Props, any> {
 
     return (
       <Map
+        highlightGeoJson={highlightGeoJson}
         useVectorLayers={useVectorLayers}
         useBounds={useBounds}
         focusedMarker={state.focusedReport}

@@ -6,6 +6,7 @@ import {
   Popup,
   LayersControl,
   ZoomControl,
+  GeoJSON,
 } from 'react-leaflet'
 import { observer, inject } from 'mobx-react'
 import MarkerIcon from './MarkerIcon'
@@ -16,6 +17,7 @@ import {
   LatLngExpression,
   LeafletMouseEvent,
   latLngBounds,
+  circle,
 } from 'leaflet'
 import { Location } from '../../shared/types/Location'
 import { MarkerState, Marker } from '../../shared/types/Marker'
@@ -25,6 +27,8 @@ import styled from 'styled-components'
 import MarkerClusterGroup from './MarkerClusterGroup'
 import MapboxGlLayer from './MapboxGlLayer'
 import get from 'lodash/get'
+import { action, observable } from 'mobx'
+import osmtogeojson from 'osmtogeojson'
 
 const attribution = `Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,
 <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>,
@@ -43,6 +47,7 @@ interface Props {
   onEachFeature?: AnyFunction
   useVectorLayers?: boolean
   children?: any
+  highlightGeoJson?: any
   Map?: {
     setClickedLocation: (location: Location) => void
     setMapLocation: (location: LatLngExpression) => void
@@ -147,10 +152,6 @@ class Map extends React.Component<Props, any> {
     })
   }
 
-  onMarkerClick = markerClickHandler => (event: LeafletMouseEvent) => {
-    markerClickHandler(event)
-  }
-
   onMapClick = (event: LeafletMouseEvent) => {
     const { useVectorLayers, Map: MapStore, onMapClick = () => {} } = this.props
     const { lat, lng } = event.latlng
@@ -187,7 +188,13 @@ class Map extends React.Component<Props, any> {
   }
 
   render() {
-    const { markers = [], children, useBounds, useVectorLayers } = this.props
+    const {
+      markers = [],
+      children,
+      useBounds,
+      useVectorLayers,
+      highlightGeoJson,
+    } = this.props
     const { center, zoom, bounds } = this.state
 
     return (
@@ -227,7 +234,7 @@ class Map extends React.Component<Props, any> {
               {markers.map(
                 ({ type, position, message, id, state: markerState, onClick }) => (
                   <LeafletMarker
-                    onClick={this.onMarkerClick(onClick)}
+                    onClick={onClick}
                     key={`marker_${id}`}
                     position={position}
                     icon={MarkerIcon({
@@ -240,6 +247,20 @@ class Map extends React.Component<Props, any> {
                 )
               )}
             </MarkerClusterGroup>
+          )}
+          {highlightGeoJson && (
+            <GeoJSON
+              data={highlightGeoJson}
+              style={() => ({ color: '#00ff99' })}
+              pointToLayer={(feature, latlng) =>
+                circle(latlng, {
+                  radius: 4,
+                  weight: 0,
+                  fillColor: '#00ff00',
+                  fillOpacity: 1,
+                })
+              }
+            />
           )}
           {children}
         </LeafletMap>
