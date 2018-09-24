@@ -239,7 +239,6 @@ class Map extends React.Component<Props, any> {
                     icon={MarkerIcon({
                       type,
                       focused: markerState === MarkerState.focus,
-                      blurred: markerState === MarkerState.inactive,
                     })}>
                     <Popup autoPan={false}>{message}</Popup>
                   </LeafletMarker>
