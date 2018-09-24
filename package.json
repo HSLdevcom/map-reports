@@ -9,8 +9,7 @@
     "server:dev": "nodemon --delay 1 --signal SIGTERM --watch 'server/**/*' --exec 'ts-node --project tsconfig.server.json' server/server.ts",
     "knex": "PG_CONNECTION_STRING=postgres://postgres:mysecretpassword@localhost:5432/postgres knex",
     "start": "concurrently 'yarn run watch' 'yarn run server:dev'",
-    "production": "forever start -c \"ts-node --project tsconfig.server.json\" server/server.ts -l server.log -o server-out.log -e server-err.log && forever -f logs 0",
-    "precommit": "lint-staged"
+    "production": "forever start -c \"ts-node --project tsconfig.server.json\" server/server.ts -l server.log -o server-out.log -e server-err.log && forever -f logs 0"
   },
   "lint-staged": {
     "linters": {
