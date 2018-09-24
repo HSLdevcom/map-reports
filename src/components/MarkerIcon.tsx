@@ -1,10 +1,9 @@
 import * as React from 'react'
-import { injectGlobal } from 'styled-components'
+import { createGlobalStyle } from 'styled-components'
 import * as L from 'leaflet'
 import classNames from 'classnames'
-import { darken } from 'polished'
 
-injectGlobal`
+export const MarkerIconStyle = createGlobalStyle`
   .marker-icon {
     
     &[style] {

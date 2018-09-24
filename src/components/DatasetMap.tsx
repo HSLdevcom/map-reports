@@ -8,7 +8,7 @@ import { get, intersection, clone } from 'lodash'
 import styled from 'styled-components'
 import { FeatureGroup, marker } from 'leaflet'
 import { GeoJSON, Popup } from 'react-leaflet/es'
-import MarkerIcon from './MarkerIcon'
+import MarkerIcon, { MarkerIconStyle } from './MarkerIcon'
 import { DatasetView } from '../../shared/types/DatasetView'
 import { AnyFunction } from '../../shared/types/AnyFunction'
 import MarkerClusterGroup from './MarkerClusterGroup'
@@ -18,7 +18,6 @@ import { Inspection } from '../../shared/types/Inspection'
 import CreateReport from './CreateReport'
 import { action, observable } from 'mobx'
 import { Location } from '../../shared/types/Location'
-import memoize from 'memoizee'
 
 const MapArea = styled.div`
   height: calc(100vh - 3rem);
@@ -66,7 +65,7 @@ class DatasetMap extends React.Component<Props, any> {
   @observable
   selectedFeature: SelectedFeature = null
 
-  getUnreportedFeatures = memoize(geoJson => {
+  getUnreportedFeatures = geoJson => {
     const { queryData } = this.props
 
     const reportItems = get(queryData, 'reportItems', []).map(i => ({
@@ -108,11 +107,8 @@ class DatasetMap extends React.Component<Props, any> {
       return unreported
     }, [])
 
-    const geoJsonClone = clone(geoJson)
-    geoJsonClone.features = unreportedFeatures
-
-    return geoJsonClone
-  })
+    return unreportedFeatures
+  }
 
   pointToLayer = (_, latlng) => {
     return marker(latlng, {
@@ -165,8 +161,6 @@ class DatasetMap extends React.Component<Props, any> {
     const { queryData, loading, useVectorLayers = true, datasetName } = this.props
     let geoJson = get(queryData, 'inspection.geoJSON', null)
 
-    // TODO: Hide features that are already reported.
-
     if (!geoJson || loading) {
       return 'Loading...'
     }
@@ -174,10 +168,12 @@ class DatasetMap extends React.Component<Props, any> {
     const { selectedFeature } = this
 
     geoJson = JSON.parse(geoJson)
-    geoJson = this.getUnreportedFeatures(geoJson)
+    const unreportedFeatures = this.getUnreportedFeatures(geoJson)
+    geoJson = { ...geoJson, features: unreportedFeatures }
 
     return (
       <MapArea>
+        <MarkerIconStyle />
         <Map useVectorLayers={useVectorLayers}>
           <MarkerClusterGroup>
             <GeoJSON

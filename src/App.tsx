@@ -12,6 +12,7 @@ import client from './helpers/graphqlClient'
 import { ApolloProvider } from 'react-apollo'
 import { Provider } from 'mobx-react'
 import CreateInspectionPage from './views/CreateInspectionPage'
+import GlobalStyle from './style/Global'
 
 const Root = styled.div`
   height: 100vh;
@@ -24,6 +25,7 @@ const App = observer(({ state, actions, router }) => (
   <ApolloProvider client={client}>
     <Provider state={state} actions={actions} router={router}>
       <Root>
+        <GlobalStyle />
         <Header position="static">
           <Nav />
         </Header>

@@ -9,7 +9,7 @@ import {
   GeoJSON,
 } from 'react-leaflet'
 import { observer, inject } from 'mobx-react'
-import MarkerIcon from './MarkerIcon'
+import MarkerIcon, { MarkerIconStyle } from './MarkerIcon'
 import { app } from 'mobx-app'
 import {
   LatLng,
@@ -27,8 +27,6 @@ import styled from 'styled-components'
 import MarkerClusterGroup from './MarkerClusterGroup'
 import MapboxGlLayer from './MapboxGlLayer'
 import get from 'lodash/get'
-import { action, observable } from 'mobx'
-import osmtogeojson from 'osmtogeojson'
 
 const attribution = `Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,
 <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>,
@@ -199,6 +197,7 @@ class Map extends React.Component<Props, any> {
 
     return (
       <MapContainer>
+        <MarkerIconStyle />
         <LeafletMap
           center={center}
           zoom={zoom}
