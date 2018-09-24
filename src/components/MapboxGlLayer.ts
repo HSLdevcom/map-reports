@@ -4,7 +4,7 @@ import mapboxLeaflet from '../helpers/MapboxGlLeaflet'
 class MapboxGlLayer extends MapLayer {
   gl
 
-  createLeafletElement({ children, leaflet: { map } }) {
+  createLeafletElement() {
     // @ts-ignore
     this.gl = mapboxLeaflet({
       style: '/style.json',

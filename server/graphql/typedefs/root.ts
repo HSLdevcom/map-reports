@@ -10,6 +10,7 @@ const rootTypeDefs = gql`
       sort: SortParams
       filter: [FilterParams]
     ): ReportsConnection
+    reportItems: [ReportItem]
     inspection(inspectionId: ID): Inspection
     inspections: [Inspection]
   }

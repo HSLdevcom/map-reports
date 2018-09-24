@@ -1,12 +1,11 @@
 import * as React from 'react'
+import { createPortal } from 'react-dom'
 import { query } from '../helpers/Query'
 import gql from 'graphql-tag'
 import Map from './Map'
 import { observer } from 'mobx-react'
-import { get } from 'lodash'
+import { get, intersection } from 'lodash'
 import styled from 'styled-components'
-import { ReportFragment } from '../fragments/ReportFragment'
-import { mutate } from '../helpers/Mutation'
 import { marker } from 'leaflet'
 import { GeoJSON, Popup } from 'react-leaflet/es'
 import MarkerIcon from './MarkerIcon'
@@ -16,6 +15,8 @@ import MarkerClusterGroup from './MarkerClusterGroup'
 import middleOfLine from '../helpers/middleOfLine'
 import * as L from 'leaflet'
 import { Inspection } from '../../shared/types/Inspection'
+import CreateReport from './CreateReport'
+import { action, observable } from 'mobx'
 
 const MapArea = styled.div`
   height: calc(100vh - 3rem);
@@ -27,17 +28,19 @@ const datasetQuery = gql`
       id
       name
       geoJSON
+      entityIdentifier
     }
   }
 `
 
-const createReportMutation = gql`
-  mutation createStopReport($reportData: InputReport!, $reportItem: InputReportItem!) {
-    createReport(reportData: $reportData, reportItem: $reportItem) {
-      ...ReportFields
+const reportItemsQuery = gql`
+  query reportedItems {
+    reportItems {
+      id
+      entityIdentifier
+      data
     }
   }
-  ${ReportFragment}
 `
 
 interface Props extends DatasetView {
@@ -47,37 +50,14 @@ interface Props extends DatasetView {
   useVectorLayers?: boolean
 }
 
+@query({ query: reportItemsQuery })
 @query({ query: datasetQuery, getVariables: ({ datasetId }) => ({ id: datasetId }) })
-@mutate({ mutation: createReportMutation })
 @observer
 class DatasetMap extends React.Component<Props, any> {
-  componentDidMount() {
-    // Attach the create issue handler to a global so that the inline js can call it.
-    // @ts-ignore
-    window.__handleClick = this.onCreateIssue
-  }
+  @observable
+  selectedFeature = null
 
-  onCreateIssue = async (lat, lon) => {
-    const { mutate } = this.props
-
-    await mutate({
-      variables: {
-        reportData: {
-          title: `Report from dataset`,
-          message: `Click and find out :)`,
-        },
-        reportItem: {
-          lat: parseFloat(lat),
-          lon: parseFloat(lon),
-          entityIdentifier: 'unknown',
-          recommendedMapZoom: 18,
-          type: 'general',
-        },
-      },
-    })
-  }
-
-  pointToLayer = ({ properties }, latlng) => {
+  pointToLayer = (_, latlng) => {
     return marker(latlng, {
       icon: MarkerIcon({ type: 'general' }),
     })
@@ -98,29 +78,87 @@ class DatasetMap extends React.Component<Props, any> {
     const lat = coordinates[1]
     const lon = coordinates[0]
 
-    this.showPopup(lat, lon, layer)
+    this.bindPopup(lat, lon, feature, layer)
   }
 
-  showPopup = (lat, lon, layer) => {
-    const popupContent = `
-      <div>
-        <button onclick="__handleClick('${lat}', '${lon}')">
-          Create report
-        </button>
-      </div>
-    `
+  bindPopup = (lat, lon, feature, layer) => {
+    const popupContent = document.createElement('div')
     layer.bindPopup(L.popup({ minWidth: 250 }).setContent(popupContent))
+
+    layer.on('popupopen', this.showPopup({ lat, lon }, feature, popupContent, layer))
+    layer.on('popupclose ', this.closePopup)
+  }
+
+  showPopup = (position, feature, element, layer) =>
+    action(() => {
+      this.selectedFeature = {
+        position,
+        feature,
+        element,
+        layer,
+      }
+    })
+
+  @action
+  closePopup = () => {
+    this.selectedFeature = null
   }
 
   render() {
-    const { queryData, loading, useVectorLayers = true } = this.props
+    const { queryData, loading, useVectorLayers = true, datasetName } = this.props
     let geoJson = get(queryData, 'inspection.geoJSON', null)
+
+    // TODO: Hide features that are already reported.
 
     if (!geoJson || loading) {
       return 'Loading...'
     }
 
+    const { selectedFeature } = this
+
     geoJson = JSON.parse(geoJson)
+
+    const reportItems = get(queryData, 'reportItems', []).map(i => ({
+      ...i,
+      data: JSON.parse(i.data),
+    }))
+
+    const identifiers = reportItems.map(i => i.entityIdentifier)
+
+    // Figure out which features are reported already and exclude them from the geojson.
+    const unreportedFeatures = geoJson.features.reduce((unreported, feature) => {
+      const keys = Object.keys(get(feature, 'properties', {}))
+
+      // If there is no identifying data, let it through.
+      if (keys.length === 0) {
+        unreported.push(feature)
+        return unreported
+      }
+
+      const identifyingKeys = intersection(identifiers, keys)
+
+      // If the data doesn't include an identifying key, let it through.
+      if (identifyingKeys.length === 0) {
+        unreported.push(feature)
+        return unreported
+      }
+
+      const entityIdentifier = identifyingKeys[0]
+      const identifyingValue = get(feature, `properties.${entityIdentifier}`)
+
+      const reportedItem = reportItems.find(i => {
+        const properties = get(i, 'data.properties', get(i, 'data', {}))
+        return get(properties, entityIdentifier) === identifyingValue
+      })
+
+      if (!reportedItem) {
+        unreported.push(feature)
+      }
+
+      return unreported
+    }, [])
+
+    geoJson.features = unreportedFeatures
 
     return (
       <MapArea>
@@ -129,11 +167,28 @@ class DatasetMap extends React.Component<Props, any> {
             <GeoJSON
               data={geoJson}
               onEachFeature={this.featureToLayer}
-              pointToLayer={this.pointToLayer}>
-              <Popup>hey</Popup>
-            </GeoJSON>
+              pointToLayer={this.pointToLayer}
+            />
           </MarkerClusterGroup>
         </Map>
+        {selectedFeature &&
+          createPortal(
+            <CreateReport
+              title={`${datasetName || 'Unknown'} dataset report`}
+              onSubmitted={() => selectedFeature && selectedFeature.layer.closePopup()}
+              reportSubject={{
+                data: JSON.stringify(selectedFeature.feature),
+                type: 'general',
+                entityIdentifier: get(
+                  queryData,
+                  'inspection.entityIdentifier',
+                  'unknown'
+                ),
+              }}
+              location={selectedFeature.position}
+            />,
+            selectedFeature.element
+          )}
       </MapArea>
     )
   }

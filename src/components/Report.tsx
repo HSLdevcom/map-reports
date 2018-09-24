@@ -5,7 +5,7 @@ import ReportPriority from '../components/ReportPriority'
 import { Report } from '../../shared/types/Report'
 import { AnyFunction } from '../../shared/types/AnyFunction'
 import { rgba } from 'polished'
-import { get } from 'lodash'
+import { get, omit } from 'lodash'
 import { SlideDown } from 'react-slidedown'
 import * as prettyJson from 'prettyjson'
 import 'react-slidedown/lib/slidedown.css'
@@ -137,7 +137,7 @@ class ReportItem extends React.Component<Props, any> {
   render() {
     const { report, onClick } = this.props
 
-    const itemData = get(JSON.parse(get(report, 'item.data', '{}')), 'properties', '')
+    const itemData = JSON.parse(get(report, 'item.data', '{}'))
 
     return (
       <Report type={get(report, 'item.type', 'manual')} onClick={onClick}>
@@ -161,7 +161,11 @@ class ReportItem extends React.Component<Props, any> {
         </ReportBody>
         <SlideDown closed={!this.state.isOpen}>
           {report.message && <ReportContent>{report.message}</ReportContent>}
-          {itemData && <ReportContent json>{prettyJson.render(itemData)}</ReportContent>}
+          {itemData && (
+            <ReportContent json>
+              {prettyJson.render(omit(itemData, 'bounds', 'geometry', 'nodes'))}
+            </ReportContent>
+          )}
         </SlideDown>
       </Report>
     )

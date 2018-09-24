@@ -23,12 +23,14 @@ export const reportsQuery = gql`
         hasNextPage
         hasPreviousPage
         totalPages
+        __typename
       }
       edges {
         cursor
         node {
           ...ReportFields
         }
+        __typename
       }
     }
   }

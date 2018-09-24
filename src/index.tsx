@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { AppContainer } from 'react-hot-loader'
-import { configure, toJS } from 'mobx'
+import { configure } from 'mobx'
 import 'normalize.css'
 import { createStore } from 'mobx-app'
 import UIStore from './stores/UIStore'
@@ -12,6 +12,7 @@ import { injectGlobal } from 'styled-components'
 import MapStore from './stores/MapStore'
 import ReportStore from './stores/ReportStore'
 import color from './style/colors'
+import App from './App'
 
 injectGlobal`
   * {
@@ -57,7 +58,7 @@ function initStore(initialState = {}) {
 }
 
 function render() {
-  const App = require('./App').default
+  /*const App = require('./App').default*/
 
   ReactDOM.render(
     <AppContainer>
@@ -74,11 +75,7 @@ declare const module: any
 
 if (module.hot) {
   module.hot.accept(() => {
-    // initStore(prevState)
+    // initStore(toJS(state))
     render()
   })
-
-  /*module.hot.dispose(() => {
-    prevState = toJS(state)
-  })*/
 }
