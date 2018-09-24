@@ -6,7 +6,7 @@ import Map from './Map'
 import { observer } from 'mobx-react'
 import { get, intersection, clone } from 'lodash'
 import styled from 'styled-components'
-import { marker } from 'leaflet'
+import { FeatureGroup, marker } from 'leaflet'
 import { GeoJSON, Popup } from 'react-leaflet/es'
 import MarkerIcon from './MarkerIcon'
 import { DatasetView } from '../../shared/types/DatasetView'
@@ -54,9 +54,9 @@ interface Props extends DatasetView {
 
 interface SelectedFeature {
   position: Location
-  feature: {}
+  feature: any
   element: HTMLElement
-  layer: {}
+  layer: any
 }
 
 @query({ query: reportItemsQuery })
