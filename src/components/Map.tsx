@@ -130,6 +130,36 @@ class Map extends React.Component<Props, any> {
     ) {
       this.getFocusedPosition()
     }
+
+    // TODO: Add mapillary layer
+
+    /*if (this.glRef.current) {
+      const mapillarySource = {
+        type: 'vector',
+        tiles: ['https://d25uarhxywzl1j.cloudfront.net/v0.1/{z}/{x}/{y}.mvt'],
+        minzoom: 0,
+        maxzoom: 14,
+      }
+
+      const map = this.glRef.current.leafletElement._glMap
+
+      map.addSource('mapillary', mapillarySource)
+      map.addLayer({
+        id: 'mapillary',
+        type: 'line',
+        source: 'mapillary',
+        'source-layer': 'mapillary-sequences',
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round',
+        },
+        paint: {
+          'line-opacity': 0.6,
+          'line-color': 'rgb(255, 0, 0)',
+          'line-width': 2,
+        },
+      })
+    }*/
   }
 
   // Get the position for the currently focused marker or return
