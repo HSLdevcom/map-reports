@@ -31,7 +31,7 @@ injectGlobal`
 
 configure({
   computedRequiresReaction: true,
-  enforceActions: true,
+  enforceActions: 'observed',
 })
 
 const baseUrl = process.env.BASE_URL || ''
