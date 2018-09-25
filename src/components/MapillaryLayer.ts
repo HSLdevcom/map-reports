@@ -1,6 +1,7 @@
 import { withLeaflet, MapLayer, GridLayer } from 'react-leaflet/es'
 import mapboxLeaflet from '../helpers/MapboxGlLeaflet'
 import { closestPointInGeometry } from '../helpers/closestPoint'
+import { LatLng } from 'leaflet'
 
 class MapillaryLayer extends MapLayer {
   gl
@@ -72,8 +73,8 @@ class MapillaryLayer extends MapLayer {
     const { containerPoint, latlng } = e
 
     const bbox = [
-      { x: containerPoint.x - 10, y: containerPoint.y - 10 },
-      { x: containerPoint.x + 10, y: containerPoint.y + 10 },
+      { x: containerPoint.x - 20, y: containerPoint.y - 20 },
+      { x: containerPoint.x + 20, y: containerPoint.y + 20 },
     ]
 
     const features = glMap.queryRenderedFeatures(bbox, {
@@ -81,16 +82,35 @@ class MapillaryLayer extends MapLayer {
     })
 
     if (features.length !== 0) {
-      const feature = features[0].toJSON()
-      const featurePoint = closestPointInGeometry(latlng, feature.geometry)
+      let hoveredFeature = null
 
-      if (featurePoint && !featurePoint.equals(latlng)) {
-        this.highlightMapillaryPoint(glMap, featurePoint)
-      }
+      let featurePoint = features.slice(0, 20).reduce((closestFeaturePoint, feature) => {
+        const jsonFeature = feature.toJSON()
+        const pointCandidate = closestPointInGeometry(latlng, jsonFeature.geometry)
+
+        if (
+          !closestFeaturePoint ||
+          (!!pointCandidate &&
+            latlng.distanceTo(pointCandidate) < latlng.distanceTo(closestFeaturePoint))
+        ) {
+          hoveredFeature = jsonFeature
+          return pointCandidate
+        }
+
+        return closestFeaturePoint
+      }, false)
+
+      featurePoint = featurePoint && !featurePoint.equals(latlng) ? featurePoint : false
+      this.highlightMapillaryPoint(glMap, featurePoint)
     }
   }
 
   highlightMapillaryPoint = (glMap, position) => {
+    if (!position) {
+      glMap.removeLayer('mapillary_point')
+      return
+    }
+
     const pointSource = glMap.getSource('mapillary_point')
 
     if (!pointSource) {
@@ -111,7 +131,7 @@ class MapillaryLayer extends MapLayer {
         type: 'circle',
         paint: {
           'circle-radius': 5,
-          'circle-color': 'rgb(50, 200, 200)',
+          'circle-color': 'rgb(255, 0, 0)',
         },
       })
     }
