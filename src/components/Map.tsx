@@ -25,8 +25,9 @@ import 'leaflet/dist/leaflet.css'
 import { AnyFunction } from '../../shared/types/AnyFunction'
 import styled from 'styled-components'
 import MarkerClusterGroup from './MarkerClusterGroup'
-import MapboxGlLayer from './MapboxGlLayer'
 import get from 'lodash/get'
+import MapboxGlLayer from './MapboxGlLayer'
+import MapillaryLayer from './MapillaryLayer'
 
 const attribution = `Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,
 <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>,
@@ -130,36 +131,6 @@ class Map extends React.Component<Props, any> {
     ) {
       this.getFocusedPosition()
     }
-
-    // TODO: Add mapillary layer
-
-    /*if (this.glRef.current) {
-      const mapillarySource = {
-        type: 'vector',
-        tiles: ['https://d25uarhxywzl1j.cloudfront.net/v0.1/{z}/{x}/{y}.mvt'],
-        minzoom: 0,
-        maxzoom: 14,
-      }
-
-      const map = this.glRef.current.leafletElement._glMap
-
-      map.addSource('mapillary', mapillarySource)
-      map.addLayer({
-        id: 'mapillary',
-        type: 'line',
-        source: 'mapillary',
-        'source-layer': 'mapillary-sequences',
-        layout: {
-          'line-cap': 'round',
-          'line-join': 'round',
-        },
-        paint: {
-          'line-opacity': 0.6,
-          'line-color': 'rgb(255, 0, 0)',
-          'line-width': 2,
-        },
-      })
-    }*/
   }
 
   // Get the position for the currently focused marker or return
@@ -249,6 +220,9 @@ class Map extends React.Component<Props, any> {
             </LayersControl.BaseLayer>
             <LayersControl.BaseLayer name="Vector" checked={useVectorLayers}>
               <MapboxGlLayer ref={this.glRef} />
+            </LayersControl.BaseLayer>
+            <LayersControl.BaseLayer name="Mapillary">
+              <MapillaryLayer />
             </LayersControl.BaseLayer>
             <LayersControl.BaseLayer name="Aerial">
               <TileLayer

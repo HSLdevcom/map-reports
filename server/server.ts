@@ -31,6 +31,19 @@ import fs from 'fs-extra'
     },
   })
 
+  const simpleStyle = hslMapStyle.generateStyle({
+    glyphsUrl: 'https://kartat.hsldev.com/',
+    components: {
+      text_fisv: { enabled: true },
+      routes: { enabled: false },
+      stops: { enabled: false },
+      citybikes: { enabled: false },
+      icons: { enabled: false },
+      print: { enabled: false },
+      municipal_borders: { enabled: false },
+    },
+  })
+
   const app = Express()
 
   app.use('/dist', Express.static(path.join(__dirname, '../dist')))
@@ -38,6 +51,11 @@ import fs from 'fs-extra'
   app.get('/style.json', (req, res) => {
     res.set('Content-Type', 'application/json')
     res.send(style)
+  })
+
+  app.get('/simple-style.json', (req, res) => {
+    res.set('Content-Type', 'application/json')
+    res.send(simpleStyle)
   })
 
   app.get('/datasets/:name', async (req, res) => {
@@ -55,6 +73,6 @@ import fs from 'fs-extra'
   server.applyMiddleware({ app })
 
   app.listen({ port: 1234 }, () =>
-    console.log(`🚀 Server ready at http://localhost:1234${server.graphqlPath}`)
+    console.log(`🚀 Server ready at http://localhost:1234`)
   )
 })()
