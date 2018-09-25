@@ -28,6 +28,7 @@ import MarkerClusterGroup from './MarkerClusterGroup'
 import get from 'lodash/get'
 import MapboxGlLayer from './MapboxGlLayer'
 import MapillaryLayer from './MapillaryLayer'
+import MapillaryViewer from './MapillaryViewer'
 
 const attribution = `Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,
 <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>,
@@ -118,6 +119,8 @@ class Map extends React.Component<Props, any> {
     center: defaultMapLocation,
     zoom: defaultMapZoom,
     bounds: null,
+    currentBaseLayer: 'Mapillary',
+    currentMapillaryKey: false,
   }
 
   componentDidUpdate({ focusedMarker: prevFocusedMarker }: Props) {
@@ -186,14 +189,29 @@ class Map extends React.Component<Props, any> {
     })
   }
 
+  onChangeBaseLayer = ({ layer, name }) => {
+    this.setState({
+      currentBaseLayer: name,
+    })
+  }
+
+  showMapillaryFeature = feature => {
+    this.setState({
+      currentMapillaryKey: get(feature, 'properties.key', false),
+    })
+  }
+
   render() {
     const { markers = [], children, useBounds, highlightGeoJson } = this.props
-    const { center, zoom, bounds } = this.state
+    const { center, zoom, bounds, currentBaseLayer, currentMapillaryKey } = this.state
+
+    console.log(currentMapillaryKey)
 
     return (
       <MapContainer>
         <MarkerIconStyle />
         <LeafletMap
+          onBaselayerchange={this.onChangeBaseLayer}
           center={center}
           zoom={zoom}
           onViewportChange={this.trackViewport}
@@ -203,7 +221,9 @@ class Map extends React.Component<Props, any> {
           minZoom={10}
           maxZoom={18}>
           <LayersControl position="topright">
-            <LayersControl.BaseLayer name="Raster">
+            <LayersControl.BaseLayer
+              name="Raster"
+              checked={currentBaseLayer === 'Raster'}>
               <TileLayer
                 zoomOffset={-1}
                 tileSize={512}
@@ -212,16 +232,25 @@ class Map extends React.Component<Props, any> {
                 url={url}
               />
             </LayersControl.BaseLayer>
-            <LayersControl.BaseLayer name="Vector">
+            <LayersControl.BaseLayer
+              name="Vector"
+              checked={currentBaseLayer === 'Vector'}>
               <MapboxGlLayer ref={this.glRef} />
             </LayersControl.BaseLayer>
-            <LayersControl.BaseLayer name="Mapillary" checked={true}>
-              <MapillaryLayer />
-            </LayersControl.BaseLayer>
-            <LayersControl.BaseLayer name="Aerial">
+            <LayersControl.BaseLayer
+              name="Aerial"
+              checked={currentBaseLayer === 'Aerial'}>
               <TileLayer
                 attribution="MML/LUKE"
                 url="http://tiles.kartat.kapsi.fi/ortokuva/{z}/{x}/{y}.jpg"
+              />
+            </LayersControl.BaseLayer>
+            <LayersControl.BaseLayer
+              name="Mapillary"
+              checked={currentBaseLayer === 'Mapillary'}>
+              <MapillaryLayer
+                layerIsActive={currentBaseLayer === 'Mapillary'}
+                onSelectFeature={this.showMapillaryFeature}
               />
             </LayersControl.BaseLayer>
           </LayersControl>
@@ -261,6 +290,8 @@ class Map extends React.Component<Props, any> {
           {children}
         </LeafletMap>
         <CenterButton onClick={this.centerOnHelsinki}>Center on Helsinki</CenterButton>
+        {currentBaseLayer === 'Mapillary' &&
+          currentMapillaryKey && <MapillaryViewer mapillaryKey={currentMapillaryKey} />}
       </MapContainer>
     )
   }

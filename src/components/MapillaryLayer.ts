@@ -1,12 +1,12 @@
 import { withLeaflet, MapLayer, GridLayer } from 'react-leaflet/es'
 import mapboxLeaflet from '../helpers/MapboxGlLeaflet'
 import { closestPointInGeometry } from '../helpers/closestPoint'
-import { LatLng } from 'leaflet'
 
 class MapillaryLayer extends MapLayer {
-  gl
+  gl = null
+  lastHoveredFeature = null
 
-  createLeafletElement() {
+  createLeafletElement(props) {
     // @ts-ignore
     this.gl = mapboxLeaflet({
       style: '/simple-style.json',
@@ -19,7 +19,12 @@ class MapillaryLayer extends MapLayer {
       // Wait for the gl stuff to be added
       setTimeout(() => {
         const map = target._glMap
+
         leafletMap.on('mousemove', this.onHover(leafletMap, map))
+
+        leafletMap.on('click', () => {
+          props.onSelectFeature(this.lastHoveredFeature)
+        })
 
         // ...and wait for the gl stuff to load
         map.on('load', () => {
@@ -82,8 +87,6 @@ class MapillaryLayer extends MapLayer {
     })
 
     if (features.length !== 0) {
-      let hoveredFeature = null
-
       let featurePoint = features.slice(0, 20).reduce((closestFeaturePoint, feature) => {
         const jsonFeature = feature.toJSON()
         const pointCandidate = closestPointInGeometry(latlng, jsonFeature.geometry)
@@ -93,7 +96,7 @@ class MapillaryLayer extends MapLayer {
           (!!pointCandidate &&
             latlng.distanceTo(pointCandidate) < latlng.distanceTo(closestFeaturePoint))
         ) {
-          hoveredFeature = jsonFeature
+          this.lastHoveredFeature = jsonFeature
           return pointCandidate
         }
 
@@ -101,6 +104,11 @@ class MapillaryLayer extends MapLayer {
       }, false)
 
       featurePoint = featurePoint && !featurePoint.equals(latlng) ? featurePoint : false
+
+      if (!featurePoint) {
+        this.lastHoveredFeature = false
+      }
+
       this.highlightMapillaryPoint(glMap, featurePoint)
     }
   }
