@@ -15,13 +15,19 @@ class MapillaryLayer extends MapLayer {
       setTimeout(() => {
         this.addMapillarySource(target)
         this.addMapillaryLayer(target)
-      }, 0)
+      }, 10)
     })
 
     return this.gl
   }
 
   addMapillarySource(layer) {
+    const map = layer._glMap
+
+    if (map.getSource('mapillary')) {
+      return
+    }
+
     const mapillarySource = {
       type: 'vector',
       tiles: ['https://d25uarhxywzl1j.cloudfront.net/v0.1/{z}/{x}/{y}.mvt'],
@@ -29,10 +35,16 @@ class MapillaryLayer extends MapLayer {
       maxzoom: 14,
     }
 
-    layer._glMap.addSource('mapillary', mapillarySource)
+    map.addSource('mapillary', mapillarySource)
   }
 
   addMapillaryLayer(layer) {
+    const map = layer._glMap
+
+    if (map.getLayer('mapillary')) {
+      return
+    }
+
     layer._glMap.addLayer({
       id: 'mapillary',
       type: 'line',
