@@ -1,4 +1,4 @@
-import geoJson from 'geojson'
+import geoJson from '../../shared/utils/geojson'
 import neatCsv from 'neat-csv'
 import { get } from 'lodash'
 

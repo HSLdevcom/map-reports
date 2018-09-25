@@ -1,7 +1,7 @@
 import got from 'got'
 import { get } from 'lodash'
 import neatCsv from 'neat-csv'
-import GeoJSON from 'geojson'
+import GeoJSON from '../../shared/utils/geojson'
 
 async function runInspections(inspections, database) {
   async function runGeoJsonInspection(inspection) {

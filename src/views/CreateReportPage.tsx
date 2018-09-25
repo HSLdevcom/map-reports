@@ -132,7 +132,6 @@ class CreateReportPage extends React.Component<Props, any> {
         <MapArea>
           <ReportsMap
             useBounds={false}
-            useVectorLayers
             onMapClick={this.onMapClick}
             highlightGeoJson={highlightGeoJson}
           />

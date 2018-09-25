@@ -1,5 +1,6 @@
 import { withLeaflet, MapLayer, GridLayer } from 'react-leaflet/es'
 import mapboxLeaflet from '../helpers/MapboxGlLeaflet'
+import { closestPointInGeometry } from '../helpers/closestPoint'
 
 class MapillaryLayer extends MapLayer {
   gl
@@ -12,18 +13,25 @@ class MapillaryLayer extends MapLayer {
     })
 
     this.gl.on('add', ({ target }) => {
+      const leafletMap = target._map
+
+      // Wait for the gl stuff to be added
       setTimeout(() => {
-        this.addMapillarySource(target)
-        this.addMapillaryLayer(target)
-      }, 10)
+        const map = target._glMap
+        leafletMap.on('mousemove', this.onHover(leafletMap, map))
+
+        // ...and wait for the gl stuff to load
+        map.on('load', () => {
+          this.addMapillarySource(map)
+          this.addMapillaryLayer(map)
+        })
+      }, 0)
     })
 
     return this.gl
   }
 
-  addMapillarySource(layer) {
-    const map = layer._glMap
-
+  addMapillarySource(map) {
     if (map.getSource('mapillary')) {
       return
     }
@@ -38,14 +46,12 @@ class MapillaryLayer extends MapLayer {
     map.addSource('mapillary', mapillarySource)
   }
 
-  addMapillaryLayer(layer) {
-    const map = layer._glMap
-
+  addMapillaryLayer(map) {
     if (map.getLayer('mapillary')) {
       return
     }
 
-    layer._glMap.addLayer({
+    map.addLayer({
       id: 'mapillary',
       type: 'line',
       source: 'mapillary',
@@ -60,6 +66,62 @@ class MapillaryLayer extends MapLayer {
         'line-width': 2,
       },
     })
+  }
+
+  onHover = (leafletMap, glMap) => e => {
+    const { containerPoint, latlng } = e
+
+    const bbox = [
+      { x: containerPoint.x - 10, y: containerPoint.y - 10 },
+      { x: containerPoint.x + 10, y: containerPoint.y + 10 },
+    ]
+
+    const features = glMap.queryRenderedFeatures(bbox, {
+      layers: ['mapillary'],
+    })
+
+    if (features.length !== 0) {
+      const feature = features[0].toJSON()
+      const featurePoint = closestPointInGeometry(latlng, feature.geometry)
+
+      if (featurePoint && !featurePoint.equals(latlng)) {
+        this.highlightMapillaryPoint(glMap, featurePoint)
+      }
+    }
+  }
+
+  highlightMapillaryPoint = (glMap, position) => {
+    const pointSource = glMap.getSource('mapillary_point')
+
+    if (!pointSource) {
+      glMap.addSource('mapillary_point', {
+        type: 'geojson',
+        data: this.getPointData(position),
+      })
+    } else {
+      requestAnimationFrame(() => {
+        pointSource.setData(this.getPointData(position))
+      })
+    }
+
+    if (!glMap.getLayer('mapillary_point')) {
+      glMap.addLayer({
+        id: 'mapillary_point',
+        source: 'mapillary_point',
+        type: 'circle',
+        paint: {
+          'circle-radius': 5,
+          'circle-color': 'rgb(50, 200, 200)',
+        },
+      })
+    }
+  }
+
+  getPointData = position => {
+    return {
+      type: 'Point',
+      coordinates: [position.lng, position.lat],
+    }
   }
 }
 

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import geoJson from 'geojson'
+import geoJson from '../../shared/utils/geojson'
 import { observer } from 'mobx-react'
 import { action, observable, toJS } from 'mobx'
 import { Divider, Grid, Typography, InputLabel } from '@material-ui/core'

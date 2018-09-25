@@ -88,7 +88,6 @@ class ReportsPage extends React.Component<Props, any> {
         <MapArea>
           <ReportsMap
             highlightGeoJson={highlightGeoJson}
-            useVectorLayers
             reports={reports}
             onMapClick={() => Report.focusReport(null)}
           />

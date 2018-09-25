@@ -71,13 +71,7 @@ class ReportsMap extends React.Component<Props, any> {
   }
 
   render() {
-    const {
-      state,
-      useBounds,
-      useVectorLayers = false,
-      children,
-      highlightGeoJson,
-    } = this.props
+    const { state, useBounds, children, highlightGeoJson } = this.props
 
     const markers: Marker[] = this.getReportMarkers()
 
@@ -95,7 +89,6 @@ class ReportsMap extends React.Component<Props, any> {
     return (
       <Map
         highlightGeoJson={highlightGeoJson}
-        useVectorLayers={useVectorLayers}
         useBounds={useBounds}
         focusedMarker={state.focusedReport}
         onMapClick={this.onMapClick}
