@@ -6,6 +6,44 @@ import database from './database'
 import createServer from './graphql/schema'
 import hslMapStyle from 'hsl-map-style'
 import fs from 'fs-extra'
+import boolParser from 'express-query-boolean'
+import { get, merge, pick, reduce } from 'lodash'
+
+const styleComponents = {
+  text: true,
+  text_sv: false,
+  text_fisv: true,
+  routes: true,
+  stops: true,
+  citybikes: true,
+  icons: true,
+  print: false,
+  municipal_borders: false,
+}
+
+function getStyleComponents(selection) {
+  const styleKeys = Object.keys(styleComponents)
+  const mergedSelection = merge(
+    {},
+    styleComponents,
+    pick(
+      selection,
+      Object.keys(selection).filter(selectedComponent =>
+        styleKeys.includes(selectedComponent)
+      )
+    )
+  )
+
+  return reduce(
+    mergedSelection,
+    (components, isEnabled, key) => {
+      components[key] = { enabled: isEnabled }
+      return components
+    },
+    {}
+  )
+}
+
 ;(async () => {
   /**
    * Set up database
@@ -18,44 +56,25 @@ import fs from 'fs-extra'
    */
 
   // create vector map style
-  const style = hslMapStyle.generateStyle({
+  const style = {
     glyphsUrl: 'https://kartat.hsldev.com/',
-    components: {
-      text_fisv: { enabled: true },
-      routes: { enabled: true },
-      stops: { enabled: true },
-      citybikes: { enabled: true },
-      icons: { enabled: true },
-      print: { enabled: false },
-      municipal_borders: { enabled: false },
-    },
-  })
-
-  const simpleStyle = hslMapStyle.generateStyle({
-    glyphsUrl: 'https://kartat.hsldev.com/',
-    components: {
-      text_fisv: { enabled: true },
-      routes: { enabled: false },
-      stops: { enabled: false },
-      citybikes: { enabled: false },
-      icons: { enabled: false },
-      print: { enabled: false },
-      municipal_borders: { enabled: false },
-    },
-  })
+    components: {},
+  }
 
   const app = Express()
 
+  const server = createServer(db)
+  server.applyMiddleware({ app })
+
+  app.use(boolParser())
   app.use('/dist', Express.static(path.join(__dirname, '../dist')))
 
   app.get('/style.json', (req, res) => {
-    res.set('Content-Type', 'application/json')
-    res.send(style)
-  })
+    const selectedComponents = getStyleComponents(req.query)
+    const selectedStyle = { ...style, components: selectedComponents }
 
-  app.get('/simple-style.json', (req, res) => {
     res.set('Content-Type', 'application/json')
-    res.send(simpleStyle)
+    res.send(hslMapStyle.generateStyle(selectedStyle))
   })
 
   app.get('/datasets/:name', async (req, res) => {
@@ -68,9 +87,6 @@ import fs from 'fs-extra'
   })
 
   app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../dist/index.html')))
-
-  const server = createServer(db)
-  server.applyMiddleware({ app })
 
   app.listen({ port: 1234 }, () =>
     console.log(`🚀 Server ready at http://localhost:1234`)

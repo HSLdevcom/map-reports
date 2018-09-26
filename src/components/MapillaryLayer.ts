@@ -7,6 +7,7 @@ import {
 import { LatLng, LatLngLiteral } from 'leaflet'
 import { AnyFunction } from '../../shared/types/AnyFunction'
 import { get } from 'lodash'
+import { stringify } from '../helpers/simpleQs'
 
 interface Props {
   location: LatLng | boolean
@@ -19,9 +20,18 @@ class MapillaryLayer extends MapLayer<Props> {
   highlightedLocation: boolean | LatLngLiteral = false
 
   createLeafletElement(props) {
+    const style = {
+      routes: false,
+      icons: true,
+      stops: false,
+      citybikes: false,
+      municipal_borders: false,
+      text_fisv: true,
+    }
+
     // @ts-ignore
     this.gl = mapboxLeaflet({
-      style: '/simple-style.json',
+      style: '/style.json?' + stringify(style),
       accessToken: 'none',
     })
 
