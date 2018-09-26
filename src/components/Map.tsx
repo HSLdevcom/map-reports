@@ -60,11 +60,13 @@ const MapContainer = styled.div`
   height: 100%;
   overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
 
   > .leaflet-container {
     width: 100%;
-    height: 100%;
     z-index: 0;
+    flex: 1 1 50%;
   }
 `
 
@@ -75,6 +77,13 @@ const CenterButton = styled.button`
   width: auto;
   height: auto;
   z-index: 100;
+`
+
+const MapillaryScreen = styled(MapillaryViewer)`
+  width: 100%;
+  height: 100%;
+  flex: 1 1 50%;
+  position: relative;
 `
 
 const defaultMapLocation: LatLng = latLng(60.1689784, 24.9230033)
@@ -293,10 +302,9 @@ class Map extends React.Component<Props, any> {
           )}
           {children}
         </LeafletMap>
-        <CenterButton onClick={this.centerOnHelsinki}>Center on Helsinki</CenterButton>
         {currentBaseLayer === 'Mapillary' &&
           currentMapillaryLocation && (
-            <MapillaryViewer location={currentMapillaryLocation} />
+            <MapillaryScreen location={currentMapillaryLocation} />
           )}
       </MapContainer>
     )

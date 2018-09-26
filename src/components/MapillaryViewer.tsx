@@ -2,6 +2,7 @@ import * as React from 'react'
 import * as Mapillary from 'mapillary-js'
 import styled from 'styled-components'
 import { LatLngLiteral } from 'leaflet'
+import 'mapillary-js/dist/mapillary.min.css'
 
 const MAPILLARY_ELEMENT_ID = 'mapillary-viewer'
 
@@ -9,15 +10,10 @@ type LocationProp = LatLngLiteral | boolean
 
 interface Props {
   location: LocationProp
+  className?: string
 }
 
-const MapillaryWrapper = styled.div`
-  width: 400px;
-  height: 300px;
-  position: fixed;
-  bottom: 1rem;
-  right: 1rem;
-`
+const MapillaryWrapper = styled.div``
 
 class MapillaryViewer extends React.Component<Props, {}> {
   static defaultProps = {
@@ -64,6 +60,12 @@ class MapillaryViewer extends React.Component<Props, {}> {
         },
       }
     )
+
+    window.addEventListener('resize', this.onResize)
+  }
+
+  onResize = () => {
+    this.mly.resize()
   }
 
   componentWillUnmount() {
@@ -71,7 +73,8 @@ class MapillaryViewer extends React.Component<Props, {}> {
   }
 
   render() {
-    return <MapillaryWrapper id={MAPILLARY_ELEMENT_ID} />
+    const { className } = this.props
+    return <MapillaryWrapper className={className} id={MAPILLARY_ELEMENT_ID} />
   }
 }
 

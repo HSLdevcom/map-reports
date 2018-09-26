@@ -64,6 +64,9 @@ class MapillaryLayer extends MapLayer<Props> {
       return
     }
 
+    const currentYear = new Date().getFullYear()
+    const minDate = new Date(currentYear - 1, 0, 1).getTime()
+
     map.addLayer({
       id: 'mapillary',
       type: 'line',
@@ -78,6 +81,7 @@ class MapillaryLayer extends MapLayer<Props> {
         'line-color': 'rgb(50, 200, 200)',
         'line-width': 2,
       },
+      filter: ['>=', 'captured_at', minDate],
     })
   }
 
@@ -109,14 +113,14 @@ class MapillaryLayer extends MapLayer<Props> {
         return closestFeaturePoint
       }, false)
 
+      this.highlightedLocation = featurePoint
+
       featurePoint = featurePoint && !featurePoint.equals(latlng) ? featurePoint : false
       this.highlightMapillaryPoint(glMap, featurePoint)
     }
   }
 
   highlightMapillaryPoint = (glMap, position: LatLngLiteral) => {
-    this.highlightedLocation = position
-
     if (!position) {
       glMap.removeLayer('mapillary_point')
       return
