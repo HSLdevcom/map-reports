@@ -1,12 +1,17 @@
 import { withLeaflet, MapLayer, GridLayer } from 'react-leaflet/es'
 import mapboxLeaflet from '../helpers/MapboxGlLeaflet'
 import { closestPointInGeometry } from '../helpers/closestPoint'
-import { latLng } from 'leaflet'
-import { offsetPosition } from '../helpers/offsetPosition'
+import { LatLngLiteral } from 'leaflet'
+import { AnyFunction } from '../../shared/types/AnyFunction'
 
-class MapillaryLayer extends MapLayer {
+interface Props {
+  layerIsActive: boolean
+  onSelectLocation: AnyFunction
+}
+
+class MapillaryLayer extends MapLayer<Props> {
   gl = null
-  lastHoveredFeature = null
+  highlightedLocation: boolean | LatLngLiteral = false
 
   createLeafletElement(props) {
     // @ts-ignore
@@ -25,7 +30,7 @@ class MapillaryLayer extends MapLayer {
         leafletMap.on('mousemove', this.onHover(leafletMap, map))
 
         leafletMap.on('click', () => {
-          props.onSelectFeature(this.lastHoveredFeature)
+          props.onSelectLocation(this.highlightedLocation)
         })
 
         // ...and wait for the gl stuff to load
@@ -77,9 +82,7 @@ class MapillaryLayer extends MapLayer {
   }
 
   onHover = (leafletMap, glMap) => e => {
-    const { containerPoint, latlng: eventLatlng } = e
-    // Offset by 10 meters or so, otherwise the dot will be under the cursor.
-    const latlng = latLng(offsetPosition(eventLatlng, 10, -10))
+    const { containerPoint, latlng } = e
 
     const pointX = containerPoint.x
     const pointY = containerPoint.y
@@ -100,7 +103,6 @@ class MapillaryLayer extends MapLayer {
           (!!pointCandidate &&
             latlng.distanceTo(pointCandidate) < latlng.distanceTo(closestFeaturePoint))
         ) {
-          this.lastHoveredFeature = jsonFeature
           return pointCandidate
         }
 
@@ -108,16 +110,13 @@ class MapillaryLayer extends MapLayer {
       }, false)
 
       featurePoint = featurePoint && !featurePoint.equals(latlng) ? featurePoint : false
-
-      if (!featurePoint) {
-        this.lastHoveredFeature = false
-      }
-
       this.highlightMapillaryPoint(glMap, featurePoint)
     }
   }
 
-  highlightMapillaryPoint = (glMap, position) => {
+  highlightMapillaryPoint = (glMap, position: LatLngLiteral) => {
+    this.highlightedLocation = position
+
     if (!position) {
       glMap.removeLayer('mapillary_point')
       return
@@ -149,7 +148,7 @@ class MapillaryLayer extends MapLayer {
     }
   }
 
-  getPointData = position => {
+  getPointData = (position: LatLngLiteral) => {
     return {
       type: 'Point',
       coordinates: [position.lng, position.lat],

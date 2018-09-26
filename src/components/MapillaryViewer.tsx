@@ -1,11 +1,14 @@
 import * as React from 'react'
 import * as Mapillary from 'mapillary-js'
 import styled from 'styled-components'
+import { LatLngLiteral } from 'leaflet'
 
 const MAPILLARY_ELEMENT_ID = 'mapillary-viewer'
 
+type LocationProp = LatLngLiteral | boolean
+
 interface Props {
-  mapillaryKey: string | boolean
+  location: LocationProp
 }
 
 const MapillaryWrapper = styled.div`
@@ -18,46 +21,53 @@ const MapillaryWrapper = styled.div`
 
 class MapillaryViewer extends React.Component<Props, {}> {
   static defaultProps = {
-    mapillaryKey: null,
+    location: false,
   }
 
   mly = null
 
   componentDidMount() {
-    const { mapillaryKey } = this.props
+    const { location } = this.props
 
-    if (mapillaryKey) {
-      this.initMapillary(mapillaryKey)
-    }
+    this.initMapillary()
+
+    this.showLocation(location)
   }
 
   componentDidUpdate(prevProps) {
-    const { mapillaryKey } = this.props
-    const prevMapillaryKey = prevProps.mapillaryKey
+    const { location } = this.props
+    const prevLocation = prevProps.location
 
-    if (mapillaryKey && mapillaryKey !== prevMapillaryKey) {
-      if (!this.mly) {
-        this.initMapillary(mapillaryKey)
-      } else {
-        this.mly.moveToKey(mapillaryKey)
-      }
+    if (location !== prevLocation) {
+      this.showLocation(location)
     }
   }
 
-  initMapillary(mapillaryKey) {
+  showLocation(location: LocationProp) {
+    if (!this.mly) {
+      this.initMapillary()
+    }
+
+    if (typeof location !== 'boolean') {
+      this.mly.moveCloseTo(location.lat, location.lng)
+    }
+  }
+
+  initMapillary() {
     this.mly = new Mapillary.Viewer(
       MAPILLARY_ELEMENT_ID,
       'V2RqRUsxM2dPVFBMdnlhVUliTkM0ZzoxNmI5ZDZhOTc5YzQ2MzEw',
-      mapillaryKey
+      null,
+      {
+        component: {
+          cover: false,
+        },
+      }
     )
   }
 
   componentWillUnmount() {
     this.mly = null
-  }
-
-  shouldComponentUpdate() {
-    return false
   }
 
   render() {

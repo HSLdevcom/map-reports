@@ -120,7 +120,7 @@ class Map extends React.Component<Props, any> {
     zoom: defaultMapZoom,
     bounds: null,
     currentBaseLayer: 'Mapillary',
-    currentMapillaryKey: false,
+    currentMapillaryLocation: false,
   }
 
   componentDidUpdate({ focusedMarker: prevFocusedMarker }: Props) {
@@ -195,17 +195,21 @@ class Map extends React.Component<Props, any> {
     })
   }
 
-  showMapillaryFeature = feature => {
+  showMapillaryLocation = location => {
     this.setState({
-      currentMapillaryKey: get(feature, 'properties.key', false),
+      currentMapillaryLocation: location,
     })
   }
 
   render() {
     const { markers = [], children, useBounds, highlightGeoJson } = this.props
-    const { center, zoom, bounds, currentBaseLayer, currentMapillaryKey } = this.state
-
-    console.log(currentMapillaryKey)
+    const {
+      center,
+      zoom,
+      bounds,
+      currentBaseLayer,
+      currentMapillaryLocation,
+    } = this.state
 
     return (
       <MapContainer>
@@ -250,7 +254,7 @@ class Map extends React.Component<Props, any> {
               checked={currentBaseLayer === 'Mapillary'}>
               <MapillaryLayer
                 layerIsActive={currentBaseLayer === 'Mapillary'}
-                onSelectFeature={this.showMapillaryFeature}
+                onSelectLocation={this.showMapillaryLocation}
               />
             </LayersControl.BaseLayer>
           </LayersControl>
@@ -291,7 +295,9 @@ class Map extends React.Component<Props, any> {
         </LeafletMap>
         <CenterButton onClick={this.centerOnHelsinki}>Center on Helsinki</CenterButton>
         {currentBaseLayer === 'Mapillary' &&
-          currentMapillaryKey && <MapillaryViewer mapillaryKey={currentMapillaryKey} />}
+          currentMapillaryLocation && (
+            <MapillaryViewer location={currentMapillaryLocation} />
+          )}
       </MapContainer>
     )
   }
