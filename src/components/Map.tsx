@@ -26,7 +26,6 @@ import 'leaflet/dist/leaflet.css'
 import { AnyFunction } from '../../shared/types/AnyFunction'
 import styled from 'styled-components'
 import MarkerClusterGroup from './MarkerClusterGroup'
-import get from 'lodash/get'
 import MapboxGlLayer from './MapboxGlLayer'
 import MapillaryLayer from './MapillaryLayer'
 import MapillaryViewer from './MapillaryViewer'
@@ -68,7 +67,8 @@ interface State {
   zoom: number
   bounds?: LatLngBounds
   currentBaseLayer: MapLayers
-  currentMapillaryLocation: LatLng | boolean
+  currentMapillaryViewerLocation: LatLng | boolean
+  currentMapillaryMapLocation: LatLng | boolean
 }
 
 const MapContainer = styled.div`
@@ -140,7 +140,8 @@ class Map extends React.Component<Props, State> {
     zoom: defaultMapZoom,
     bounds: null,
     currentBaseLayer: this.props.defaultLayer,
-    currentMapillaryLocation: false,
+    currentMapillaryViewerLocation: false,
+    currentMapillaryMapLocation: false,
   }
 
   componentDidUpdate({ focusedMarker: prevFocusedMarker }: Props) {
@@ -210,9 +211,17 @@ class Map extends React.Component<Props, State> {
     })
   }
 
-  showMapillaryLocation = location => {
+  setMapillaryViewerLocation = (location: LatLng) => {
     this.setState({
-      currentMapillaryLocation: location,
+      currentMapillaryViewerLocation: location,
+    })
+  }
+
+  onMapillaryNavigation = ({ latLon: { lat, lon } }: { latLon: Location }) => {
+    const location = latLng({ lat, lng: lon })
+
+    this.setState({
+      currentMapillaryMapLocation: location,
     })
   }
 
@@ -223,7 +232,8 @@ class Map extends React.Component<Props, State> {
       zoom,
       bounds,
       currentBaseLayer,
-      currentMapillaryLocation,
+      currentMapillaryViewerLocation,
+      currentMapillaryMapLocation,
     } = this.state
 
     return (
@@ -268,8 +278,9 @@ class Map extends React.Component<Props, State> {
               name="Mapillary"
               checked={currentBaseLayer === 'Mapillary'}>
               <MapillaryLayer
+                location={currentMapillaryMapLocation}
                 layerIsActive={currentBaseLayer === 'Mapillary'}
-                onSelectLocation={this.showMapillaryLocation}
+                onSelectLocation={this.setMapillaryViewerLocation}
               />
             </LayersControl.BaseLayer>
           </LayersControl>
@@ -309,8 +320,11 @@ class Map extends React.Component<Props, State> {
           {children}
         </LeafletMap>
         {currentBaseLayer === 'Mapillary' &&
-          currentMapillaryLocation && (
-            <MapillaryScreen location={currentMapillaryLocation} />
+          currentMapillaryViewerLocation && (
+            <MapillaryScreen
+              onNavigation={this.onMapillaryNavigation}
+              location={currentMapillaryViewerLocation}
+            />
           )}
       </MapContainer>
     )

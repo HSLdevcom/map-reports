@@ -4,10 +4,12 @@ import {
   closestPointInGeometry,
   closestPointCompareReducer,
 } from '../helpers/closestPoint'
-import { LatLngLiteral } from 'leaflet'
+import { LatLng, LatLngLiteral } from 'leaflet'
 import { AnyFunction } from '../../shared/types/AnyFunction'
+import { get } from 'lodash'
 
 interface Props {
+  location: LatLng | boolean
   layerIsActive: boolean
   onSelectLocation: AnyFunction
 }
@@ -45,6 +47,22 @@ class MapillaryLayer extends MapLayer<Props> {
     })
 
     return this.gl
+  }
+
+  updateLeafletElement(prevProps, props) {
+    const { location, leaflet } = props
+    const { location: prevLocation } = prevProps
+
+    // For some reason this.gl is null here. Wrong context?
+    // There should be a better way of finding a specific layer...
+    const glMap = Object.values(get(leaflet, 'map._layers', {})).reduce(
+      (gl, layer) => get(layer, '_glMap', gl),
+      null
+    )
+
+    if (location && prevLocation && !location.equals(prevLocation) && glMap) {
+      this.highlightMapillaryPoint(glMap, location)
+    }
   }
 
   addMapillarySource(map) {
@@ -94,7 +112,7 @@ class MapillaryLayer extends MapLayer<Props> {
     const pointX = containerPoint.x
     const pointY = containerPoint.y
 
-    const bbox = [{ x: pointX - 20, y: pointY - 20 }, { x: pointX + 20, y: pointY + 20 }]
+    const bbox = [{ x: pointX - 40, y: pointY - 40 }, { x: pointX + 40, y: pointY + 40 }]
 
     const features = glMap.queryRenderedFeatures(bbox, {
       layers: ['mapillary'],
@@ -103,7 +121,7 @@ class MapillaryLayer extends MapLayer<Props> {
     if (features.length !== 0) {
       let featurePoint = closestPointCompareReducer(
         features,
-        feature => closestPointInGeometry(latlng, feature.toJSON().geometry),
+        feature => closestPointInGeometry(latlng, feature.toJSON().geometry, 50),
         latlng
       )
 

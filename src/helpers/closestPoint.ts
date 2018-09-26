@@ -6,16 +6,17 @@ type ReturnType = LatLng | false
 
 export function closestPointInGeometry(
   queryPoint: LatLngExpression,
-  geometry: AcceptedGeometries
+  geometry: AcceptedGeometries,
+  maxDistance = 100
 ) {
   const queryLatLng = latLng(queryPoint)
 
   if (geometry.type === 'LineString') {
-    return closestPointOnLine(queryLatLng, geometry.coordinates)
+    return closestPointOnLine(queryLatLng, geometry.coordinates, maxDistance)
   } else if (geometry.type === 'MultiLineString') {
     return closestPointCompareReducer(
       geometry.coordinates,
-      coordinate => closestPointOnLine(queryLatLng, coordinate),
+      coordinate => closestPointOnLine(queryLatLng, coordinate, maxDistance),
       queryLatLng
     )
   }
@@ -42,8 +43,12 @@ export function closestPointCompareReducer(
   }, false)
 }
 
-function closestPointOnLine(queryPoint: LatLng, lineGeometry: Position[]) {
-  let prevDistance = 10
+function closestPointOnLine(
+  queryPoint: LatLng,
+  lineGeometry: Position[],
+  maxDistance = 100
+) {
+  let prevDistance = maxDistance
   let closestPoint: ReturnType = false
 
   for (let i = 0; i < lineGeometry.length; i++) {

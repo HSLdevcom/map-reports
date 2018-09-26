@@ -1,32 +1,27 @@
 import * as React from 'react'
 import * as Mapillary from 'mapillary-js'
 import styled from 'styled-components'
-import { LatLngLiteral } from 'leaflet'
+import { LatLng, LatLngLiteral } from 'leaflet'
 import 'mapillary-js/dist/mapillary.min.css'
+import { AnyFunction } from '../../shared/types/AnyFunction'
 
 const MAPILLARY_ELEMENT_ID = 'mapillary-viewer'
 
-type LocationProp = LatLngLiteral | boolean
-
 interface Props {
-  location: LocationProp
+  location: LatLng
   className?: string
+  onNavigation: AnyFunction
 }
 
 const MapillaryWrapper = styled.div``
 
 class MapillaryViewer extends React.Component<Props, {}> {
-  static defaultProps = {
-    location: false,
-  }
-
   mly = null
 
   componentDidMount() {
     const { location } = this.props
 
     this.initMapillary()
-
     this.showLocation(location)
   }
 
@@ -34,22 +29,24 @@ class MapillaryViewer extends React.Component<Props, {}> {
     const { location } = this.props
     const prevLocation = prevProps.location
 
-    if (location !== prevLocation) {
+    if (!location.equals(prevLocation)) {
       this.showLocation(location)
     }
   }
 
-  showLocation(location: LocationProp) {
+  showLocation(location: LatLngLiteral) {
     if (!this.mly) {
       this.initMapillary()
     }
 
-    if (typeof location !== 'boolean') {
+    if (this.mly.isNavigable) {
       this.mly.moveCloseTo(location.lat, location.lng)
     }
   }
 
   initMapillary() {
+    const { onNavigation } = this.props
+
     this.mly = new Mapillary.Viewer(
       MAPILLARY_ELEMENT_ID,
       'V2RqRUsxM2dPVFBMdnlhVUliTkM0ZzoxNmI5ZDZhOTc5YzQ2MzEw',
@@ -61,6 +58,7 @@ class MapillaryViewer extends React.Component<Props, {}> {
       }
     )
 
+    this.mly.on(Mapillary.Viewer.nodechanged, onNavigation)
     window.addEventListener('resize', this.onResize)
   }
 
