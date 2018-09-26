@@ -11,6 +11,7 @@ import { query } from '../helpers/Query'
 import { AnyFunction } from '../../shared/types/AnyFunction'
 import { ReportActions } from '../../shared/types/ReportActions'
 import osmtogeojson from 'osmtogeojson'
+import { MapLayers } from '../components/Map'
 
 const ReportsView = styled.div`
   height: 100%;
@@ -87,6 +88,7 @@ class ReportsPage extends React.Component<Props, any> {
         </Sidebar>
         <MapArea>
           <ReportsMap
+            defaultLayer={MapLayers.VECTOR}
             highlightGeoJson={highlightGeoJson}
             reports={reports}
             onMapClick={() => Report.focusReport(null)}

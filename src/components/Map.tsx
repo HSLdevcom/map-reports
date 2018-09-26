@@ -18,6 +18,7 @@ import {
   LeafletMouseEvent,
   latLngBounds,
   circle,
+  LatLngBounds,
 } from 'leaflet'
 import { Location } from '../../shared/types/Location'
 import { MarkerState, Marker } from '../../shared/types/Marker'
@@ -37,6 +38,13 @@ Imagery © <a href="http://mapbox.com">Mapbox</a>`
 const url =
   'https://digitransit-dev-cdn-origin.azureedge.net/map/v1/hsl-map/{z}/{x}/{y}{retina}.png'
 
+export const enum MapLayers {
+  RASTER = 'Raster',
+  AERIAL = 'Aerial',
+  VECTOR = 'Vector',
+  MAPILLARY = 'Mapillary',
+}
+
 interface Props {
   useBounds?: boolean
   markers?: Marker[]
@@ -45,7 +53,7 @@ interface Props {
   geoJSON?: any
   pointToLayer?: AnyFunction
   onEachFeature?: AnyFunction
-  useVectorLayers?: boolean
+  defaultLayer?: MapLayers
   children?: any
   highlightGeoJson?: any
   Map?: {
@@ -53,6 +61,14 @@ interface Props {
     setMapLocation: (location: LatLngExpression) => void
     setMapZoom: (zoom: number) => void
   }
+}
+
+interface State {
+  center: LatLngExpression
+  zoom: number
+  bounds?: LatLngBounds
+  currentBaseLayer: MapLayers
+  currentMapillaryLocation: LatLng | boolean
 }
 
 const MapContainer = styled.div`
@@ -68,15 +84,6 @@ const MapContainer = styled.div`
     z-index: 0;
     flex: 1 1 50%;
   }
-`
-
-const CenterButton = styled.button`
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: auto;
-  height: auto;
-  z-index: 100;
 `
 
 const MapillaryScreen = styled(MapillaryViewer)`
@@ -107,7 +114,11 @@ function calculateMarkerBounds(markers) {
 
 @inject(app('Map'))
 @observer
-class Map extends React.Component<Props, any> {
+class Map extends React.Component<Props, State> {
+  static defaultProps = {
+    defaultLayer: MapLayers.VECTOR,
+  }
+
   static getDerivedStateFromProps({ useBounds, markers }) {
     if (useBounds && markers && markers.length > 0) {
       const bounds = calculateMarkerBounds(markers)
@@ -128,7 +139,7 @@ class Map extends React.Component<Props, any> {
     center: defaultMapLocation,
     zoom: defaultMapZoom,
     bounds: null,
-    currentBaseLayer: 'Mapillary',
+    currentBaseLayer: this.props.defaultLayer,
     currentMapillaryLocation: false,
   }
 
@@ -164,16 +175,11 @@ class Map extends React.Component<Props, any> {
   }
 
   onMapClick = (event: LeafletMouseEvent) => {
-    const { useVectorLayers, Map: MapStore, onMapClick = () => {} } = this.props
+    const { Map: MapStore, onMapClick = () => {} } = this.props
     const { lat, lng } = event.latlng
 
     MapStore.setClickedLocation({ lat, lon: lng })
-
-    if (useVectorLayers && this.glRef.current) {
-      onMapClick(event, this.state.zoom, get(this, 'glRef.current.leafletElement', null))
-    } else {
-      onMapClick(event, this.state.zoom)
-    }
+    onMapClick(event, this.state.zoom)
   }
 
   centerOnHelsinki = e => {
@@ -198,7 +204,7 @@ class Map extends React.Component<Props, any> {
     })
   }
 
-  onChangeBaseLayer = ({ layer, name }) => {
+  onChangeBaseLayer = ({ name }: { name: MapLayers }) => {
     this.setState({
       currentBaseLayer: name,
     })

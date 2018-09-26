@@ -5,13 +5,14 @@ import ReportsMap from '../components/ReportsMap'
 import { get } from 'lodash'
 import { inject, observer } from 'mobx-react'
 import { app } from 'mobx-app'
-import { Popup, GeoJSON, Circle } from 'react-leaflet/es'
+import { Circle, GeoJSON, Popup } from 'react-leaflet/es'
 import { ReportActions } from '../../shared/types/ReportActions'
-import { circle, latLngBounds } from 'leaflet'
+import { latLngBounds } from 'leaflet'
 import SelectFeatureTable from '../components/SelectFeatureTable'
-import { observable, action } from 'mobx'
+import { action, observable } from 'mobx'
 import { ReportSubject } from '../../shared/types/ReportSubject'
 import osmtogeojson from 'osmtogeojson'
+import { MapLayers } from '../components/Map'
 
 const CreateReportView = styled.div`
   height: 100%;
@@ -131,6 +132,7 @@ class CreateReportPage extends React.Component<Props, any> {
         </Sidebar>
         <MapArea>
           <ReportsMap
+            defaultLayer={MapLayers.MAPILLARY}
             useBounds={false}
             onMapClick={this.onMapClick}
             highlightGeoJson={highlightGeoJson}
