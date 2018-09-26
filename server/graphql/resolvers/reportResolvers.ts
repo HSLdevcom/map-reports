@@ -10,7 +10,6 @@ import createCursor from '../../../shared/utils/createCursor'
 import { ReportDataInput } from '../../../shared/types/CreateReportData'
 import { createReport as reportFactory } from '../../reports/createReport'
 import pFilter from 'p-filter'
-import { func } from 'prop-types'
 
 const filterableKeys = ['status', 'priority', 'item.type', 'item.entityIdentifier']
 
@@ -83,9 +82,9 @@ const reportResolvers = db => {
   function applySorting(reportsToSort, sortRules) {
     return orderBy<Report>(
       reportsToSort,
-      value => {
+      report => {
         const getSortValue = get(sortValues, sortRules.key, obj => obj[sortRules.key])
-        return getSortValue(value)
+        return getSortValue(report)
       },
       sortRules.direction
     )
