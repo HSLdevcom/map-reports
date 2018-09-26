@@ -1,6 +1,8 @@
 import { withLeaflet, MapLayer, GridLayer } from 'react-leaflet/es'
 import mapboxLeaflet from '../helpers/MapboxGlLeaflet'
 import { closestPointInGeometry } from '../helpers/closestPoint'
+import { latLng } from 'leaflet'
+import { offsetPosition } from '../helpers/offsetPosition'
 
 class MapillaryLayer extends MapLayer {
   gl = null
@@ -75,12 +77,14 @@ class MapillaryLayer extends MapLayer {
   }
 
   onHover = (leafletMap, glMap) => e => {
-    const { containerPoint, latlng } = e
+    const { containerPoint, latlng: eventLatlng } = e
+    // Offset by 10 meters or so, otherwise the dot will be under the cursor.
+    const latlng = latLng(offsetPosition(eventLatlng, 10, -10))
 
-    const bbox = [
-      { x: containerPoint.x - 20, y: containerPoint.y - 20 },
-      { x: containerPoint.x + 20, y: containerPoint.y + 20 },
-    ]
+    const pointX = containerPoint.x
+    const pointY = containerPoint.y
+
+    const bbox = [{ x: pointX - 20, y: pointY - 20 }, { x: pointX + 20, y: pointY + 20 }]
 
     const features = glMap.queryRenderedFeatures(bbox, {
       layers: ['mapillary'],

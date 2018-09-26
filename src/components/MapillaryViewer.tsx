@@ -47,7 +47,7 @@ class MapillaryViewer extends React.Component<Props, {}> {
   initMapillary(mapillaryKey) {
     this.mly = new Mapillary.Viewer(
       MAPILLARY_ELEMENT_ID,
-      'TG1sUUxGQlBiYWx2V05NM0pQNUVMQTo2NTU3NTBiNTk1NzM1Y2U2',
+      'V2RqRUsxM2dPVFBMdnlhVUliTkM0ZzoxNmI5ZDZhOTc5YzQ2MzEw',
       mapillaryKey
     )
   }
