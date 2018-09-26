@@ -3,7 +3,7 @@ import * as L from 'leaflet'
 const mapboxgl = window.mapboxgl
 
 // @ts-ignore
-const MapboxLeaflet = L.GridLayer.extend({
+const MapboxLeaflet = L.Layer.extend({
   options: {},
 
   initialize(options) {

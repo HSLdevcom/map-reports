@@ -1,11 +1,9 @@
 import * as React from 'react'
 import { observer } from 'mobx-react'
 import { action, observable } from 'mobx'
-import geoJson from 'geojson'
 import { map, get } from 'lodash'
 import { Divider, FormGroup, InputLabel, TextField, Typography } from '@material-ui/core'
 import Select from '../helpers/Select'
-import neatCsv from 'neat-csv'
 import { AnyFunction } from '../../shared/types/AnyFunction'
 import fetchSampleAsGeoJSON from '../helpers/fetchSampleAsGeoJSON'
 

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import Map from './Map'
+import Map, { MapLayers } from './Map'
 import { RendersReports } from '../../shared/types/RendersReports'
 import { inject, observer } from 'mobx-react'
 import { MapModes } from '../stores/MapStore'
@@ -19,11 +19,16 @@ interface Props extends RendersReports {
   useVectorLayers?: boolean
   onMapClick?: AnyFunction
   highlightGeoJson?: any
+  defaultLayer?: MapLayers
 }
 
 @inject(app('Report'))
 @observer
 class ReportsMap extends React.Component<Props, any> {
+  static defaultProps = {
+    defaultLayer: MapLayers.VECTOR,
+  }
+
   onMapClick = async (event: LeafletMouseEvent, zoom) => {
     const { onMapClick } = this.props
     const {
@@ -71,13 +76,7 @@ class ReportsMap extends React.Component<Props, any> {
   }
 
   render() {
-    const {
-      state,
-      useBounds,
-      useVectorLayers = false,
-      children,
-      highlightGeoJson,
-    } = this.props
+    const { state, useBounds, children, highlightGeoJson, defaultLayer } = this.props
 
     const markers: Marker[] = this.getReportMarkers()
 
@@ -94,8 +93,8 @@ class ReportsMap extends React.Component<Props, any> {
 
     return (
       <Map
+        defaultLayer={defaultLayer}
         highlightGeoJson={highlightGeoJson}
-        useVectorLayers={useVectorLayers}
         useBounds={useBounds}
         focusedMarker={state.focusedReport}
         onMapClick={this.onMapClick}

@@ -7,31 +7,13 @@ import { createStore } from 'mobx-app'
 import UIStore from './stores/UIStore'
 import { Router } from 'pathricia'
 import createHistory from 'history/createBrowserHistory'
-import { typography } from './style/typography'
-import { injectGlobal } from 'styled-components'
 import MapStore from './stores/MapStore'
 import ReportStore from './stores/ReportStore'
-import color from './style/colors'
 import App from './App'
-
-injectGlobal`
-  * {
-    box-sizing: border-box;
-  }
-
-  body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-  }
-  
-  ${color}
-  ${typography}
-`
 
 configure({
   computedRequiresReaction: true,
-  enforceActions: true,
+  enforceActions: 'observed',
 })
 
 const baseUrl = process.env.BASE_URL || ''
