@@ -63,7 +63,9 @@ class MapillaryViewer extends React.Component<Props, {}> {
   }
 
   onResize = () => {
-    this.mly.resize()
+    if (this.mly) {
+      this.mly.resize()
+    }
   }
 
   componentWillUnmount() {
