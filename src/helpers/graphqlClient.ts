@@ -17,7 +17,6 @@ const cache = new InMemoryCache({
   fragmentMatcher,
   dataIdFromObject: (obj: any) => {
     switch (obj.__typename) {
-      case 'Report':
       case 'ReportItem':
       case 'Inspection':
         return obj.id

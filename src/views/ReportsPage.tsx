@@ -41,6 +41,7 @@ type Props = {
 @inject(app('Report'))
 @query({
   query: reportsQuery,
+  fetchPolicy: 'cache-first',
   getVariables: ({ state }) => ({
     perPage: 10,
     sort: toJS(state.sortReports),
@@ -53,7 +54,7 @@ class ReportsPage extends React.Component<Props, any> {
     const { state, refetch } = this.props
 
     autorun(() => {
-      refetch({ filter: toJS(state.filterReports) })
+      refetch({ filter: toJS(state.filterReports), sort: toJS(state.sortReports) })
     })
   }
 

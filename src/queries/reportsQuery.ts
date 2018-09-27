@@ -17,7 +17,7 @@ export const reportsQuery = gql`
     $filter: [FilterParams]
   ) {
     reportsConnection(perPage: $perPage, cursor: $cursor, sort: $sort, filter: $filter)
-      @connection(key: "reports") {
+      @connection(key: "reports", filter: ["sort", "filter"]) {
       pageInfo {
         currentPage
         hasNextPage
