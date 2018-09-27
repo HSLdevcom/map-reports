@@ -1,9 +1,11 @@
 import reportResolvers from './reportResolvers'
+import commentResolvers from './commentResolvers'
 import inspectionResolvers from './inspectionResolvers'
 
 const createResolvers = (db): any => {
   const reports = reportResolvers(db)
   const inspections = inspectionResolvers(db)
+  const comments = commentResolvers(db)
 
   return {
     Query: {
@@ -24,9 +26,11 @@ const createResolvers = (db): any => {
       setStatus: reports.setStatus,
       setPriority: reports.setPriority,
       createInspection: inspections.createInspection,
+      createComment: comments.createComment,
     },
     Report: {
       item: reports.resolveReportItem,
+      comments: comments.resolveCommentsForReport,
     },
     ReportItem: {
       data: reportItem => {

@@ -21,6 +21,7 @@ const rootTypeDefs = gql`
     setStatus(reportId: String!, newStatus: ReportStatus): Report
     setPriority(reportId: String!, newPriority: ReportPriority): Report
     createInspection(inspection: InspectionSpecInput): Inspection
+    createComment(comment: CommentInput): Comment
   }
 `
 

@@ -1,11 +1,25 @@
 import { get as _get } from 'lodash'
 import knex, { migrate } from './knex'
+import { AnyFunction } from '../shared/types/AnyFunction'
 
 interface RecordTypeContract {
   id: string
 }
 
-async function createDb<RecordType extends RecordTypeContract>(tableName) {
+type ReturningType = string | string[]
+type DbResponse = any | any[]
+
+export interface DatabaseRepository {
+  get: (id?: string) => Promise<DbResponse>
+  add: (item: any, returning?: ReturningType) => Promise<DbResponse>
+  update: (id: string, newValues: any[], returning?: ReturningType) => Promise<DbResponse>
+  remove: (id: string) => Promise<DbResponse>
+  table: AnyFunction
+}
+
+async function createDb<RecordType extends RecordTypeContract>(
+  tableName
+): Promise<DatabaseRepository> {
   async function get(id: string = null) {
     const table = knex(tableName)
 
@@ -56,10 +70,11 @@ async function createDb<RecordType extends RecordTypeContract>(tableName) {
   }
 }
 
-// TODO: Sort out database abstraction.
-// Cannot select table once and re-use.
+export interface DatabaseWrapper {
+  table: (tableName: string) => DatabaseRepository
+}
 
-const database = async () => {
+const database = async (): Promise<DatabaseWrapper> => {
   await migrate()
 
   const tables = {

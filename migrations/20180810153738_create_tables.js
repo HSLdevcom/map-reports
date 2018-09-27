@@ -14,20 +14,6 @@ exports.up = async function(knex) {
     table.timestamps(true, true)
   })
 
-  await knex.schema.createTable('Comments', table => {
-    table
-      .uuid('id')
-      .primary()
-      .defaultTo(knex.raw('uuid_generate_v4()'))
-    table.text('body').notNullable()
-    table
-      .uuid('user')
-      .references('id')
-      .inTable('Users')
-      .notNullable()
-    table.timestamps(true, true)
-  })
-
   await knex.schema.createTable('ReportedItems', table => {
     table
       .uuid('id')
@@ -88,6 +74,25 @@ exports.up = async function(knex) {
       .uuid('user')
       .references('id')
       .inTable('Users')
+    table.timestamps(true, true)
+  })
+
+  await knex.schema.createTable('Comments', table => {
+    table
+      .uuid('id')
+      .primary()
+      .defaultTo(knex.raw('uuid_generate_v4()'))
+    table.text('body').notNullable()
+    table
+      .uuid('user')
+      .references('id')
+      .inTable('Users')
+      .notNullable()
+    table
+      .uuid('report')
+      .references('id')
+      .inTable('Reports')
+      .notNullable()
     table.timestamps(true, true)
   })
 }
