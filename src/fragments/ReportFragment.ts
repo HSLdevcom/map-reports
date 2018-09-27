@@ -1,4 +1,5 @@
 import gql from 'graphql-tag'
+import { CommentFragment } from './CommentFragment'
 
 export const ReportFragment = gql`
   fragment ReportFields on Report {
@@ -15,10 +16,12 @@ export const ReportFragment = gql`
       lat
       lon
       entityIdentifier
-      __typename
     }
     created_at
     updated_at
-    __typename
+    comments {
+      ...CommentFields
+    }
   }
+  ${CommentFragment}
 `

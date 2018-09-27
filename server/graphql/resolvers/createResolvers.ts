@@ -10,6 +10,7 @@ const createResolvers = (db): any => {
   return {
     Query: {
       // Reports
+      report: reports.getReport,
       reports: reports.allReports,
       reportItems: reports.allReportItems,
       reportFilterOptions: reports.reportFilterOptions,

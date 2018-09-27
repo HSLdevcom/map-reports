@@ -67,6 +67,10 @@ const reportResolvers = db => {
     )
   }
 
+  async function getReport(_, { reportId }) {
+    return reportsDb.get(reportId)
+  }
+
   async function allReports() {
     return reportsDb.get()
   }
@@ -163,7 +167,7 @@ const reportResolvers = db => {
       item: reportItemId,
     }
 
-    const report = merge(reportData, defaultReportData)
+    const report = merge({}, defaultReportData, reportData)
 
     const reportRecord = await reportsDb.add(report, ['id', 'created_at', 'updated_at'])
     merge(report, get(reportRecord, '[0]', {}))
@@ -196,6 +200,7 @@ const reportResolvers = db => {
 
   return {
     reportsConnection,
+    getReport,
     allReports,
     allReportItems,
     resolveReportItem,

@@ -30,7 +30,7 @@ export const Mutation = observer(
       onCompleted={onCompleted}
       mutation={mutation}
       // If update is a function of length 1, assume that it takes props as args and returns the update function.
-      update={typeof update === 'function' && update.length === 1 ? update(rest) : update}
+      update={typeof update === 'function' ? update(rest) : undefined}
       variables={variables}>
       {(mutate, { loading, error, data = {} }): React.ReactNode => {
         const queryName = Object.keys(data)[0]

@@ -12,7 +12,6 @@ const commentTypeDefs = gql`
 
   input CommentInput {
     body: String!
-    report: String!
   }
 `
 

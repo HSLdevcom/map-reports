@@ -25,23 +25,23 @@ const commentResolvers = db => {
     return pMap(reportComments, resolveRelations)
   }
 
-  async function createComment(_, { comment }) {
+  async function createComment(_, { comment, reportId }) {
     const user = await usersDb
       .table()
       .where('name', 'Admin')
       .first()
 
-    const addedComment = await commentsDb.add({ ...comment, user: user.id }, [
-      'id',
-      'created_at',
-      'updated_at',
-      'body',
-      'user',
-      'report',
-    ])
+    const addedComment = await commentsDb.add(
+      { ...comment, report: reportId, user: user.id },
+      ['id', 'created_at', 'updated_at', 'body', 'user', 'report']
+    )
 
-    const resolveRelations = commentRelationsResolver()
-    return resolveRelations(addedComment)
+    if (addedComment.length !== 0) {
+      const resolveRelations = commentRelationsResolver()
+      return resolveRelations(addedComment[0])
+    }
+
+    return []
   }
 
   return {

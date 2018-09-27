@@ -92,15 +92,16 @@ exports.up = async function(knex) {
       .uuid('report')
       .references('id')
       .inTable('Reports')
+      .onDelete('CASCADE') // Delete comment when report is deleted.
       .notNullable()
     table.timestamps(true, true)
   })
 }
 
 exports.down = async function(knex) {
+  await knex.schema.dropTable('Comments')
   await knex.schema.dropTable('Reports')
   await knex.schema.dropTable('ReportedItems')
   await knex.schema.dropTable('Inspections')
-  await knex.schema.dropTable('Comments')
   await knex.schema.dropTable('Users')
 }

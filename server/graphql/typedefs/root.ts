@@ -2,6 +2,7 @@ import { gql } from 'apollo-server-express'
 
 const rootTypeDefs = gql`
   type Query {
+    report(reportId: String!): Report
     reports: [Report]
     reportFilterOptions: [ReportFilterOptions]
     reportsConnection(
@@ -21,7 +22,7 @@ const rootTypeDefs = gql`
     setStatus(reportId: String!, newStatus: ReportStatus): Report
     setPriority(reportId: String!, newPriority: ReportPriority): Report
     createInspection(inspection: InspectionSpecInput): Inspection
-    createComment(comment: CommentInput): Comment
+    createComment(comment: CommentInput!, reportId: String!): Comment
   }
 `
 

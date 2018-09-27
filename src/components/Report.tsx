@@ -15,6 +15,7 @@ import { observer } from 'mobx-react'
 import { compose } from 'react-apollo'
 import { Button } from '@material-ui/core'
 import { Delete } from '@material-ui/icons'
+import Comments from './Comments'
 
 const Report = styled.div<{ type: string }>`
   cursor: pointer;
@@ -162,9 +163,12 @@ class ReportItem extends React.Component<Props, any> {
         <SlideDown closed={!this.state.isOpen}>
           {report.message && <ReportContent>{report.message}</ReportContent>}
           {itemData && (
-            <ReportContent json>
-              {prettyJson.render(omit(itemData, 'bounds', 'geometry', 'nodes'))}
-            </ReportContent>
+            <>
+              <ReportContent json>
+                {prettyJson.render(omit(itemData, 'bounds', 'geometry', 'nodes'))}
+              </ReportContent>
+              <Comments comments={report.comments} reportId={report.id} />
+            </>
           )}
         </SlideDown>
       </Report>
