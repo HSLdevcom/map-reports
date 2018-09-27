@@ -66,6 +66,8 @@ const database = async () => {
     report: await createDb('Reports'),
     reportItem: await createDb('ReportedItems'),
     inspection: await createDb('Inspections'),
+    comment: await createDb('Comments'),
+    user: await createDb('Users'),
   }
 
   function table(tableName) {

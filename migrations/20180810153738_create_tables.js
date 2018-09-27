@@ -1,7 +1,33 @@
-const ReportStatus = ['NEW', 'ACCEPTED', 'WIP', 'DONE', 'REJECTED']
-const ReportPriority = ['LOW', 'HIGH', 'CRITICAL']
-
 exports.up = async function(knex) {
+  await knex.schema.createTable('Users', table => {
+    table
+      .uuid('id')
+      .primary()
+      .defaultTo(knex.raw('uuid_generate_v4()'))
+    table.text('name').notNullable()
+    table
+      .string('email')
+      .notNullable()
+      .unique()
+    table.text('password').notNullable()
+    table.string('group').notNullable()
+    table.timestamps(true, true)
+  })
+
+  await knex.schema.createTable('Comments', table => {
+    table
+      .uuid('id')
+      .primary()
+      .defaultTo(knex.raw('uuid_generate_v4()'))
+    table.text('body').notNullable()
+    table
+      .uuid('user')
+      .references('id')
+      .inTable('Users')
+      .notNullable()
+    table.timestamps(true, true)
+  })
+
   await knex.schema.createTable('ReportedItems', table => {
     table
       .uuid('id')
@@ -58,6 +84,10 @@ exports.up = async function(knex) {
       .uuid('inspection')
       .references('id')
       .inTable('Inspections')
+    table
+      .uuid('user')
+      .references('id')
+      .inTable('Users')
     table.timestamps(true, true)
   })
 }
@@ -66,4 +96,6 @@ exports.down = async function(knex) {
   await knex.schema.dropTable('Reports')
   await knex.schema.dropTable('ReportedItems')
   await knex.schema.dropTable('Inspections')
+  await knex.schema.dropTable('Comments')
+  await knex.schema.dropTable('Users')
 }
