@@ -7,6 +7,7 @@ const reportTypeDefs = gql`
     WIP
     DONE
     REJECTED
+    UNCLEAR
   }
 
   enum ReportPriority {

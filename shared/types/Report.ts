@@ -4,6 +4,7 @@ export enum ReportStatus {
   WIP = 'WIP',
   DONE = 'DONE',
   REJECTED = 'REJECTED',
+  UNCLEAR = 'UNCLEAR',
 }
 
 export enum ReportPriority {
