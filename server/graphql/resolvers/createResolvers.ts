@@ -28,6 +28,7 @@ const createResolvers = (db): any => {
       setPriority: reports.setPriority,
       createInspection: inspections.createInspection,
       createComment: comments.createComment,
+      removeComment: comments.removeComment,
     },
     Report: {
       item: reports.resolveReportItem,

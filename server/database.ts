@@ -57,7 +57,7 @@ async function createDb<RecordType extends RecordTypeContract>(
     try {
       return table.where('id', id).delete()
     } catch (err) {
-      return []
+      return 0
     }
   }
 

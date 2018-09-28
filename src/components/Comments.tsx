@@ -7,8 +7,8 @@ import { Button } from '@material-ui/core'
 import { CommentFragment } from '../fragments/CommentFragment'
 import { get } from 'lodash'
 import { reportQuery } from '../queries/reportQuery'
-import { reportsCacheQuery } from '../queries/reportsQuery'
 import { query } from '../helpers/Query'
+import Comment from './Comment'
 
 const createCommentMutation = gql`
   mutation createComment($comment: CommentInput!, $reportId: String!) {
@@ -53,13 +53,6 @@ const updateCommentsCache = ({ reportId }) => (store, { data }) => {
 
 const CommentsList = styled.div`
   margin-top: 2rem;
-`
-
-const Comment = styled.div`
-  margin-bottom: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 0.75rem;
 `
 
 const CreateCommentForm = styled.form`
@@ -118,7 +111,7 @@ class Comments extends React.Component<any, any> {
     return (
       <CommentsList>
         {comments.map(comment => (
-          <Comment key={`comment_${comment.id}`}>{comment.body}</Comment>
+          <Comment comment={comment} key={`comment_${comment.id}`} />
         ))}
         <CreateCommentForm onSubmit={this.onSubmitComment}>
           <CommentBodyField value={body} onChange={this.setDraftBody} />

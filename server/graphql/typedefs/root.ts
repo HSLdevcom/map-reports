@@ -23,6 +23,7 @@ const rootTypeDefs = gql`
     setPriority(reportId: String!, newPriority: ReportPriority): Report
     createInspection(inspection: InspectionSpecInput): Inspection
     createComment(comment: CommentInput!, reportId: String!): Comment
+    removeComment(commentId: String!): Boolean
   }
 `
 

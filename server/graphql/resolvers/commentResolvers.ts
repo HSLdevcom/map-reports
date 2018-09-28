@@ -44,9 +44,15 @@ const commentResolvers = db => {
     return []
   }
 
+  async function removeComment(_, { commentId }) {
+    const removed = await commentsDb.remove(commentId)
+    return removed > 0
+  }
+
   return {
     resolveCommentsForReport,
     createComment,
+    removeComment,
   }
 }
 

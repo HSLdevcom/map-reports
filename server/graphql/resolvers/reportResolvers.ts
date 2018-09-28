@@ -177,7 +177,7 @@ const reportResolvers = db => {
 
   async function removeReport(_, { reportId }): Promise<boolean> {
     const removed = await reportsDb.remove(reportId)
-    return removed.length > 0
+    return removed > 0
   }
 
   async function setStatus(_, { reportId, newStatus }): Promise<Report> {
