@@ -92,9 +92,11 @@
     "react-leaflet-markercluster": "^2.0.0-rc3",
     "react-slidedown": "^2.0.4",
     "react-transition-group": "^2.4.0",
+    "reflect-metadata": "^0.1.12",
     "shortid": "^2.2.11",
     "styled-components": "^4.0.0-beta.8",
     "ts-node": "^7.0.0",
+    "typeorm": "^0.2.7",
     "typescript": "^3.0.3",
     "uuid": "^3.3.2"
   },

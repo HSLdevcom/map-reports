@@ -1,4 +1,5 @@
 require('dotenv').config()
+import 'reflect-metadata'
 
 import Express from 'express'
 import path from 'path'
