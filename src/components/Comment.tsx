@@ -8,6 +8,7 @@ import { Button } from '@material-ui/core'
 import { AnyFunction } from '../../shared/types/AnyFunction'
 import { get } from 'lodash'
 import { reportQuery } from '../queries/reportQuery'
+import { updateApolloCache } from '../helpers/updateApolloCache'
 
 const removeCommentMutation = gql`
   mutation removeComment($commentId: String!) {
@@ -22,37 +23,23 @@ const CommentElement = styled.div`
   padding: 0.75rem;
 `
 
-const updateCommentsCache = ({ comment }) => (store, { data }) => {
-  const operationName = Object.keys(data)[0]
-  const deleteCommentResult = get(data, operationName, false)
-
-  if (deleteCommentResult) {
-    let report
-    const variables = { reportId: comment.report.id }
-
-    try {
-      report = store.readQuery({
-        query: reportQuery,
-        variables,
-      })
-    } catch (err) {
-      report = { report: { id: variables.reportId, comments: [], __typename: 'Report' } }
-    }
-
-    if (report) {
-      const commentIndex = report.report.comments.findIndex(c => c.id === comment.id)
+const updateCommentsCache = ({ comment }) => {
+  const getData = (existingData, mutationResult) => {
+    if (existingData && mutationResult) {
+      const commentIndex = existingData.report.comments.findIndex(
+        c => c.id === comment.id
+      )
 
       if (commentIndex > -1) {
-        report.report.comments.splice(commentIndex, 1)
-
-        store.writeQuery({
-          query: reportQuery,
-          variables,
-          data: report,
-        })
+        existingData.report.comments.splice(commentIndex, 1)
+        return existingData
       }
     }
+
+    return false
   }
+
+  return updateApolloCache(reportQuery, { reportId: comment.report.id }, getData)
 }
 
 interface Props {

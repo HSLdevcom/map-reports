@@ -9,6 +9,7 @@ import { get } from 'lodash'
 import { reportQuery } from '../queries/reportQuery'
 import { query } from '../helpers/Query'
 import Comment from './Comment'
+import { updateApolloCache } from '../helpers/updateApolloCache'
 
 const createCommentMutation = gql`
   mutation createComment($comment: CommentInput!, $reportId: String!) {
@@ -19,36 +20,17 @@ const createCommentMutation = gql`
   ${CommentFragment}
 `
 
-const updateCommentsCache = ({ reportId }) => (store, { data }) => {
-  const operationName = Object.keys(data)[0]
-  const newCommentResult = { ...get(data, operationName, {}), __typename: 'Comment' }
-
-  if (newCommentResult) {
-    let report
-
-    try {
-      report = store.readQuery({
-        query: reportQuery,
-        variables: {
-          reportId,
-        },
-      })
-    } catch (err) {
-      report = { report: { id: reportId, comments: [], __typename: 'Report' } }
+const updateCommentsCache = ({ reportId }) => {
+  const getData = (existingData, mutationResult) => {
+    if (existingData && mutationResult) {
+      existingData.report.comments.unshift(mutationResult)
+      return existingData
     }
 
-    if (report) {
-      report.report.comments.unshift(newCommentResult)
-
-      store.writeQuery({
-        query: reportQuery,
-        variables: {
-          reportId,
-        },
-        data: report,
-      })
-    }
+    return false
   }
+
+  return updateApolloCache(reportQuery, { reportId }, getData, 'Comment')
 }
 
 const CommentsList = styled.div`
