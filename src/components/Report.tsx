@@ -15,6 +15,9 @@ import { observer } from 'mobx-react'
 import { compose } from 'react-apollo'
 import { Button } from '@material-ui/core'
 import { Delete } from '@material-ui/icons'
+import Comments from './Comments'
+import EditInOSM from './EditInOSM'
+import { latLng } from 'leaflet'
 
 const Report = styled.div<{ type: string }>`
   cursor: pointer;
@@ -137,6 +140,7 @@ class ReportItem extends React.Component<Props, any> {
   render() {
     const { report, onClick } = this.props
 
+    const item = get(report, 'item', null)
     const itemData = JSON.parse(get(report, 'item.data', '{}'))
 
     return (
@@ -166,6 +170,8 @@ class ReportItem extends React.Component<Props, any> {
               {prettyJson.render(omit(itemData, 'bounds', 'geometry', 'nodes'))}
             </ReportContent>
           )}
+          {item && <EditInOSM location={latLng({ lat: item.lat, lng: item.lon })} />}
+          {report.comments.length !== 0 && <Comments reportId={report.id} />}
         </SlideDown>
       </Report>
     )

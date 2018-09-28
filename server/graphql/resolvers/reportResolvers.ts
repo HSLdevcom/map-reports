@@ -3,13 +3,15 @@ import { orderBy, get, toLower, groupBy, values, merge } from 'lodash'
 import {
   Report,
   ReportItem,
+  ReportPriority,
   ReportPriority as ReportPriorityEnum,
+  ReportStatus,
   ReportStatus as ReportStatusEnum,
 } from '../../../shared/types/Report'
 import createCursor from '../../../shared/utils/createCursor'
 import { ReportDataInput } from '../../../shared/types/CreateReportData'
-import { createReport as reportFactory } from '../../reports/createReport'
 import pFilter from 'p-filter'
+import { createRelationResolver } from '../../util/resolveRelations'
 
 const filterableKeys = ['status', 'priority', 'item.type', 'item.entityIdentifier']
 
@@ -27,41 +29,16 @@ const reportResolvers = db => {
   const reportsDb = db.table('report')
   const reportItemsDb = db.table('reportItem')
 
-  function createRelationResolver() {
-    const relations = {
-      item: {
-        resolved: [],
-        db: reportItemsDb,
-      },
-    }
-
-    return async report => {
-      const returnReport = { ...report }
-
-      for (const reportProp in report) {
-        if (reportProp in relations === false || typeof report[reportProp] !== 'string') {
-          continue
-        }
-
-        let related = relations[reportProp].resolved.find(
-          r => r.id === report[reportProp]
-        )
-
-        if (!related) {
-          related = await relations[reportProp].db.get(report[reportProp])
-          relations[reportProp].resolved.push(related)
-        }
-
-        returnReport[reportProp] = related
-      }
-
-      return returnReport
-    }
+  const relations = {
+    item: 'reportItem',
+    user: 'user',
   }
+
+  const reportRelationResolver = () => createRelationResolver(db, relations)
 
   async function applyFilters(reportsToFilter, filterRules) {
     const filterGroups = values(groupBy(filterRules.filter(f => !!f.key), 'key'))
-    const resolveRelations = createRelationResolver()
+    const resolveRelations = reportRelationResolver()
 
     // Include only reports that match all filters
     return pFilter(reportsToFilter, async reportRecord => {
@@ -88,6 +65,10 @@ const reportResolvers = db => {
       },
       sortRules.direction
     )
+  }
+
+  async function getReport(_, { reportId }) {
+    return reportsDb.get(reportId)
   }
 
   async function allReports() {
@@ -129,7 +110,7 @@ const reportResolvers = db => {
   async function reportFilterOptions() {
     const reports = await reportsDb.get()
     const options = []
-    const resolveRelations = createRelationResolver()
+    const resolveRelations = reportRelationResolver()
 
     for (const recordIndex in reports) {
       const report = await resolveRelations(reports[recordIndex])
@@ -177,7 +158,16 @@ const reportResolvers = db => {
   ): Promise<Report> {
     const reportItemInsert = await reportItemsDb.add(reportItem)
 
-    const report = reportFactory(reportData, get(reportItemInsert, '[0]'))
+    const reportItemId = get(reportItemInsert, '[0]')
+
+    const defaultReportData = {
+      priority: ReportPriority.LOW,
+      status: ReportStatus.NEW,
+      message: '',
+      item: reportItemId,
+    }
+
+    const report = merge({}, defaultReportData, reportData)
 
     const reportRecord = await reportsDb.add(report, ['id', 'created_at', 'updated_at'])
     merge(report, get(reportRecord, '[0]', {}))
@@ -187,7 +177,7 @@ const reportResolvers = db => {
 
   async function removeReport(_, { reportId }): Promise<boolean> {
     const removed = await reportsDb.remove(reportId)
-    return removed.length > 0
+    return removed > 0
   }
 
   async function setStatus(_, { reportId, newStatus }): Promise<Report> {
@@ -210,6 +200,7 @@ const reportResolvers = db => {
 
   return {
     reportsConnection,
+    getReport,
     allReports,
     allReportItems,
     resolveReportItem,

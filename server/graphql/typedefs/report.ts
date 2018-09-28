@@ -7,6 +7,7 @@ const reportTypeDefs = gql`
     WIP
     DONE
     REJECTED
+    UNCLEAR
   }
 
   enum ReportPriority {
@@ -41,8 +42,10 @@ const reportTypeDefs = gql`
     status: ReportStatus!
     priority: ReportPriority!
     item: ReportItem!
+    user: User!
     created_at: String!
     updated_at: String!
+    comments: [Comment]!
   }
 
   input InputReport {

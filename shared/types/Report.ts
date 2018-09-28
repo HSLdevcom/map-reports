@@ -1,9 +1,12 @@
+import { Comment } from './Comment'
+
 export enum ReportStatus {
   NEW = 'NEW',
   ACCEPTED = 'ACCEPTED',
   WIP = 'WIP',
   DONE = 'DONE',
   REJECTED = 'REJECTED',
+  UNCLEAR = 'UNCLEAR',
 }
 
 export enum ReportPriority {
@@ -27,6 +30,7 @@ export interface Report<ItemType = ReportItem> {
   message?: string
   status: ReportStatus
   priority: ReportPriority
+  comments?: Comment[]
   item: ItemType | string
   created_at?: number
   updated_at?: number

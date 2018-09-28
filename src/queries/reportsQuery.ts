@@ -23,14 +23,27 @@ export const reportsQuery = gql`
         hasNextPage
         hasPreviousPage
         totalPages
-        __typename
       }
       edges {
         cursor
         node {
           ...ReportFields
         }
-        __typename
+      }
+    }
+  }
+  ${ReportFragment}
+`
+
+export const reportsCacheQuery = gql`
+  query reportsCacheQuery($sort: SortParams, $filter: [FilterParams]) {
+    reportsConnection(sort: $sort, filter: $filter)
+      @connection(key: "reports", filter: ["sort", "filter"]) {
+      edges {
+        cursor
+        node {
+          ...ReportFields
+        }
       }
     }
   }

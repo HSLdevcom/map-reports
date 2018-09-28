@@ -1,2 +1,3 @@
-+ Fix report ordering
-+ Add parameters to style request
++ Add UNCLEAR status to reports
++ Add report comments
++ Open report in OSM editor

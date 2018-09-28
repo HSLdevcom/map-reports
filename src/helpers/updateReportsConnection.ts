@@ -1,7 +1,9 @@
 import { get } from 'lodash'
-import { emptyArguments, reportsQuery } from '../queries/reportsQuery'
+import { emptyArguments, reportsCacheQuery, reportsQuery } from '../queries/reportsQuery'
 import createCursor from '../../shared/utils/createCursor'
 import { toJS } from 'mobx'
+import gql from 'graphql-tag'
+import { ReportFragment } from '../fragments/ReportFragment'
 
 // The first function needs props (and state) and will return the update function.
 const updateReportsConnection = ({ state }) => (store, { data }) => {
@@ -19,7 +21,7 @@ const updateReportsConnection = ({ state }) => (store, { data }) => {
           filter: toJS(state.filterReports.filter(f => !!f.key)),
         }
 
-    const query = reportsQuery
+    const query = reportsCacheQuery
 
     const resultData = {
       // Create a cursor for the item that should be the same as what the server creates.
@@ -28,7 +30,6 @@ const updateReportsConnection = ({ state }) => (store, { data }) => {
         sort: variables.sort,
       }),
       node: operationResult,
-      __typename: 'ReportsEdge',
     }
 
     let cachedData

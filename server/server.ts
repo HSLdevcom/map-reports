@@ -88,7 +88,8 @@ function getStyleComponents(selection) {
 
   app.get('*', (req, res) => res.sendFile(path.join(__dirname, '../dist/index.html')))
 
-  app.listen({ port: 1234 }, () =>
+  app.listen({ port: 1234 }, () => {
     console.log(`🚀 Server ready at http://localhost:1234`)
-  )
+    console.log(`Get your graphQL at ${server.graphqlPath}`)
+  })
 })()
