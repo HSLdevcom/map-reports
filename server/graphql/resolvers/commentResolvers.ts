@@ -1,56 +1,35 @@
-import pMap from 'p-map'
-import { createRelationResolver } from '../../util/resolveRelations'
+import { Comment } from '../../entity/Comment'
+import { Comment as CommentType } from '../../../shared/types/Comment'
+import { Report } from '../../entity/Report'
 
 const commentResolvers = db => {
-  const commentsDb = db.table('comment')
-  const usersDb = db.table('user')
+  const commentsRepo = db.getRepo(Comment)
+  const reportsRepo = db.getRepo(Report)
 
-  const commentRelationsResolver = () =>
-    createRelationResolver(db, {
-      user: 'user',
-      report: 'report',
-    })
+  async function createComment(_, { comment, reportId }): Promise<CommentType> {
+    // TODO: Add the user authenticated for the request
+    const user = db.getAdmin()
 
-  async function resolveCommentsForReport(report) {
-    const reportComments = await commentsDb
-      .table()
-      .where({ report: report.id })
-      .orderBy('created_at', 'desc')
+    const report = await reportsRepo().findOne(reportId)
 
-    if (reportComments.length === 0) {
-      return reportComments
-    }
+    const commentEntity = new Comment()
+    Object.assign(commentEntity, comment)
 
-    const resolveRelations = commentRelationsResolver()
-    return pMap(reportComments, resolveRelations)
+    commentEntity.report = report
+    commentEntity.author = user
+
+    commentsRepo.save(commentEntity)
+
+    return commentEntity
   }
 
-  async function createComment(_, { comment, reportId }) {
-    const user = await usersDb
-      .table()
-      .where('name', 'Admin')
-      .first()
-
-    const addedComment = await commentsDb.add(
-      { ...comment, report: reportId, user: user.id },
-      ['id', 'created_at', 'updated_at', 'body', 'user', 'report']
-    )
-
-    if (addedComment.length !== 0) {
-      const resolveRelations = commentRelationsResolver()
-      return resolveRelations(addedComment[0])
-    }
-
-    return []
-  }
-
-  async function removeComment(_, { commentId }) {
-    const removed = await commentsDb.remove(commentId)
-    return removed > 0
+  async function removeComment(_, { commentId }): Promise<boolean> {
+    const comment = await commentsRepo.findOne(commentId)
+    await commentsRepo.remove(comment)
+    return true
   }
 
   return {
-    resolveCommentsForReport,
     createComment,
     removeComment,
   }

@@ -10,7 +10,7 @@ const createResolvers = (db): any => {
   return {
     Query: {
       // Reports
-      report: reports.getReport,
+      report: reports.getReportResolver,
       reports: reports.allReports,
       reportItems: reports.allReportItems,
       reportFilterOptions: reports.reportFilterOptions,
@@ -29,10 +29,6 @@ const createResolvers = (db): any => {
       createInspection: inspections.createInspection,
       createComment: comments.createComment,
       removeComment: comments.removeComment,
-    },
-    Report: {
-      item: reports.resolveReportItem,
-      comments: comments.resolveCommentsForReport,
     },
     ReportItem: {
       data: reportItem => {

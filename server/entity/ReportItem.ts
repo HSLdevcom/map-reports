@@ -8,9 +8,10 @@ import {
   OneToOne,
 } from 'typeorm'
 import { Report } from './Report'
+import { ReportItem as ReportItemType } from '../../shared/types/Report'
 
 @Entity()
-export class ReportItem {
+export class ReportItem implements ReportItemType {
   @PrimaryGeneratedColumn('uuid')
   id: string
 

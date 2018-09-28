@@ -2,8 +2,9 @@ import got from 'got'
 import { get } from 'lodash'
 import neatCsv from 'neat-csv'
 import GeoJSON from '../../shared/utils/geojson'
+import { Inspection } from '../../shared/types/Inspection'
 
-async function runInspections(inspections, database) {
+async function runInspections(inspections: Inspection[], repo) {
   async function runGeoJsonInspection(inspection) {
     const geoJsonRequest = await got(inspection.datasetUri)
     return get(geoJsonRequest, 'body', {})
@@ -34,7 +35,8 @@ async function runInspections(inspections, database) {
         result = await runCSVInspection(inspection)
       }
 
-      await database.update(id, { geoJSON: result })
+      inspection.geoJSON = result
+      await repo.save(inspection)
     }
   }
 }

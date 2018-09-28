@@ -27,14 +27,15 @@ const inspectionTypeDefs = gql`
     id: ID!
     name: String!
     type: InspectionType!
-    datasetType: DatasetType!
+    datasetType: DatasetType
     datasetUri: String
     cron: String
     entityIdentifier: String!
     geoJSONProps: String
     geoJSON: String
-    created_at: String!
-    updated_at: String!
+    reports: [Report]
+    createdAt: String!
+    updatedAt: String!
   }
 `
 

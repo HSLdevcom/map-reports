@@ -42,9 +42,10 @@ const reportTypeDefs = gql`
     status: ReportStatus!
     priority: ReportPriority!
     item: ReportItem!
-    user: User!
-    created_at: String!
-    updated_at: String!
+    reportedBy: User!
+    inspection: Inspection
+    createdAt: String!
+    updatedAt: String!
     comments: [Comment]!
   }
 

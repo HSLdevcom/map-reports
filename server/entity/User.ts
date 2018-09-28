@@ -8,9 +8,12 @@ import {
 } from 'typeorm'
 import { Report } from './Report'
 import { Comment } from './Comment'
+import { User as UserType } from '../../shared/types/User'
+import { Report as ReportType } from '../../shared/types/Report'
+import { Comment as CommentType } from '../../shared/types/Comment'
 
 @Entity()
-export class User {
+export class User implements UserType {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
@@ -20,17 +23,17 @@ export class User {
   @Column('varchar', { length: 256, unique: true })
   email: string
 
-  @Column('text')
+  @Column('text', { select: false })
   password: string
 
   @Column('simple-array')
   roles: string[]
 
   @OneToMany(type => Report, report => report.reportedBy)
-  reports: Report[]
+  reports: ReportType[]
 
   @OneToMany(type => Comment, comment => comment.author)
-  comments: Comment[]
+  comments: CommentType[]
 
   @CreateDateColumn()
   createdAt: string

@@ -4,10 +4,10 @@ const commentTypeDefs = gql`
   type Comment {
     id: ID!
     body: String!
-    user: User!
+    author: User!
     report: Report!
-    created_at: String!
-    updated_at: String!
+    createdAt: String
+    updatedAt: String
   }
 
   input CommentInput {

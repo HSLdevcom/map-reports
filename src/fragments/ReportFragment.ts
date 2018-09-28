@@ -17,8 +17,11 @@ export const ReportFragment = gql`
       lon
       entityIdentifier
     }
-    created_at
-    updated_at
+    reportedBy {
+      id
+    }
+    createdAt
+    updatedAt
     comments {
       ...CommentFields
     }

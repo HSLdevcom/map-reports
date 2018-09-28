@@ -1,10 +1,11 @@
 import { Report } from './Report'
+import { User } from './User'
 
 export interface Comment {
   id: string
   body: string
-  user: any
-  report: Report | string
-  created_at?: number
-  updated_at?: number
+  author: User
+  report: Report
+  createdAt?: string
+  updatedAt?: string
 }

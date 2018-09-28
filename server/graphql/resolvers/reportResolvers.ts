@@ -1,17 +1,20 @@
 import fuzzysearch from 'fuzzysearch'
-import { orderBy, get, toLower, groupBy, values, merge } from 'lodash'
+import { orderBy, get, toLower, groupBy, values } from 'lodash'
 import {
-  Report,
-  ReportItem,
+  Report as ReportType,
+  ReportEdge,
+  ReportItem as ReportItemType,
   ReportPriority,
   ReportPriority as ReportPriorityEnum,
+  ReportsConnection,
   ReportStatus,
   ReportStatus as ReportStatusEnum,
 } from '../../../shared/types/Report'
 import createCursor from '../../../shared/utils/createCursor'
 import { ReportDataInput } from '../../../shared/types/CreateReportData'
 import pFilter from 'p-filter'
-import { createRelationResolver } from '../../util/resolveRelations'
+import { Report } from '../../entity/Report'
+import { ReportItem } from '../../entity/ReportItem'
 
 const filterableKeys = ['status', 'priority', 'item.type', 'item.entityIdentifier']
 
@@ -21,28 +24,19 @@ const filterableKeys = ['status', 'priority', 'item.type', 'item.entityIdentifie
 const sortValues = {
   status: obj => Object.values(ReportStatusEnum).indexOf(obj.status),
   priority: obj => Object.values(ReportPriorityEnum).indexOf(obj.priority),
-  created_at: obj => +new Date(obj.created_at),
-  updated_at: obj => +new Date(obj.updated_at),
+  createdAt: obj => +new Date(obj.createdAt),
+  updatedAt: obj => +new Date(obj.updatedAt),
 }
 
 const reportResolvers = db => {
-  const reportsDb = db.table('report')
-  const reportItemsDb = db.table('reportItem')
-
-  const relations = {
-    item: 'reportItem',
-    user: 'user',
-  }
-
-  const reportRelationResolver = () => createRelationResolver(db, relations)
+  const reportsRepo = db.getRepo(Report)
+  const reportItemsRepo = db.getRepo(ReportItem)
 
   async function applyFilters(reportsToFilter, filterRules) {
     const filterGroups = values(groupBy(filterRules.filter(f => !!f.key), 'key'))
-    const resolveRelations = reportRelationResolver()
 
     // Include only reports that match all filters
-    return pFilter(reportsToFilter, async reportRecord => {
-      const report = await resolveRelations(reportRecord)
+    return pFilter(reportsToFilter, async report => {
       // make sure that the current report matches every filter group
       return filterGroups.every(filterGroup =>
         // Filters are grouped by key. If there are many keys, treat it as an
@@ -57,7 +51,7 @@ const reportResolvers = db => {
   }
 
   function applySorting(reportsToSort, sortRules) {
-    return orderBy<Report>(
+    return orderBy<ReportType>(
       reportsToSort,
       report => {
         const getSortValue = get(sortValues, sortRules.key, obj => obj[sortRules.key])
@@ -67,26 +61,35 @@ const reportResolvers = db => {
     )
   }
 
-  async function getReport(_, { reportId }) {
-    return reportsDb.get(reportId)
+  async function getReportResolver(_, { reportId }): Promise<ReportType> {
+    return getReport(reportId)
   }
 
-  async function allReports() {
-    return reportsDb.get()
+  async function getReport(reportId): Promise<ReportType> {
+    return reportsRepo.findOne(reportId)
   }
 
-  async function allReportItems() {
-    return reportItemsDb.get()
+  async function allReports(): Promise<ReportType[]> {
+    return reportsRepo.find()
   }
 
-  async function reportsConnection(_, { perPage = 10, cursor = '', sort, filter }) {
-    const reports = await reportsDb.get()
+  async function allReportItems(): Promise<ReportItemType[]> {
+    return reportItemsRepo.find()
+  }
+
+  async function reportsConnection(
+    _,
+    { perPage = 10, cursor = '', sort, filter }
+  ): Promise<ReportsConnection> {
+    const reports = await allReports()
+
+    console.log(reports)
 
     // Filter first, then sort.
     const filteredReports = await applyFilters(reports, filter)
     const requestedReports = applySorting(filteredReports, sort)
 
-    const reportEdges = requestedReports.map(report => ({
+    const reportEdges: ReportEdge[] = requestedReports.map(report => ({
       node: report,
       cursor: createCursor(report, { filter, sort }),
     }))
@@ -108,12 +111,11 @@ const reportResolvers = db => {
   }
 
   async function reportFilterOptions() {
-    const reports = await reportsDb.get()
+    const reports = await allReports()
     const options = []
-    const resolveRelations = reportRelationResolver()
 
     for (const recordIndex in reports) {
-      const report = await resolveRelations(reports[recordIndex])
+      const report = reports[recordIndex]
 
       for (const keyIndex in filterableKeys) {
         const key = filterableKeys[keyIndex]
@@ -138,9 +140,9 @@ const reportResolvers = db => {
     return options
   }
 
-  async function resolveReportItem(report): Promise<ReportItem> {
+  async function resolveReportItem(report): Promise<ReportItemType> {
     if (typeof report.item === 'string') {
-      return reportItemsDb.get(report.item)
+      return reportItemsRepo.findOne({ id: report.item, relations: ['report'] })
     }
 
     return report.item
@@ -153,53 +155,52 @@ const reportResolvers = db => {
       reportItem,
     }: {
       reportData: ReportDataInput
-      reportItem: ReportItem
+      reportItem: ReportItemType
     }
-  ): Promise<Report> {
-    const reportItemInsert = await reportItemsDb.add(reportItem)
-
-    const reportItemId = get(reportItemInsert, '[0]')
+  ): Promise<ReportType> {
+    const reportItemEntity = new ReportItem()
+    const reportEntity = new Report()
 
     const defaultReportData = {
       priority: ReportPriority.LOW,
       status: ReportStatus.NEW,
       message: '',
-      item: reportItemId,
     }
 
-    const report = merge({}, defaultReportData, reportData)
+    Object.assign(reportItemEntity, reportItem)
+    Object.assign(reportEntity, defaultReportData, reportData)
+    reportEntity.item = reportItemEntity
 
-    const reportRecord = await reportsDb.add(report, ['id', 'created_at', 'updated_at'])
-    merge(report, get(reportRecord, '[0]', {}))
+    await reportsRepo.save(reportEntity)
+
+    return reportEntity
+  }
+
+  async function removeReport(_, { reportId }): Promise<boolean> {
+    const report = await getReport(reportId)
+    await reportsRepo.remove(report)
+    return true
+  }
+
+  async function setStatus(_, { reportId, newStatus }): Promise<ReportType> {
+    const report = await getReport(reportId)
+    report.status = newStatus
+    await reportsRepo.save(report)
 
     return report
   }
 
-  async function removeReport(_, { reportId }): Promise<boolean> {
-    const removed = await reportsDb.remove(reportId)
-    return removed > 0
-  }
+  async function setPriority(_, { reportId, newPriority }): Promise<ReportType> {
+    const report = await getReport(reportId)
+    report.status = newPriority
+    await reportsRepo.save(report)
 
-  async function setStatus(_, { reportId, newStatus }): Promise<Report> {
-    const updated = await reportsDb.update(reportId, { status: newStatus }, [
-      'id',
-      'status',
-      'updated_at',
-    ])
-    return updated[0]
-  }
-
-  async function setPriority(_, { reportId, newPriority }): Promise<Report> {
-    const updated = await reportsDb.update(reportId, { priority: newPriority }, [
-      'id',
-      'priority',
-      'updated_at',
-    ])
-    return updated[0]
+    return report
   }
 
   return {
     reportsConnection,
+    getReportResolver,
     getReport,
     allReports,
     allReportItems,

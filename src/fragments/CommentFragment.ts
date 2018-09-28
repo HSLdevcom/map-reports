@@ -5,14 +5,14 @@ export const CommentFragment = gql`
   fragment CommentFields on Comment {
     id
     body
-    user {
+    author {
       ...UserFields
     }
     report {
       id
     }
-    created_at
-    updated_at
+    createdAt
+    updatedAt
     __typename
   }
   ${UserFragment}

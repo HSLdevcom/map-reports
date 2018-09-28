@@ -8,9 +8,15 @@ import {
   ManyToOne,
 } from 'typeorm'
 import { Report } from './Report'
+import {
+  DatasetType,
+  Inspection as InspectionInterface,
+  InspectionType,
+} from '../../shared/types/Inspection'
+import { Report as ReportType } from '../../shared/types/Report'
 
 @Entity()
-export class Inspection {
+export class Inspection implements InspectionInterface {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
@@ -18,10 +24,10 @@ export class Inspection {
   name: string
 
   @Column({ default: 'cron' })
-  type: string
+  type: InspectionType
 
   @Column({ default: 'none', nullable: true })
-  datasetType: string
+  datasetType: DatasetType
 
   @Column({ nullable: true })
   datasetUri: string
@@ -33,13 +39,13 @@ export class Inspection {
   entityIdentifier: string
 
   @Column('jsonb', { nullable: true })
-  geoJSONProps: string
+  geoJSONProps: any
 
   @Column('jsonb', { nullable: true })
-  geoJSON: string
+  geoJSON: any
 
   @ManyToOne(type => Report, report => report.inspection)
-  reports: Report[]
+  reports: ReportType[]
 
   @CreateDateColumn()
   createdAt: string

@@ -8,9 +8,12 @@ import {
 } from 'typeorm'
 import { User } from './User'
 import { Report } from './Report'
+import { Comment as CommentType } from '../../shared/types/Comment'
+import { Report as ReportType } from '../../shared/types/Report'
+import { User as UserType } from '../../shared/types/User'
 
 @Entity()
-export class Comment {
+export class Comment implements CommentType {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
@@ -18,10 +21,10 @@ export class Comment {
   body: string
 
   @ManyToOne(type => Report, report => report.comments)
-  report: Report
+  report: ReportType
 
-  @ManyToOne(type => User, user => user.comments, { cascade: true })
-  author: User
+  @ManyToOne(type => User, user => user.comments)
+  author: UserType
 
   @CreateDateColumn()
   createdAt: string

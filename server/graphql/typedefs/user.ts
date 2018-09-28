@@ -5,9 +5,11 @@ const userTypeDefs = gql`
     id: ID!
     name: String!
     email: String!
-    group: String!
-    created_at: String!
-    updated_at: String!
+    roles: [String]!
+    reports: [Report]
+    comments: [Comment]
+    createdAt: String!
+    updatedAt: String!
   }
 `
 
