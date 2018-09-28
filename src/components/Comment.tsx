@@ -6,7 +6,6 @@ import { Comment as CommentType } from '../../shared/types/Comment'
 import { Delete } from '@material-ui/icons'
 import { Button } from '@material-ui/core'
 import { AnyFunction } from '../../shared/types/AnyFunction'
-import { get } from 'lodash'
 import { reportQuery } from '../queries/reportQuery'
 import { updateApolloCache } from '../helpers/updateApolloCache'
 
