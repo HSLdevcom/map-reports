@@ -167,7 +167,7 @@ class ReportItem extends React.Component<Props, any> {
               <ReportContent json>
                 {prettyJson.render(omit(itemData, 'bounds', 'geometry', 'nodes'))}
               </ReportContent>
-              <Comments comments={report.comments} reportId={report.id} />
+              <Comments reportId={report.id} />
             </>
           )}
         </SlideDown>

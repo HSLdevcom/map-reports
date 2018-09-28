@@ -8,6 +8,7 @@ import { CommentFragment } from '../fragments/CommentFragment'
 import { get } from 'lodash'
 import { reportQuery } from '../queries/reportQuery'
 import { reportsCacheQuery } from '../queries/reportsQuery'
+import { query } from '../helpers/Query'
 
 const createCommentMutation = gql`
   mutation createComment($comment: CommentInput!, $reportId: String!) {
@@ -17,6 +18,38 @@ const createCommentMutation = gql`
   }
   ${CommentFragment}
 `
+
+const updateCommentsCache = ({ reportId }) => (store, { data }) => {
+  const operationName = Object.keys(data)[0]
+  const newCommentResult = { ...get(data, operationName, {}), __typename: 'Comment' }
+
+  if (newCommentResult) {
+    let report
+
+    try {
+      report = store.readQuery({
+        query: reportQuery,
+        variables: {
+          reportId,
+        },
+      })
+    } catch (err) {
+      report = { report: { id: reportId, comments: [], __typename: 'Report' } }
+    }
+
+    if (report) {
+      report.report.comments.unshift(newCommentResult)
+
+      store.writeQuery({
+        query: reportQuery,
+        variables: {
+          reportId,
+        },
+        data: report,
+      })
+    }
+  }
+}
 
 const CommentsList = styled.div`
   margin-top: 2rem;
@@ -45,40 +78,7 @@ const CommentBodyField = styled.textarea`
   background: transparent;
 `
 
-const updateCommentsCache = ({ reportId }) => (store, { data }) => {
-  const operationName = Object.keys(data)[0]
-  const newCommentResult = { ...get(data, operationName, {}), __typename: 'Comment' }
-
-  if (newCommentResult) {
-    let reports
-
-    try {
-      reports = store.readQuery({
-        query: reportsCacheQuery,
-      })
-    } catch (err) {
-      reports = { reportsConnection: { edges: [] } }
-    }
-
-    const commentParent = get(reports, 'reportsConnection.edges', []).find(
-      edge => edge.node.id === reportId
-    )
-
-    // TODO: Make this work
-
-    console.log(commentParent, reports)
-
-    if (commentParent) {
-      commentParent.comments.unshift(newCommentResult)
-
-      store.writeQuery({
-        query: reportsCacheQuery,
-        data: reports,
-      })
-    }
-  }
-}
-
+@query({ query: reportQuery, getVariables: ({ reportId }) => ({ reportId }) })
 @mutate({
   mutation: createCommentMutation,
   update: updateCommentsCache,
@@ -110,8 +110,10 @@ class Comments extends React.Component<any, any> {
   }
 
   render() {
-    const { comments } = this.props
+    const { queryData } = this.props
     const { body } = this.state
+
+    const comments = get(queryData, 'report.comments', [])
 
     return (
       <CommentsList>
