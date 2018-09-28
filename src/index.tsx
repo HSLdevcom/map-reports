@@ -9,7 +9,6 @@ import { Router } from 'pathricia'
 import createHistory from 'history/createBrowserHistory'
 import MapStore from './stores/MapStore'
 import ReportStore from './stores/ReportStore'
-import App from './App'
 
 configure({
   computedRequiresReaction: true,
@@ -40,8 +39,7 @@ function initStore(initialState = {}) {
 }
 
 function render() {
-  /*const App = require('./App').default*/
-
+  const App = require('./App').default
   ReactDOM.render(
     <AppContainer>
       <App state={state} actions={actions} router={router} />
@@ -57,7 +55,6 @@ declare const module: any
 
 if (module.hot) {
   module.hot.accept(() => {
-    // initStore(toJS(state))
     render()
   })
 }

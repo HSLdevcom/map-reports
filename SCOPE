@@ -1,3 +1,4 @@
-+ Add UNCLEAR status to reports
-+ Add report comments
-+ Open report in OSM editor
+X Change to Webpack
+- Fix HMR
+- Start using Typeorm
+- Add user authentication
