@@ -22,5 +22,4 @@ export interface Inspection {
   entityIdentifier?: string
   geoJSONProps?: any
   geoJSON?: any
-  reports: Report[]
 }

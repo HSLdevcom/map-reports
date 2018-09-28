@@ -34,7 +34,7 @@ export interface Report {
   priority: ReportPriority
   comments: Comment[]
   item: ReportItem
-  inspection?: InspectionType
+  inspection?: string
   reportedBy: User
   createdAt: string
   updatedAt: string

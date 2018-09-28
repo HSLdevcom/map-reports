@@ -15,10 +15,10 @@ export class ReportItem implements ReportItemType {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @Column('float')
+  @Column('numeric')
   lat: number
 
-  @Column('float')
+  @Column('numeric')
   lon: number
 
   @Column()

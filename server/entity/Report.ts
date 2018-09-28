@@ -11,7 +11,6 @@ import {
   OneToMany,
 } from 'typeorm'
 import { ReportItem } from './ReportItem'
-import { Inspection } from './Inspection'
 import { User } from './User'
 import { Comment } from './Comment'
 import { ReportPriority, ReportStatus } from '../../shared/types/Report'
@@ -21,7 +20,6 @@ import {
 } from '../../shared/types/Report'
 import { User as UserType } from '../../shared/types/User'
 import { Comment as CommentType } from '../../shared/types/Comment'
-import { Inspection as InspectionType } from '../../shared/types/Inspection'
 
 @Entity()
 export class Report implements ReportType {
@@ -40,17 +38,17 @@ export class Report implements ReportType {
   @Column('varchar', { length: 20, default: 'LOW' })
   priority: ReportPriority
 
-  @OneToOne(type => ReportItem, reportItem => reportItem.report, { cascade: true })
+  @OneToOne(type => ReportItem, reportItem => reportItem.report)
   @JoinColumn()
   item: ReportItemType
 
-  @ManyToOne(type => Inspection, inspection => inspection.reports, { nullable: true })
-  inspection: InspectionType
+  @Column({ nullable: true })
+  inspection: string
 
-  @ManyToOne(type => User, user => user.reports, { cascade: true })
+  @ManyToOne(type => User, user => user.reports)
   reportedBy: UserType
 
-  @OneToMany(type => Comment, comment => comment.report, { cascade: true })
+  @OneToMany(type => Comment, comment => comment.report, { nullable: true })
   comments: CommentType[]
 
   @CreateDateColumn()

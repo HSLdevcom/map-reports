@@ -43,10 +43,10 @@ const reportTypeDefs = gql`
     priority: ReportPriority!
     item: ReportItem!
     reportedBy: User!
-    inspection: Inspection
+    inspection: String
     createdAt: String!
     updatedAt: String!
-    comments: [Comment]!
+    comments: [Comment]
   }
 
   input InputReport {

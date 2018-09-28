@@ -33,7 +33,6 @@ const inspectionTypeDefs = gql`
     entityIdentifier: String!
     geoJSONProps: String
     geoJSON: String
-    reports: [Report]
     createdAt: String!
     updatedAt: String!
   }

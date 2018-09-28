@@ -66,15 +66,17 @@ const reportResolvers = db => {
   }
 
   async function getReport(reportId): Promise<ReportType> {
-    return reportsRepo.findOne(reportId)
+    return reportsRepo.findOne(reportId, {
+      relations: ['item', 'reportedBy', 'comments'],
+    })
   }
 
   async function allReports(): Promise<ReportType[]> {
-    return reportsRepo.find()
+    return reportsRepo.find({ relations: ['item', 'reportedBy', 'comments'] })
   }
 
   async function allReportItems(): Promise<ReportItemType[]> {
-    return reportItemsRepo.find()
+    return reportItemsRepo.find({ relations: ['report'] })
   }
 
   async function reportsConnection(
@@ -82,8 +84,6 @@ const reportResolvers = db => {
     { perPage = 10, cursor = '', sort, filter }
   ): Promise<ReportsConnection> {
     const reports = await allReports()
-
-    console.log(reports)
 
     // Filter first, then sort.
     const filteredReports = await applyFilters(reports, filter)
@@ -158,8 +158,9 @@ const reportResolvers = db => {
       reportItem: ReportItemType
     }
   ): Promise<ReportType> {
-    const reportItemEntity = new ReportItem()
-    const reportEntity = new Report()
+    const user = await db.getAdmin()
+    let reportItemEntity = new ReportItem()
+    let reportEntity = new Report()
 
     const defaultReportData = {
       priority: ReportPriority.LOW,
@@ -168,10 +169,15 @@ const reportResolvers = db => {
     }
 
     Object.assign(reportItemEntity, reportItem)
-    Object.assign(reportEntity, defaultReportData, reportData)
-    reportEntity.item = reportItemEntity
 
-    await reportsRepo.save(reportEntity)
+    reportItemEntity = await reportItemsRepo.save(reportItemEntity)
+
+    Object.assign(reportEntity, defaultReportData, reportData)
+
+    reportEntity.item = reportItemEntity
+    reportEntity.reportedBy = user
+
+    reportEntity = await reportsRepo.save(reportEntity)
 
     return reportEntity
   }
