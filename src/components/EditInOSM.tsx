@@ -5,12 +5,13 @@ import styled from 'styled-components'
 import { Util, LatLng } from 'leaflet'
 
 const ButtonsWrapper = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
   padding: 0.75rem;
   margin-top: 1rem;
   border: 1px solid #ddd;
+
+  > button {
+    margin-right: 1rem;
+  }
 `
 
 const EditHeading = styled.h5`
