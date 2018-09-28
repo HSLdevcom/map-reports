@@ -51,7 +51,7 @@ class EditInOSM extends React.Component<Props, any> {
           })
         break
       case 'potlatch':
-        url = 'https://www.openstreetmap.org/edit?editor=id#map='
+        url = 'http://open.mapquestapi.com/dataedit/index_flash.html'
         url =
           url +
           Util.getParamString({
