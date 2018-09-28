@@ -70,15 +70,24 @@ class ReportsPage extends React.Component<Props, any> {
     let highlightGeoJson = null
 
     if (focusedReport) {
-      const parsedData = JSON.parse(get(focusedReport, 'item.data', '{}'))
+      const dataJson = get(focusedReport, 'item.data', null)
+      let parsedData
 
-      if (parsedData.type === 'way' || parsedData.type === 'node') {
-        highlightGeoJson = osmtogeojson({ elements: [parsedData] })
-      } else if (
-        parsedData.type === 'FeatureCollection' ||
-        parsedData.type === 'Feature'
-      ) {
-        highlightGeoJson = parsedData
+      try {
+        parsedData = JSON.parse(dataJson)
+      } catch (err) {
+        parsedData = false
+      }
+
+      if (parsedData) {
+        if (parsedData.type === 'way' || parsedData.type === 'node') {
+          highlightGeoJson = osmtogeojson({ elements: [parsedData] })
+        } else if (
+          parsedData.type === 'FeatureCollection' ||
+          parsedData.type === 'Feature'
+        ) {
+          highlightGeoJson = parsedData
+        }
       }
     }
 

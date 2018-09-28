@@ -1,5 +1,5 @@
 import fuzzysearch from 'fuzzysearch'
-import { orderBy, get, toLower, groupBy, values } from 'lodash'
+import { get, groupBy, orderBy, toLower, values } from 'lodash'
 import {
   Report as ReportType,
   ReportEdge,
@@ -160,7 +160,7 @@ const reportResolvers = db => {
   ): Promise<ReportType> {
     const user = await db.getAdmin()
     let reportItemEntity = new ReportItem()
-    let reportEntity = new Report()
+    const reportEntity = new Report()
 
     const defaultReportData = {
       priority: ReportPriority.LOW,
@@ -168,7 +168,11 @@ const reportResolvers = db => {
       message: '',
     }
 
-    Object.assign(reportItemEntity, reportItem)
+    const defaultReportItemData = {
+      data: {},
+    }
+
+    Object.assign(reportItemEntity, defaultReportItemData, reportItem)
 
     reportItemEntity = await reportItemsRepo.save(reportItemEntity)
 
@@ -177,9 +181,7 @@ const reportResolvers = db => {
     reportEntity.item = reportItemEntity
     reportEntity.reportedBy = user
 
-    reportEntity = await reportsRepo.save(reportEntity)
-
-    return reportEntity
+    return reportsRepo.save(reportEntity)
   }
 
   async function removeReport(_, { reportId }): Promise<boolean> {
@@ -189,17 +191,17 @@ const reportResolvers = db => {
   }
 
   async function setStatus(_, { reportId, newStatus }): Promise<ReportType> {
-    const report = await getReport(reportId)
+    let report = await getReport(reportId)
     report.status = newStatus
-    await reportsRepo.save(report)
+    report = await reportsRepo.save(report)
 
     return report
   }
 
   async function setPriority(_, { reportId, newPriority }): Promise<ReportType> {
-    const report = await getReport(reportId)
-    report.status = newPriority
-    await reportsRepo.save(report)
+    let report = await getReport(reportId)
+    report.priority = newPriority
+    report = await reportsRepo.save(report)
 
     return report
   }
