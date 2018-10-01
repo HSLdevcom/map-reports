@@ -10,7 +10,7 @@ const createResolvers = (db): any => {
   return {
     Query: {
       // Reports
-      report: reports.getReport,
+      report: reports.getReportResolver,
       reports: reports.allReports,
       reportItems: reports.allReportItems,
       reportFilterOptions: reports.reportFilterOptions,
@@ -30,25 +30,29 @@ const createResolvers = (db): any => {
       createComment: comments.createComment,
       removeComment: comments.removeComment,
     },
-    Report: {
-      item: reports.resolveReportItem,
-      comments: comments.resolveCommentsForReport,
-    },
     ReportItem: {
       data: reportItem => {
-        try {
+        if (typeof reportItem.data !== 'string') {
           return JSON.stringify(reportItem.data)
-        } catch (err) {
-          return '{}'
         }
+
+        return reportItem.data
       },
     },
     Inspection: {
       geoJSON: inspection => {
-        return JSON.stringify(inspection.geoJSON)
+        if (typeof inspection.geoJSON !== 'string') {
+          return JSON.stringify(inspection.geoJSON)
+        }
+
+        return inspection.geoJSON
       },
       geoJSONProps: inspection => {
-        return JSON.stringify(inspection.geoJSONProps)
+        if (typeof inspection.geoJSONProps !== 'string') {
+          return JSON.stringify(inspection.geoJSONProps)
+        }
+
+        return inspection.geoJSONProps
       },
     },
   }

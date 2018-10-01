@@ -6,7 +6,7 @@ const ReportStore = (state, initialState): ReportActions => {
   const reportState = extendObservable(state, {
     focusedReport: get(initialState, 'focusedReport', null),
     sortReports: get(initialState, 'sortReports', {
-      key: 'created_at',
+      key: 'createdAt',
       direction: 'desc',
     }),
     filterReports: get(initialState, 'filterReports', [{ key: '', value: '' }]),

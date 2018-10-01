@@ -73,6 +73,10 @@ class DatasetMap extends React.Component<Props, any> {
       data: JSON.parse(i.data),
     }))
 
+    if (reportItems.length === 0) {
+      return []
+    }
+
     const identifiers = reportItems.map(i => i.entityIdentifier)
 
     const unreportedFeatures = geoJson.features.reduce((unreported, feature) => {
@@ -158,8 +162,8 @@ class DatasetMap extends React.Component<Props, any> {
   }
 
   render() {
-    const { queryData, loading, useVectorLayers = true, datasetName } = this.props
-    let geoJson = get(queryData, 'inspection.geoJSON', null)
+    const { queryData, loading, datasetName } = this.props
+    const geoJson = get(queryData, 'inspection.geoJSON', null)
 
     if (!geoJson || loading) {
       return 'Loading...'
@@ -167,17 +171,18 @@ class DatasetMap extends React.Component<Props, any> {
 
     const { selectedFeature } = this
 
-    geoJson = JSON.parse(geoJson)
-    const unreportedFeatures = this.getUnreportedFeatures(geoJson)
-    geoJson = { ...geoJson, features: unreportedFeatures }
+    const parsedGeoJson = JSON.parse(geoJson)
+
+    const unreportedFeatures = this.getUnreportedFeatures(parsedGeoJson)
+    const unreportedGeoJson = { ...geoJson, features: unreportedFeatures }
 
     return (
       <MapArea>
         <MarkerIconStyle />
-        <Map useVectorLayers={useVectorLayers}>
+        <Map>
           <MarkerClusterGroup>
             <GeoJSON
-              data={geoJson}
+              data={unreportedGeoJson}
               onEachFeature={this.featureToLayer}
               pointToLayer={this.pointToLayer}
             />
@@ -189,7 +194,7 @@ class DatasetMap extends React.Component<Props, any> {
               title={`${datasetName || 'Unknown'} dataset report`}
               onSubmitted={() => selectedFeature && selectedFeature.layer.closePopup()}
               reportSubject={{
-                data: JSON.stringify(selectedFeature.feature),
+                data: selectedFeature.feature,
                 type: 'general',
                 entityIdentifier: get(
                   queryData,

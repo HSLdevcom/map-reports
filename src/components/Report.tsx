@@ -171,7 +171,7 @@ class ReportItem extends React.Component<Props, any> {
             </ReportContent>
           )}
           {item && <EditInOSM location={latLng({ lat: item.lat, lng: item.lon })} />}
-          {report.comments.length !== 0 && <Comments reportId={report.id} />}
+          <Comments reportId={report.id} />
         </SlideDown>
       </Report>
     )

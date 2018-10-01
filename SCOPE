@@ -1,4 +1,2 @@
-X Change to Webpack
-- Fix HMR
-- Start using Typeorm
-- Add user authentication
++ Start using Typeorm
++ Figure out how to merge partial things

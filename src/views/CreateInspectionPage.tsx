@@ -1,5 +1,10 @@
 import * as React from 'react'
-import { DatasetType, Inspection, InspectionType } from '../../shared/types/Inspection'
+import {
+  DatasetType,
+  Inspection,
+  InspectionInput,
+  InspectionType,
+} from '../../shared/types/Inspection'
 import { mutate } from '../helpers/Mutation'
 import { observer } from 'mobx-react'
 import gql from 'graphql-tag'
@@ -30,7 +35,7 @@ const createInspectionMutation = gql`
   ${InspectionFragment}
 `
 
-const updateInspectionsList = (cache, { data: { createInspection } }) => {
+const updateInspectionsList = () => (cache, { data: { createInspection } }) => {
   const { inspections } = cache.readQuery({ query: allInspectionsQuery })
   cache.writeQuery({
     query: allInspectionsQuery,
@@ -53,7 +58,7 @@ const Field = styled(TextField)`
   update: updateInspectionsList,
 })
 @observer
-class CreateInspectionPage extends React.Component<any, Inspection> {
+class CreateInspectionPage extends React.Component<any, InspectionInput> {
   state = {
     name: 'New inspection',
     type: InspectionType.MANUAL,

@@ -3,14 +3,7 @@ import gql from 'graphql-tag'
 import { inject, observer } from 'mobx-react'
 import { query } from '../helpers/Query'
 import styled from 'styled-components'
-import {
-  Card,
-  Typography,
-  Divider,
-  Switch,
-  FormGroup,
-  FormLabel,
-} from '@material-ui/core'
+import { Card, Typography } from '@material-ui/core'
 import Select from '../helpers/Select'
 import { get } from 'lodash'
 import DatasetMap from '../components/DatasetMap'

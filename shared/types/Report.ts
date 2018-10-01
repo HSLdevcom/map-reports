@@ -1,4 +1,6 @@
 import { Comment } from './Comment'
+import { User } from './User'
+import { Inspection as InspectionType } from './Inspection'
 
 export enum ReportStatus {
   NEW = 'NEW',
@@ -24,16 +26,18 @@ export interface ReportItem {
   entityIdentifier: string
 }
 
-export interface Report<ItemType = ReportItem> {
-  id?: string
+export interface Report {
+  id: string
   title: string
   message?: string
   status: ReportStatus
   priority: ReportPriority
-  comments?: Comment[]
-  item: ItemType | string
-  created_at?: number
-  updated_at?: number
+  comments: Comment[]
+  item: ReportItem
+  inspection?: string
+  reportedBy: User
+  createdAt: string
+  updatedAt: string
 }
 
 export interface ReportDraft {
@@ -42,4 +46,19 @@ export interface ReportDraft {
   entityIdentifier: string
   type: string
   data?: string
+}
+
+export interface ReportEdge {
+  cursor: string
+  node: Report
+}
+
+export interface ReportsConnection {
+  edges: ReportEdge[]
+  pageInfo: {
+    currentPage: number
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+    totalPages: number
+  }
 }

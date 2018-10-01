@@ -10,7 +10,7 @@ export const InspectionFragment = gql`
     cron
     geoJSONProps
     entityIdentifier
-    created_at
-    updated_at
+    createdAt
+    updatedAt
   }
 `

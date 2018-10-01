@@ -51,8 +51,8 @@ const filterLabels = {
   message: 'Viesti',
   status: 'Vaihe',
   priority: 'Tärkeys',
-  created_at: 'Luontipäivämäärä',
-  updated_at: 'Viimeksi päivitetty',
+  createdAt: 'Luontipäivämäärä',
+  updatedAt: 'Viimeksi päivitetty',
   asc: 'Nouseva',
   desc: 'Laskeva',
 }

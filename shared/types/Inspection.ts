@@ -1,3 +1,5 @@
+import { Report } from './Report'
+
 export enum InspectionType {
   CRON = 'cron',
   ONETIME = 'onetime',
@@ -11,11 +13,23 @@ export enum DatasetType {
 }
 
 export interface Inspection {
+  id: string
+  name: string
+  type: InspectionType
+  datasetType?: DatasetType
+  datasetUri?: string
+  cron?: string
+  entityIdentifier?: string
+  geoJSONProps?: any
+  geoJSON?: any
+}
+
+export interface InspectionInput {
   name: string
   type: InspectionType
   datasetType: DatasetType
   datasetUri?: string
   cron?: string
-  entityIdentifier: string
+  entityIdentifier?: string
   geoJSONProps?: string
 }

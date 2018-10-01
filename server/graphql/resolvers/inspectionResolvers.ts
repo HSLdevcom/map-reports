@@ -1,28 +1,28 @@
-import createInspectionFromSpec from '../../inspections/createInspection'
-import { get } from 'lodash'
+import { get, merge } from 'lodash'
 import runInspections from '../../inspections/runInspections'
+import { Inspection } from '../../entity/Inspection'
+import { Inspection as InspectionType } from '../../../shared/types/Inspection'
 
 const inspectionResolvers = db => {
-  const inspectionsDb = db.table('inspection')
+  const inspectionsRepo = db.getRepo(Inspection)
 
-  async function getInspection(_, { inspectionId }) {
-    return inspectionsDb.get(inspectionId)
+  async function getInspection(_, { inspectionId }): Promise<InspectionType> {
+    return inspectionsRepo.findOne(inspectionId)
   }
 
-  async function allInspections() {
-    return inspectionsDb.get()
+  async function allInspections(): Promise<InspectionType[]> {
+    return inspectionsRepo.find()
   }
 
-  async function createInspection(_, { inspection }) {
-    const inspectionObj = createInspectionFromSpec(inspection)
+  async function createInspection(_, { inspection }): Promise<InspectionType> {
+    const inspectionEntity = new Inspection()
+    Object.assign(inspectionEntity, inspection)
 
-    console.log(inspectionObj)
+    await inspectionsRepo.save(inspectionEntity)
 
-    const insertedId = await inspectionsDb.add(inspectionObj)
-    const insertedInspection = await inspectionsDb.get(get(insertedId, '[0]', insertedId))
-    await runInspections([insertedInspection], inspectionsDb)
+    await runInspections([inspectionEntity], inspectionsRepo)
 
-    return insertedInspection
+    return inspectionEntity
   }
 
   return {
