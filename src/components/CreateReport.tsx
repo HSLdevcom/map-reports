@@ -61,16 +61,10 @@ class CreateReport extends React.Component<Props, any> {
   onSubmit = async e => {
     e.preventDefault()
 
-    const {
-      title = 'Manual report',
-      mutate,
-      location,
-      reportSubject,
-      onSubmitted = () => {},
-    } = this.props
+    const { mutate, location, reportSubject, onSubmitted = () => {} } = this.props
 
     const { entityIdentifier, data, type } = reportSubject
-    const { message } = this.draft
+    const { message, title } = this.draft
 
     await mutate({
       variables: {
@@ -94,13 +88,21 @@ class CreateReport extends React.Component<Props, any> {
   render() {
     const { reportSubject } = this.props
     const { entityIdentifier, data } = reportSubject
-    const { message } = this.draft
+    const { message, title } = this.draft
 
     const parsedData = typeof data === 'string' ? JSON.parse(data) : data
 
     return (
       <CreateReportForm onSubmit={this.onSubmit}>
         <FormGroup>
+          <Input
+            fullWidth
+            value={title}
+            onChange={this.onChange('title')}
+            label="Title"
+            margin="normal"
+          />
+
           <Input
             multiline
             rowsMax="5"
