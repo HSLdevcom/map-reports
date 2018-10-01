@@ -23,3 +23,13 @@ export interface Inspection {
   geoJSONProps?: any
   geoJSON?: any
 }
+
+export interface InspectionInput {
+  name: string
+  type: InspectionType
+  datasetType: DatasetType
+  datasetUri?: string
+  cron?: string
+  entityIdentifier?: string
+  geoJSONProps?: string
+}

@@ -82,7 +82,7 @@ class CreateReport extends React.Component<Props, any> {
           ...location,
           entityIdentifier,
           type,
-          data,
+          data: typeof data === 'string' ? data : JSON.stringify(data),
           recommendedMapZoom: 16,
         },
       },
@@ -96,7 +96,7 @@ class CreateReport extends React.Component<Props, any> {
     const { entityIdentifier, data } = reportSubject
     const { message } = this.draft
 
-    const parsedData = JSON.parse(data)
+    const parsedData = typeof data === 'string' ? JSON.parse(data) : data
 
     return (
       <CreateReportForm onSubmit={this.onSubmit}>

@@ -7,15 +7,15 @@ const inspectionResolvers = db => {
   const inspectionsRepo = db.getRepo(Inspection)
 
   async function getInspection(_, { inspectionId }): Promise<InspectionType> {
-    return inspectionsRepo.findOne({ id: inspectionId, relations: ['reports'] })
+    return inspectionsRepo.findOne(inspectionId)
   }
 
   async function allInspections(): Promise<InspectionType[]> {
-    return inspectionsRepo.find({ relations: ['reports'] })
+    return inspectionsRepo.find()
   }
 
   async function createInspection(_, { inspection }): Promise<InspectionType> {
-    const inspectionEntity = new inspection()
+    const inspectionEntity = new Inspection()
     Object.assign(inspectionEntity, inspection)
 
     await inspectionsRepo.save(inspectionEntity)

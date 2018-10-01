@@ -4,7 +4,7 @@ import { observer } from 'mobx-react'
 import { action, observable, toJS } from 'mobx'
 import { Divider, Grid, Typography, InputLabel } from '@material-ui/core'
 import Select from '../helpers/Select'
-import { map, get, omit, set } from 'lodash'
+import { map, get, omit, set, throttle } from 'lodash'
 import SelectPointProps from '../helpers/SelectPointProps'
 import fetchSampleCsv from '../helpers/fetchSampleCsv'
 
@@ -22,6 +22,19 @@ class CSVtoGeoJSON extends React.Component<any, any> {
   @observable
   lastFetchedUrl: string = ''
 
+  sampleData = throttle(async () => {
+    const { datasetUri = '' } = this.props
+
+    if (datasetUri !== this.lastFetchedUrl) {
+      const sample = await fetchSampleCsv(datasetUri)
+
+      if (sample) {
+        this.setDataSample(sample)
+        this.setLastFetched(datasetUri)
+      }
+    }
+  }, 500)
+
   @action
   setDataSample = sample => (this.dataSample = sample)
   @action
@@ -33,15 +46,6 @@ class CSVtoGeoJSON extends React.Component<any, any> {
 
   async componentDidMount() {
     await this.sampleData()
-  }
-
-  sampleData = async () => {
-    const { datasetUri = '' } = this.props
-
-    if (datasetUri !== this.lastFetchedUrl) {
-      const sample = await fetchSampleCsv(datasetUri)
-      this.setDataSample(sample)
-    }
   }
 
   createGeoJsonFeature(value) {

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { observer } from 'mobx-react'
 import { action, observable } from 'mobx'
-import { map, get } from 'lodash'
+import { map, get, throttle } from 'lodash'
 import { Divider, FormGroup, InputLabel, TextField, Typography } from '@material-ui/core'
 import Select from '../helpers/Select'
 import { AnyFunction } from '../../shared/types/AnyFunction'
@@ -21,6 +21,19 @@ class EntityIdentifierFromGeoJSON extends React.Component<Props, any> {
   @observable
   lastFetchedUrl: string = ''
 
+  sampleData = throttle(async () => {
+    const { datasetUri = '', mapToGeoJSON } = this.props
+
+    if (datasetUri !== this.lastFetchedUrl || !this.dataSample) {
+      const sample = await fetchSampleAsGeoJSON(datasetUri, mapToGeoJSON)
+
+      if (sample) {
+        this.setDataSample(sample)
+        this.setLastFetched(datasetUri)
+      }
+    }
+  }, 500)
+
   @action
   setDataSample = sample => (this.dataSample = sample)
   @action
@@ -32,15 +45,6 @@ class EntityIdentifierFromGeoJSON extends React.Component<Props, any> {
 
   async componentDidMount() {
     await this.sampleData()
-  }
-
-  sampleData = async () => {
-    const { datasetUri = '', mapToGeoJSON } = this.props
-
-    if (datasetUri !== this.lastFetchedUrl || !this.dataSample) {
-      const sample = await fetchSampleAsGeoJSON(datasetUri, mapToGeoJSON)
-      this.setDataSample(sample)
-    }
   }
 
   render() {

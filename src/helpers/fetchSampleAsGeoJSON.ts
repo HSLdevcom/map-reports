@@ -34,7 +34,7 @@ async function fetchSampleAsGeoJSON(fetchUrl, mapToGeoJSON) {
     }
   }
 
-  return {}
+  return null
 }
 
 export default fetchSampleAsGeoJSON

@@ -28,7 +28,7 @@ export class ReportItem implements ReportItemType {
   @Index('entities')
   entityIdentifier: string
 
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   data: any
 
   @Column('int', { nullable: true, default: 16 })

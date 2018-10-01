@@ -36,10 +36,10 @@ export class Inspection implements InspectionInterface {
   @Column({ nullable: true })
   entityIdentifier: string
 
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   geoJSONProps: any
 
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   geoJSON: any
 
   @CreateDateColumn()

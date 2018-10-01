@@ -19,7 +19,7 @@ async function fetchSampleCsv(fetchUrl: string) {
     return sample
   }
 
-  return {}
+  return null
 }
 
 export default fetchSampleCsv
