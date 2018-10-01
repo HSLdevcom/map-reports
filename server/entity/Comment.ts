@@ -20,10 +20,10 @@ export class Comment implements CommentType {
   @Column('text')
   body: string
 
-  @ManyToOne(type => Report, report => report.comments)
+  @ManyToOne(type => Report, report => report.comments, { eager: true })
   report: ReportType
 
-  @ManyToOne(type => User, user => user.comments)
+  @ManyToOne(type => User, user => user.comments, { eager: true })
   author: UserType
 
   @CreateDateColumn()
